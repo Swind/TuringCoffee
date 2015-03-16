@@ -1,64 +1,85 @@
 import re
+import math
+from process import Process
+from process import Point
 
-class Circle(Namespace):
+
+class Circle(Process):
     """
-    Circle: 1 cm
-        Water: 40 ml
-        AvgWater: 0.01 ml
-        Space: 0.1 mm
+    Example:
+
+    ''' circle
+
+        Radius: 1 cm
+        High: 80 -> 90
+        Total Water: 40 ml
+        Feedrate: 80 mm/min
+        Extrudate: 1 ml/mm
+        Point interval: 0.01 mm
+    '''
     """
+
     params_rules = {
-        # Key      Unit       Required
-        "Water": ["capacity", True],
-        "AvgWater": ["capacity", True],
-        "Space": ["length", True]
+        # Key:      [Unit,       Required,      Default Value]
+        "Water":          ["capacity", True],
+        "Velocity":       ["velocity", True],
+        "Radius":         ["length",   True],
+        "Extrudate":      ["extrudate", True],
+        "Feedrate":       ["feedrate", False, 80],
+        "Point interval": ["length",   False, 0.01]
     }
-    def __init__(self, raw_params):
-        self.__params = self.__parse_params(raw_params)
 
-    def gcode(self):
-        points = self.points(self["avgwater"].get_ml())
-
-        lines = []
-        for point in points:
-            if self.get_radius() <= 5:
-                template = "G1 X%.4f Y%.4f E%.4f F80"
-            else:
-                template = "G1 X%.4f Y%.4f E%.4f"
-
-            tmp = template % point
-
-            lines.append(tmp)
-
-        return lines
-
-    def points(self, avg_water):
-        circumference = 2 * np.pi * self.get_radius()
-        space = self.get_space()
-        water = self["water"].get_ml()
-        steps = water / avg_water
-
-        cylinder = round((space * steps) / circumference)
-
-        av = 2 * np.pi * cylinder / steps
-
-        step_range = np.arange(0.0, steps)
-
-        x = self.get_radius() * np.cos(av * step_range)
-        y = self.get_radius() * np.sin(av * step_range)
-        z = avg_water
-
-        return zip(x, y, itertools.repeat(z, len(x)))
-
-    def __convert_to_mm(self, value, unit):
-        if unit == "cm":
-            return value * 10
+    def points(self, previous_end_point=None):
+        if previous_end_point:
+            start_angle = math.atan2(previous_end_point.y, previous_end_point.x)
         else:
-            return value
+            start_angle = 0
 
-    def get_radius(self):
-        return self.__convert_to_mm(float(self.radius.value), self.radius.unit)
+        total_length = self.__water / self.__extrudate
+        point_number = total_length / self.__point_interval
 
-    def get_space(self):
-        return self.__convert_to_mm(float(self["space"].value), self["space"].unit)
+        # Init all points
+        points = [Point(None, None, None, None, None)] * point_number
 
+        points = self.__point_xy(points, start_angle)
+        points = self.__point_e(points)
+        points = self.__point_z(points)
+
+        return points
+
+    def __point_xy(self, points, start_angle):
+        circumference = 2 * math.pi * self.__radius
+        total_length = self.__water / self.__extrudate
+        point_number = len(points)
+
+        cylinder = total_length / circumference
+
+        av = (2 * math.pi * cylinder) / point_number
+
+        for index, point in enumerate(points):
+            point.x = self.__radius * math.cos(av * index + start_angle)
+            point.y = self.__radius * math.sin(av * index + start_angle)
+
+        return points
+
+    def __point_e(self, points):
+        extrudate_per_point = self.__extrudate * self._point_interval
+
+        for point in points:
+            point.e1 = extrudate_per_point
+
+        return points
+
+    def __point_z(self, points):
+        z_start = self.__high[0]
+        z_end = self.__high[1]
+
+        z_per_point = (z_end - z_start) / len(points)
+
+        for index, point in enumerate(points):
+            point.z = z_start + (z_per_point * index)
+
+        return points
+
+if __name__ == "__main__":
+    pass
