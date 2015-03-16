@@ -27,8 +27,8 @@ class Server(object):
         self.cmd_socket = Socket(PAIR)
         self.cmd_socket.bind(self.config["Command_Socket_Address"])
 
-    def __pid_controller_observer(self, **pid_status):
-        self.publish_pid_status(**pid_status)
+    def __pid_controller_observer(self, *pid_status):
+        self.publish_pid_status(*pid_status)
 
     def start(self):
         # Start pid controller thread

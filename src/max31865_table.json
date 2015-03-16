@@ -1,0 +1,278 @@
+[
+    {
+        "code_dec": "1517", 
+        "code_hex": "0BDAh", 
+        "temperature": "-200", 
+        "resistance": "18.52"
+    }, 
+    {
+        "code_dec": "2394", 
+        "code_hex": "12B4h", 
+        "temperature": "-175", 
+        "resistance": "29.22"
+    }, 
+    {
+        "code_dec": "3254", 
+        "code_hex": "196Ch", 
+        "temperature": "-150", 
+        "resistance": "39.72"
+    }, 
+    {
+        "code_dec": "4101", 
+        "code_hex": "200Ah", 
+        "temperature": "-125", 
+        "resistance": "50.06"
+    }, 
+    {
+        "code_dec": "4936", 
+        "code_hex": "2690h", 
+        "temperature": "-100", 
+        "resistance": "60.26"
+    }, 
+    {
+        "code_dec": "5762", 
+        "code_hex": "2D04h", 
+        "temperature": "-75", 
+        "resistance": "70.33"
+    }, 
+    {
+        "code_dec": "6579", 
+        "code_hex": "3366h", 
+        "temperature": "-50", 
+        "resistance": "80.31"
+    }, 
+    {
+        "code_dec": "6903", 
+        "code_hex": "35EEh", 
+        "temperature": "-40", 
+        "resistance": "84.27"
+    }, 
+    {
+        "code_dec": "7227", 
+        "code_hex": "3876h", 
+        "temperature": "-30", 
+        "resistance": "88.22"
+    }, 
+    {
+        "code_dec": "7550", 
+        "code_hex": "3AFCh", 
+        "temperature": "-20", 
+        "resistance": "92.16"
+    }, 
+    {
+        "code_dec": "7871", 
+        "code_hex": "3D7Eh", 
+        "temperature": "-10", 
+        "resistance": "96.09"
+    }, 
+    {
+        "code_dec": "8192", 
+        "code_hex": "4000h", 
+        "temperature": "0", 
+        "resistance": "100.00"
+    }, 
+    {
+        "code_dec": "8512", 
+        "code_hex": "4280h", 
+        "temperature": "10", 
+        "resistance": "103.90"
+    }, 
+    {
+        "code_dec": "8830", 
+        "code_hex": "44FCh", 
+        "temperature": "20", 
+        "resistance": "107.79"
+    }, 
+    {
+        "code_dec": "9148", 
+        "code_hex": "4778h", 
+        "temperature": "30", 
+        "resistance": "111.67"
+    }, 
+    {
+        "code_dec": "9465", 
+        "code_hex": "49F2h", 
+        "temperature": "40", 
+        "resistance": "115.54"
+    }, 
+    {
+        "code_dec": "9781", 
+        "code_hex": "4C6Ah", 
+        "temperature": "50", 
+        "resistance": "119.40"
+    }, 
+    {
+        "code_dec": "10096", 
+        "code_hex": "4EE0h", 
+        "temperature": "60", 
+        "resistance": "123.24"
+    }, 
+    {
+        "code_dec": "10410", 
+        "code_hex": "5154h", 
+        "temperature": "70", 
+        "resistance": "127.08"
+    }, 
+    {
+        "code_dec": "10723", 
+        "code_hex": "53C6h", 
+        "temperature": "80", 
+        "resistance": "130.90"
+    }, 
+    {
+        "code_dec": "11035", 
+        "code_hex": "5636h", 
+        "temperature": "90", 
+        "resistance": "134.71"
+    }, 
+    {
+        "code_dec": "11346", 
+        "code_hex": "58A4h", 
+        "temperature": "100", 
+        "resistance": "138.51"
+    }, 
+    {
+        "code_dec": "11657", 
+        "code_hex": "5B12h", 
+        "temperature": "110", 
+        "resistance": "142.29"
+    }, 
+    {
+        "code_dec": "11966", 
+        "code_hex": "5D7Ch", 
+        "temperature": "120", 
+        "resistance": "146.07"
+    }, 
+    {
+        "code_dec": "12274", 
+        "code_hex": "5FE4h", 
+        "temperature": "130", 
+        "resistance": "149.83"
+    }, 
+    {
+        "code_dec": "12582", 
+        "code_hex": "624Ch", 
+        "temperature": "140", 
+        "resistance": "153.58"
+    }, 
+    {
+        "code_dec": "12888", 
+        "code_hex": "64B0h", 
+        "temperature": "150", 
+        "resistance": "157.33"
+    }, 
+    {
+        "code_dec": "13194", 
+        "code_hex": "6714h", 
+        "temperature": "160", 
+        "resistance": "161.05"
+    }, 
+    {
+        "code_dec": "13498", 
+        "code_hex": "6974h", 
+        "temperature": "170", 
+        "resistance": "164.77"
+    }, 
+    {
+        "code_dec": "13802", 
+        "code_hex": "6BD4h", 
+        "temperature": "180", 
+        "resistance": "168.48"
+    }, 
+    {
+        "code_dec": "14104", 
+        "code_hex": "6E30h", 
+        "temperature": "190", 
+        "resistance": "172.17"
+    }, 
+    {
+        "code_dec": "14406", 
+        "code_hex": "708Ch", 
+        "temperature": "200", 
+        "resistance": "175.86"
+    }, 
+    {
+        "code_dec": "15156", 
+        "code_hex": "7668h", 
+        "temperature": "225", 
+        "resistance": "185.01"
+    }, 
+    {
+        "code_dec": "15901", 
+        "code_hex": "7C3Ah", 
+        "temperature": "250", 
+        "resistance": "194.10"
+    }, 
+    {
+        "code_dec": "16639", 
+        "code_hex": "81FEh", 
+        "temperature": "275", 
+        "resistance": "203.11"
+    }, 
+    {
+        "code_dec": "17371", 
+        "code_hex": "87B6h", 
+        "temperature": "300", 
+        "resistance": "212.05"
+    }, 
+    {
+        "code_dec": "18098", 
+        "code_hex": "8D64h", 
+        "temperature": "325", 
+        "resistance": "220.92"
+    }, 
+    {
+        "code_dec": "18818", 
+        "code_hex": "9304h", 
+        "temperature": "350", 
+        "resistance": "229.72"
+    }, 
+    {
+        "code_dec": "19533", 
+        "code_hex": "989Ah", 
+        "temperature": "375", 
+        "resistance": "238.44"
+    }, 
+    {
+        "code_dec": "20242", 
+        "code_hex": "9E24h", 
+        "temperature": "400", 
+        "resistance": "247.09"
+    }, 
+    {
+        "code_dec": "20945", 
+        "code_hex": "A3A2h", 
+        "temperature": "425", 
+        "resistance": "255.67"
+    }, 
+    {
+        "code_dec": "21642", 
+        "code_hex": "A914h", 
+        "temperature": "450", 
+        "resistance": "264.18"
+    }, 
+    {
+        "code_dec": "22333", 
+        "code_hex": "AE7Ah", 
+        "temperature": "475", 
+        "resistance": "272.61"
+    }, 
+    {
+        "code_dec": "23018", 
+        "code_hex": "B3D4h", 
+        "temperature": "500", 
+        "resistance": "280.98"
+    }, 
+    {
+        "code_dec": "23697", 
+        "code_hex": "B922h", 
+        "temperature": "525", 
+        "resistance": "289.27"
+    }, 
+    {
+        "code_dec": "24370", 
+        "code_hex": "BE64h", 
+        "temperature": "550", 
+        "resistance": "297.49"
+    }
+]

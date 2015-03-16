@@ -17,6 +17,7 @@ class Heater(object):
         self.worker.daemon = True
 
     def start(self):
+	GPIO.setmode(GPIO.BOARD)
         if self.pin_number > 0:
             GPIO.setup(self.pin_number, GPIO.OUT)
 
