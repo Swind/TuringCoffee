@@ -21,12 +21,12 @@ class Circle(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "Water":          ["capacity", True],
-        "Velocity":       ["velocity", True],
-        "Radius":         ["length",   True],
-        "Extrudate":      ["extrudate", True],
-        "Feedrate":       ["feedrate", False, 80],
-        "Point interval": ["length",   False, 0.01]
+        "Water":          ["capacity",  True, None],
+        "Radius":         ["length",    True, None],
+        "Extrudate":      ["extrudate", True, None],
+        "High":           ["high",      True, None],
+        "Feedrate":       ["feedrate",  False, 80],
+        "Point interval": ["length",    False, 0.01]
     }
 
     def points(self, previous_end_point=None):

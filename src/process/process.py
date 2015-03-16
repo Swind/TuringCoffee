@@ -20,14 +20,19 @@ class ParamterValueError(Exception):
         return "Parameter Value Error: {}: {} is not valid.{}".format(self.key, self.value)
 
 
-class Process(object):
-    unit_regex = {
+class Unit(object):
+    regex = {
         "time": re.compile("([0-9]+)\s*(s)"),
         "capacity": re.compile("([0-9]+)\s*(ml|l)"),
         "length": re.compile("([0-9]+)\s*(cm|mm)"),
-        "velocity": re.compile("([0-9]+)\s*(ml/mm)")
+        "extrudate": re.compile("([0-9]+)\s*(ml/mm)"),
+        "feedrate": re.compile("([0-9]+)\s*(mm/min)"),
+        "high": re.compile()
     }
 
+
+class Process(object):
+    unit = Unit()
     params_rules = {}
 
     def __init__(self, raw_params):
@@ -40,16 +45,17 @@ class Process(object):
     def __parse_params(self, params):
         result = {}
 
-        for key, (except_unit, required) in self.params_rules.items():
+        for key, (except_unit, required, default) in self.params_rules.items():
             value = params.get(key, None)
 
             if value is None:
                 if required:
                     raise ParameterNameError(key)
                 else:
+                    result[key] = default
                     continue
 
-            m = self.unit_regex[except_unit].match(value)
+            m = self.unit.regex[except_unit].match(value)
 
             if m is None:
                 raise ParamterValueError(key, value)
