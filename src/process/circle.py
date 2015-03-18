@@ -8,15 +8,15 @@ class Circle(Process):
     """
     Example:
 
-    ''' circle
+        ''' circle
 
-        Radius: 1 cm
-        High: 80 mm to 90 mm
-        Total Water: 40 ml
-        Feedrate: 80 mm/min
-        Extrudate: 1 ml/mm
-        Point interval: 0.01 mm
-    '''
+            Radius: 1 cm
+            High: 80 mm to 90 mm
+            Total Water: 40 ml
+            Feedrate: 80 mm/min
+            Extrudate: 0.1 ml/mm
+            Point interval: 0.01 mm
+        '''
     """
 
     params_rules = {
@@ -24,7 +24,7 @@ class Circle(Process):
         "Total Water":          ["capacity",  True, None],
         "Radius":         ["length",    True, None],
         "Extrudate":      ["extrudate", True, None],
-        "High":           ["high",      True, None],
+        "High":           ["length_from_to",      True, None],
         "Feedrate":       ["feedrate",  False, 80],
         "Point interval": ["length",    False, 0.01]
     }
@@ -39,7 +39,7 @@ class Circle(Process):
         point_number = total_length / self.point_interval
 
         # Init all points
-         
+
         points = map(lambda index: Point(), range(0, int(point_number)))
         points = self.__point_xy(points, start_angle)
         points = self.__point_e(points)

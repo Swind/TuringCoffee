@@ -1,88 +1,51 @@
-from __future__ import unicode_literals
-
-from pypeg2 import *
 import re
-
-import itertools
 import math
+from process import Process
+from process import Point
 
-from config import *
 
-
-class Spiral(Namespace):
+class Spiral(Process):
     """
-    Spiral: 1 cm -> 2 cm
-        AvgWater: 0.01 ml
-        Space: 0.1 mm
-        Cylinder: 5
+    Example:
+
+        ''' spiral
+            Radius: 1 cm to 2 cm
+            High: 80 mm to 90 mm
+
+            Cylinder: 5
+
+            Point interval: 0.01 mm
+            Feedrate: 80 mm/min
+            Extrudate: 1 ml/mm
+        '''
     """
-    name = "spiral"
-    configs = [Space, AvgWater, Cylinder]
+    params_rules = {
+        # Key:      [Unit,       Required,      Default Value]
+        "Radius":         ["length_from_to",    True, None],
+        "High":           ["length_from_to",      True, None],
+        "Cylinder":       [None,  True, None],
+        "Point interval": ["length",    False, 0.01],
+        "Feedrate":       ["feedrate",  False, 80],
+        "Extrudate":      ["extrudate", True, None],
+    }
 
-    grammar = "Spiral", ":", attr("start", LengthItem), "->", attr("end", LengthItem), endl, indent(maybe_some(configs))
-
-    def gcode(self):
-        start = self.start_point()
-        end = self.end_point()
-
-        avg_water = self["avgwater"].get_ml()
-        cylinder = self["cylinder"].value
-        space = self.__convert_to_mm(float(self["space"].value), self["space"].unit)
-
-        points = self.__points(start, end, space, cylinder, avg_water)
-
-        lines = []
-        for point in points:
-            template = "G1 X%.4f Y%.4f E%.4f"
-            tmp = template % point
-
-            lines.append(tmp)
-
-        return lines
-
-    def info(self):
-        pass
-
-    def __points(self, start, end, space, cylinder, avg_water):
-        theta = 10
-
-        cylinder = int(cylinder)
-
-        a = float(end - start) / int(cylinder) / 360
-        radius = start
+    def points(self):
+        max_theta = math.radians(self.cylinder * 360)
+        a = (self.radius[1] - self.radius[0]) / max_theta
 
         total_theta = 0
-        max_theta = cylinder * 360
-
         point_list = []
 
         while (total_theta <= max_theta):
-            # space / (2 * pi * r) * 360 = theta
-            now_radius = a * total_theta + radius
+            # point interval / (2 * pi * r) = theta
+            now_radius = a * total_theta + self.radius[0]
+            now_theta = math.radians((self.point_interval / (2*math.pi*now_radius))*360)
 
-            now_theta = (space / ( 2 * math.pi * now_radius)) * 360
             total_theta = total_theta + now_theta
 
-            x, y = self.__point(now_radius, total_theta)
+            x = now_radius * math.cos(total_theta)
+            y = now_radius * math.sin(total_theta)
 
-            point_list.append((x, y, avg_water))
+            point_list.append(Point(x=x, y=y))
 
         return point_list
-
-    def __point(self, radius, theta):
-        x = radius * math.cos(theta * math.pi / 180)
-        y = radius * math.sin(theta * math.pi / 180)
-
-        return (x, y)
-
-    def __convert_to_mm(self, value, unit):
-        if unit == "cm":
-            return value * 10
-        else:
-            return value
-
-    def start_point(self):
-        return self.__convert_to_mm(float(self.start.value), self.start.unit)
-
-    def end_point(self):
-        return self.__convert_to_mm(float(self.end.value), self.end.unit)

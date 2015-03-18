@@ -3,6 +3,7 @@ from collections import namedtuple
 
 Point = namedtuple('Point', ['x', 'y', 'z', 'e1', 'e2'])
 
+
 class Point(object):
     def __init__(self, x=None, y=None, z=None, e1=None, e2=None):
         self.x = x
@@ -13,6 +14,7 @@ class Point(object):
 
     def __str__(self):
         return "x:{} y:{} z:{} e1:{} e2:{}".format(self.x, self.y, self.z, self.e1, self.e2)
+
 
 class ParameterNameError(Exception):
     def __init__(self, param_name):
@@ -38,7 +40,7 @@ class Unit(object):
 
     def __init__(self):
         self.regex = {
-            # 10 min 
+            # 10 min
             "time": {
                 "regex": self.__number_with_unit,
                 "unit_and_factory": {
@@ -46,7 +48,7 @@ class Unit(object):
                     "s": 1
                 },
                 "handler": self.__number_with_unit_handler
-            }, 
+            },
 
             # 1 ml
             "capacity": {
@@ -56,8 +58,8 @@ class Unit(object):
                     "ml": 1
                 },
                 "handler": self.__number_with_unit_handler
-            }, 
-            
+            },
+
             # 1 mm
             "length": {
                 "regex": self.__number_with_unit,
@@ -66,7 +68,7 @@ class Unit(object):
                     "mm": 1
                 },
                 "handler": self.__number_with_unit_handler
-            }, 
+            },
 
             # 1 ml/mm
             "extrudate": {
@@ -87,7 +89,7 @@ class Unit(object):
             },
 
             # 1 cm to 2 cm
-            "high": {
+            "length_from_to": {
                 "regex": self.__from_to,
                 "unit_and_factory": {
                     "cm": 10,
@@ -98,7 +100,7 @@ class Unit(object):
         }
 
     def __number_with_unit_handler(self, unit_and_factory, groups):
-        value, unit = groups  
+        value, unit = groups
 
         if unit is not None and unit in unit_and_factory:
             return float(value) * unit_and_factory[unit]
@@ -137,12 +139,15 @@ class Process(object):
                     continue
 
             # Parse the value and convert the unit to minimal unit
-            unit_item = self.unit.regex[except_unit]
-            m = unit_item["regex"].match(value)
-
-            if m is None:
-                raise ParamterValueError(key, value)
+            if except_unit is None:
+                result[key] = float(value)
             else:
-                result[key] = unit_item["handler"](unit_item["unit_and_factory"], m.groups())
+                unit_item = self.unit.regex[except_unit]
+                m = unit_item["regex"].match(value)
+
+                if m is None:
+                    raise ParamterValueError(key, value)
+                else:
+                    result[key] = unit_item["handler"](unit_item["unit_and_factory"], m.groups())
 
         return result
