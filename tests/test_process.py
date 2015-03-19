@@ -6,6 +6,7 @@ import unittest
 
 from process.circle import Circle
 from process.spiral import Spiral
+from process.fixed_point import FixedPoint
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -34,7 +35,6 @@ class TestProcess(unittest.TestCase):
 
         points = circle.points()
 
-        show_animation(points)
 
     def test_spiral(self):
         test_data = {
@@ -57,7 +57,23 @@ class TestProcess(unittest.TestCase):
 
         points = spiral.points()
 
-        show_animation(points)
+    def test_fixedpoint(self):
+        test_data = {
+            "Coordinates": "(0, 0)",
+            "High": "80 mm to 90 mm",
+            "Total Water": "40 ml",
+            "Extrudate": "0.1 ml/step",
+            "Feedrate": "80 mm/min",
+        }
+
+        fixedpoint = FixedPoint(test_data)
+        self.assertEqual(fixedpoint.coordinates, (0, 0), "The coordinates should be {} but {}".format((0, 0), fixedpoint.coordinates))
+        self.assertEqual(fixedpoint.high, (80, 90), "The high should be {} mm to {} mm but {} mm to {} mm".format(80, 90, fixedpoint.high[0], fixedpoint.high[1]))
+        self.assertEqual(fixedpoint.total_water, 40, "The total water should be {} ml but {} ml".format(40, fixedpoint.total_water))
+        self.assertEqual(fixedpoint.feedrate, 80, "The feedrate should be {} mm/min but {} mm/min".format(80, fixedpoint.feedrate))
+        self.assertEqual(fixedpoint.extrudate, 0.1, "The extrudate should be {} ml/mm but {}".format(0.1, fixedpoint.extrudate))
+
+        points = fixedpoint.points()
 
 
 def show_animation(points):
@@ -82,13 +98,14 @@ def show_animation(points):
         return line,
 
     # call the animator.  blit=true means only re-draw the parts that have changed.
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=frame_size, interval=20, blit=False)
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=frame_size, interval=20, blit=True)
+    anim.save("test.gif", writer="imagemagick", fps=4)
 
-    plt.show()
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestProcess("test_circle"))
+    #suite.addTest(TestProcess("test_circle"))
     #suite.addTest(TestProcess("test_spiral"))
+    suite.addTest(TestProcess("test_fixedpoint"))
 
     unittest.TextTestRunner().run(suite)

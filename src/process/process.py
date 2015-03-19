@@ -37,6 +37,7 @@ class Unit(object):
 
     __number_with_unit = re.compile("([0-9\.]+)\s*([a-z\/]+)")
     __from_to = re.compile("([0-9\.]+)\s*([a-z]+)(\s*to\s*(([0-9\.]+)\s*([a-z]+))?)?")
+    __x_y = re.compile("\(\s*([0-9\.]+)\s*,\s*([0-9\.]+)\)")
 
     def __init__(self):
         self.regex = {
@@ -74,7 +75,8 @@ class Unit(object):
             "extrudate": {
                 "regex": self.__number_with_unit,
                 "unit_and_factory": {
-                    "ml/mm": 1
+                    "ml/mm": 1,
+                    "ml/step": 1
                 },
                 "handler": self.__number_with_unit_handler
             },
@@ -96,6 +98,13 @@ class Unit(object):
                     "mm": 1
                 },
                 "handler": self.__from_to_handler
+            },
+
+            # (0, 0) 
+            "x_y_coordinates": {
+                "regex": self.__x_y,
+                "unit_and_factory": None,
+                "handler": self.__x_y_coordinates_handler
             }
         }
 
@@ -113,6 +122,8 @@ class Unit(object):
 
         return (from_value, to_value)
 
+    def __x_y_coordinates_handler(self, unit_and_factory, groups):
+        return (float(groups[0]), float(groups[1]))
 
 class Process(object):
     unit = Unit()
@@ -127,7 +138,6 @@ class Process(object):
 
     def __parse_params(self, params):
         result = {}
-
         for key, (except_unit, required, default) in self.params_rules.items():
             value = params.get(key, None)
 
