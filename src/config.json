@@ -27,6 +27,20 @@
         "heat_dissipation_per_c": 600
     },
 
-    "Publish_Socket_Address": "ipc:///tmp/pub_pid_controller",
-    "Command_Socket_Address": "ipc:///tmp/cmd_pid_controller"
+    "Printer":{
+        "PortName": "VIRTUAL",
+        "Baudrate": 115200
+    },
+
+    "HeaterServer":
+    {
+        "Publish_Socket_Address": "ipc:///tmp/heater_pub_pid_controller",
+        "Command_Socket_Address": "ipc:///tmp/heater_cmd_pid_controller"
+    },
+
+    "PrinterServer":
+    {
+        "Publish_Socket_Address": "ipc:///tmp/printer_pub_pid_controller",
+        "Command_Socket_Address": "ipc:///tmp/printer_cmd_pid_controller"
+    }
 }

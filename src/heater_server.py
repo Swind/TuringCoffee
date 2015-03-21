@@ -21,11 +21,11 @@ class Server(object):
 
         # That other process can subscribe the pid controller status
         self.pub_socket = Socket(PUB)
-        self.pub_socket.bind(self.config["Publish_Socket_Address"])
+        self.pub_socket.bind(self.config["HeaterServer"]["Publish_Socket_Address"])
 
         # Receive the pid controller command
         self.cmd_socket = Socket(PAIR)
-        self.cmd_socket.bind(self.config["Command_Socket_Address"])
+        self.cmd_socket.bind(self.config["HeaterServer"]["Command_Socket_Address"])
 
     def __pid_controller_observer(self, *pid_status):
         self.publish_pid_status(*pid_status)
@@ -33,18 +33,18 @@ class Server(object):
     def start(self):
         # Start pid controller thread
         self.pid_controller.start()
-        
+
         # Add observer to publish pid status
         self.pid_controller.add_observer(self.__pid_controller_observer)
 
         # The main thread will receive and set the pid parameters by nanomsg
         self.receive_pid_parameters()
 
-    #============================================================================================================
+    # ============================================================================================================
     #
     #   nanomsg API
     #
-    #============================================================================================================
+    # ============================================================================================================
     def publish_pid_status(self, cycle_time, duty_cycle, set_point, temperature):
         """
         Publish pid status:
