@@ -32,6 +32,11 @@
         "Baudrate": 115200
     },
 
+    "Refill":{
+        "water_level_pin": [16, 17],
+        "motor_pin": 18
+    },
+
     "HeaterServer":
     {
         "Publish_Socket_Address": "ipc:///tmp/heater_pub_pid_controller",
@@ -42,5 +47,11 @@
     {
         "Publish_Socket_Address": "ipc:///tmp/printer_pub_pid_controller",
         "Command_Socket_Address": "ipc:///tmp/printer_cmd_pid_controller"
+    },
+
+    "RefillServer":
+    {
+        "Publish_Socket_Address": "ipc:///tmp/refill_pub_pid_controller",
+        "Command_Socket_Address": "ipc:///tmp/refill_cmd_pid_controller"
     }
 }
