@@ -15,6 +15,14 @@ class Point(object):
     def __str__(self):
         return "x:{} y:{} z:{} e1:{} e2:{}".format(self.x, self.y, self.z, self.e1, self.e2)
 
+class Command(object):
+    def __init__(self, command, value):
+        self.command = command
+        self.value = value
+
+    def __str__(self):
+        return "command:{} value:{}".format(self.command, self.value)
+
 
 class ParameterNameError(Exception):
     def __init__(self, param_name):
@@ -38,6 +46,7 @@ class Unit(object):
     __number_with_unit = re.compile("([0-9\.]+)\s*([a-z\/]+)")
     __from_to = re.compile("([0-9\.]+)\s*([a-z]+)(\s*to\s*(([0-9\.]+)\s*([a-z]+))?)?")
     __x_y = re.compile("\(\s*([0-9\.]+)\s*,\s*([0-9\.]+)\)")
+    __temperature = re.compile("([0-9\.]+)\s*degress\s*(C|F)")
 
     def __init__(self):
         self.regex = {
@@ -100,19 +109,35 @@ class Unit(object):
                 "handler": self.__from_to_handler
             },
 
-            # (0, 0) 
+            # (0, 0)
             "x_y_coordinates": {
                 "regex": self.__x_y,
                 "unit_and_factory": None,
                 "handler": self.__x_y_coordinates_handler
+            },
+
+            # 70 degress C
+            "temperature": {
+                "regex": self.__temperature,
+                "unit_and_factory": {
+                    "C": 1,
+                    "F": self.__f_to_c
+                },
+                "handler": self.__number_with_unit_handler
             }
         }
+
+    def __f_to_c(self, f):
+        return (f - 32) * 5 / 9
 
     def __number_with_unit_handler(self, unit_and_factory, groups):
         value, unit = groups
 
         if unit is not None and unit in unit_and_factory:
-            return float(value) * unit_and_factory[unit]
+            if type(unit_and_factory[unit]) is int:
+                return float(value) * unit_and_factory[unit]
+            else:
+                return unit_and_factory[unit](float(value))
         else:
             return None
 
@@ -136,12 +161,27 @@ class Process(object):
             # Water: 100 ml -> self.__Water = 100
             setattr(self, key.replace(" ", "_").lower(), value)
 
+    def __find_values_by_key(self, params, key):
+        result = []
+
+        for item in params:
+            if item[0] == key:
+                result.append(item[1])
+
+        return result
+
+    def __convert_if_is_number(self, s):
+        try:
+            return float(s)
+        except ValueError:
+            return s
+
     def __parse_params(self, params):
         result = {}
         for key, (except_unit, required, default) in self.params_rules.items():
-            value = params.get(key, None)
+            values = self.__find_values_by_key(params, key)
 
-            if value is None:
+            if len(values) == 0:
                 if required:
                     raise ParameterNameError(key)
                 else:
@@ -149,15 +189,28 @@ class Process(object):
                     continue
 
             # Parse the value and convert the unit to minimal unit
-            if except_unit is None:
-                result[key] = float(value)
-            else:
-                unit_item = self.unit.regex[except_unit]
-                m = unit_item["regex"].match(value)
+            for value in values:
 
-                if m is None:
-                    raise ParamterValueError(key, value)
+                if except_unit is None:
+                    value_result = self.__convert_if_is_number(value)
                 else:
-                    result[key] = unit_item["handler"](unit_item["unit_and_factory"], m.groups())
+                    unit_item = self.unit.regex[except_unit]
+                    m = unit_item["regex"].match(value)
+
+                    if m is None:
+                        raise ParamterValueError(key, value)
+                    else:
+                        value_result = unit_item["handler"](unit_item["unit_and_factory"], m.groups())
+
+                # If there are not only one value of this key, save all the
+                # value to a list
+                if key in result:
+                    if type(result[key]) is not list:
+                        tmp_value = result[key]
+                        result[key] = [tmp_value, value_result]
+                    else:
+                        result[key].append(value_result)
+                else:
+                    result[key] = value_result
 
         return result

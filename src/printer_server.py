@@ -68,7 +68,7 @@ class PrinterServer(object):
         if self._comm is None:
             return
 
-        self.pub_socket.send(msgpack.packb({"state": state, "state_string": self._comm.getStateString()}))
+        self.pub_socket.send(msgpack.packb({"state": self._comm.getState(), "state_string": self._comm.getStateString()}))
 
     def mcMessage(self, message):
         self.pub_socket.send(msgpack.packb({"message": message}))
@@ -93,6 +93,11 @@ class PrinterServer(object):
                 self._comm.sendCommand(cmd["C"])
             elif 'START' in cmd:
                 self._comm.printGCode(self._gcodeList)
+            elif 'INFORMATION' in cmd:
+                self.cmd_socket.send(msgpack.packb({"state": self._comm.getState(), "state_string": self._comm.getStateString()}))
+            elif 'SHUTDOWN' in cmd:
+                print "Receie SHUTDOWN"
+                break
 
 
 def startMonitor():

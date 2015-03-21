@@ -7,6 +7,8 @@ import unittest
 from process.circle import Circle
 from process.spiral import Spiral
 from process.fixed_point import FixedPoint
+from process.heat import Heat
+from process.operations import Operations
 
 import matplotlib.pyplot as plt
 from matplotlib import animation
@@ -15,14 +17,14 @@ from matplotlib import animation
 class TestProcess(unittest.TestCase):
 
     def test_circle(self):
-        test_data = {
-            "Radius": "1 cm",
-            "High": "80 mm to 90 mm",
-            "Total Water": "40 ml",
-            "Point interval": "0.01 mm",
-            "Extrudate": "0.1 ml/mm",
-            "Feedrate": "1 mm/min",
-        }
+        test_data = [
+            ("Radius", "1 cm"),
+            ("High", "80 mm to 90 mm"),
+            ("Total Water", "40 ml"),
+            ("Point interval", "0.01 mm"),
+            ("Extrudate", "0.1 ml/mm"),
+            ("Feedrate", "1 mm/min"),
+        ]
 
         circle = Circle(test_data)
 
@@ -37,14 +39,14 @@ class TestProcess(unittest.TestCase):
 
 
     def test_spiral(self):
-        test_data = {
-            "Radius": "1 cm to 2 cm",
-            "High": "80 mm to 90 mm",
-            "Cylinder": "5",
-            "Point interval": "0.01 mm",
-            "Extrudate": "0.1 ml/mm",
-            "Feedrate": "1 mm/min",
-        }
+        test_data = [
+            ("Radius", "1 cm to 2 cm"),
+            ("High", "80 mm to 90 mm"),
+            ("Cylinder", "5"),
+            ("Point interval", "0.01 mm"),
+            ("Extrudate", "0.1 ml/mm"),
+            ("Feedrate", "1 mm/min"),
+        ]
 
         spiral = Spiral(test_data)
 
@@ -58,13 +60,13 @@ class TestProcess(unittest.TestCase):
         points = spiral.points()
 
     def test_fixedpoint(self):
-        test_data = {
-            "Coordinates": "(0, 0)",
-            "High": "80 mm to 90 mm",
-            "Total Water": "40 ml",
-            "Extrudate": "0.1 ml/step",
-            "Feedrate": "80 mm/min",
-        }
+        test_data = [
+            ("Coordinates", "(0, 0)"),
+            ("High", "80 mm to 90 mm"),
+            ("Total Water", "40 ml"),
+            ("Extrudate", "0.1 ml/step"),
+            ("Feedrate", "80 mm/min"),
+        ]
 
         fixedpoint = FixedPoint(test_data)
         self.assertEqual(fixedpoint.coordinates, (0, 0), "The coordinates should be {} but {}".format((0, 0), fixedpoint.coordinates))
@@ -75,6 +77,25 @@ class TestProcess(unittest.TestCase):
 
         points = fixedpoint.points()
 
+    def test_heat(self):
+        test_data = [
+            ("Water Tank", "70 degress C")
+        ]
+
+        heat = Heat(test_data)
+        self.assertEqual(heat.water_tank, 70, "The temperature of water tank should be {} but {}".format(70, heat.water_tank))
+
+        points = heat.points()
+
+    def test_operations(self):
+        test_data = [
+            ("Command", "home"),
+            ("Command", "refill"),
+            ("Command", "wait 30s")
+        ]
+
+        operations = Operations(test_data)
+        self.assertEqual(len(operations.points()), 3, "There should be {} commands but {}".format(3, len(operations.points())))
 
 def show_animation(points):
     # first set up the figure, the axis, and the plot element we want to animate
@@ -104,8 +125,10 @@ def show_animation(points):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    #suite.addTest(TestProcess("test_circle"))
-    #suite.addTest(TestProcess("test_spiral"))
+    suite.addTest(TestProcess("test_circle"))
+    suite.addTest(TestProcess("test_spiral"))
     suite.addTest(TestProcess("test_fixedpoint"))
+    suite.addTest(TestProcess("test_heat"))
+    suite.addTest(TestProcess("test_operations"))
 
     unittest.TextTestRunner().run(suite)

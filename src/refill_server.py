@@ -23,12 +23,15 @@ class RefillServer(object):
 
         self.refill_pin = self.config["Refill"]["water_level_pin"]
         self.motor_pin = self.config["Refill"]["motor_pin"]
+        self.valve_pin = self.config["Refill"]["valve_pin"]
 
 	GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.refill_pin[0], GPIO.OUT)
         GPIO.setup(self.refill_pin[1], GPIO.IN)
 
         GPIO.setup(self.motor_pin, GPIO.OUT)
+
+        GPIO.setup(self.valve_pin, GPIO.OUT)
 
         self.water_level_worker = Thread(target=self.__monitor_water_level)
         self.water_level_worker.daemon = True
@@ -70,6 +73,9 @@ class RefillServer(object):
     def __refill_water(self):
         self.water_level_worker.start()
 
+        # Open valve
+        GPIO.output(self.valve_pin, True)
+
         while True:
             if not self.stop:
                 GPIO.output(self.motor_pin, True)
@@ -77,6 +83,8 @@ class RefillServer(object):
                 GPIO.output(self.motor_pin, False)
                 time.sleep(0.01)
 
+        # Close valve
+        GPIO.output(self.valve_pin, False)
         self.stop = False
 
 if __name__ == '__main__':

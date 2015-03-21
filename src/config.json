@@ -34,7 +34,8 @@
 
     "Refill":{
         "water_level_pin": [16, 17],
-        "motor_pin": 18
+        "motor_pin": 18,
+        "valve_pin": 19
     },
 
     "HeaterServer":

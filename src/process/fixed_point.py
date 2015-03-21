@@ -8,8 +8,8 @@ class FixedPoint(Process):
     """
     Example:
 
-        ''' fixed point
-            Coordinates: (0, 0) 
+        ''' fixed_point
+            Coordinates: (0, 0)
             High: 80 mm to 90 mm
             Total Water: 40 ml
 
@@ -36,7 +36,7 @@ class FixedPoint(Process):
         return points
 
     def __point_x_y(self, points):
-        
+
         for point in points:
             point.x = self.coordinates[0]
             point.y = self.coordinates[1]
