@@ -73,6 +73,7 @@ class PointHandler(object):
                     self.wait_temperature()
 
     def wait_temperature():
+
         pass
 
     def start(self):

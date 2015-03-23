@@ -34,24 +34,25 @@
 
     "Refill":{
         "water_level_pin": [13, 15],
-        "motor_pin": [11, 12]
+        "motor_pin": [11, 12],
+        "motor_direct": false,
+	"valve_pin": 22
     },
 
     "HeaterServer":
     {
-        "Publish_Socket_Address": "ipc:///tmp/heater_pub_pid_controller",
-        "Command_Socket_Address": "ipc:///tmp/heater_cmd_pid_controller"
+        "Publish_Socket_Address": "ipc:///tmp/heater_pub_channel",
+        "Command_Socket_Address": "ipc:///tmp/heater_cmd_channel"
     },
 
     "PrinterServer":
     {
-        "Publish_Socket_Address": "ipc:///tmp/printer_pub_pid_controller",
-        "Command_Socket_Address": "ipc:///tmp/printer_cmd_pid_controller"
+        "Publish_Socket_Address": "ipc:///tmp/printer_pub_channel",
+        "Command_Socket_Address": "ipc:///tmp/printer_cmd_channel"
     },
 
     "RefillServer":
     {
-        "Publish_Socket_Address": "ipc:///tmp/refill_pub_pid_controller",
-        "Command_Socket_Address": "ipc:///tmp/refill_cmd_pid_controller"
+        "Command_Socket_Address": "ipc:///tmp/refill_cmd_channel"
     }
 }
