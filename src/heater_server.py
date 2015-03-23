@@ -1,15 +1,6 @@
 import pid_controller
 from utils import json_config
-
-import msgpack
-
-from nanomsg import (
-    PUB,
-    PAIR,
-    DONTWAIT,
-    Socket
-)
-
+from utils import channel
 
 class Server(object):
     def __init__(self):
@@ -20,12 +11,10 @@ class Server(object):
         self.pid_controller = pid_controller.PIDController(self.config)
 
         # That other process can subscribe the pid controller status
-        self.pub_socket = Socket(PUB)
-        self.pub_socket.bind(self.config["HeaterServer"]["Publish_Socket_Address"])
+        self.pub_channel = channel.Channel(self.config["HeaterServer"]["Publish_Socket_Address"], "Pub", True)
 
         # Receive the pid controller command
-        self.cmd_socket = Socket(PAIR)
-        self.cmd_socket.bind(self.config["HeaterServer"]["Command_Socket_Address"])
+        self.cmd_channel = channel.Channel(self.config["HeaterServer"]["Command_Socket_Address"], "Pair", True)
 
     def __pid_controller_observer(self, *pid_status):
         self.publish_pid_status(*pid_status)
@@ -58,7 +47,7 @@ class Server(object):
         }
         """
         print "Publish cycle_time:{}, duty_cycle:{}, set_point:{}".format(cycle_time, duty_cycle, set_point, temperature)
-        self.pub_socket.send(msgpack.packb({"cycle_time": cycle_time, "duty_cycle": duty_cycle, "set_point": set_point, "temperature": temperature}))
+        self.pub_channel.send({"cycle_time": cycle_time, "duty_cycle": duty_cycle, "set_point": set_point, "temperature": temperature})
 
     def receive_pid_parameters(self):
         """
@@ -74,8 +63,7 @@ class Server(object):
         """
         # The main thread will handle the command socket
         while(True):
-            req = self.cmd_socket.recv()
-            cmd = msgpack.unpackb(req)
+            cmd = self.cmd_channel.recv()
 
             self.pid_controller.set_params(cmd["cycle_time"], cmd["k"], cmd["i"], cmd["d"], cmd["set_point"])
 

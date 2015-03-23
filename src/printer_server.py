@@ -15,14 +15,8 @@ import json
 from utils import machineCom
 
 from utils import json_config
-import msgpack
+from utils import channel
 
-from nanomsg import (
-    PUB,
-    PAIR,
-    DONTWAIT,
-    Socket
-)
 
 
 class PrinterServer(object):
@@ -37,12 +31,10 @@ class PrinterServer(object):
         self.config = json_config.parse_json("config.json")
 
         # Create nanomsg socket to publish status and receive command
-        self.pub_socket = Socket(PUB)
-        self.pub_socket.bind(self.config["PrinterServer"]["Publish_Socket_Address"])
+        self.pub_channel = channel.Channel(self.config["PrinterServer"]["Publish_Socket_Address"], "Pub", True)
 
         # Receive the printer command
-        self.cmd_socket = Socket(PAIR)
-        self.cmd_socket.bind(self.config["PrinterServer"]["Command_Socket_Address"])
+        self.cmd_channel = channel.Channel(self.config["PrinterServer"]["Command_Socket_Address"], "Pair", True)
 
         self._comm = None
         self._gcodeList = []
@@ -58,7 +50,7 @@ class PrinterServer(object):
     #
     # ================================================================================
     def mcLog(self, message):
-        self.pub_socket.send(msgpack.packb({"log": message}))
+        self.pub_channel.send({"log": message})
 
     def mcTempUpdate(self, temp, bedTemp, targetTemp, bedTargetTemp):
         # Because now the temperature is not controled by arduino
@@ -68,21 +60,20 @@ class PrinterServer(object):
         if self._comm is None:
             return
 
-        self.pub_socket.send(msgpack.packb({"state": self._comm.getState(), "state_string": self._comm.getStateString()}))
+        self.pub_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
 
     def mcMessage(self, message):
-        self.pub_socket.send(msgpack.packb({"message": message}))
+        self.pub_channel.send({"message": message})
 
     def mcProgress(self, lineNr):
-        self.pub_socket.send(msgpack.packb({"progress": lineNr}))
+        self.pub_channel.send({"progress": lineNr})
 
     def mcZChange(self, newZ):
-        self.pub_socket.send(msgpack.packb({"changeZ": newZ}))
+        self.pub_channel.send({"changeZ": newZ})
 
     def monitorStdin(self):
         while True:
-            req = self.cmd_socket.recv()
-            cmd = msgpack.unpackb(req)
+            cmd = self.cmd_channel.recv()
 
             if 'STOP' in cmd:
                 self._comm.cancelPrint()
@@ -94,9 +85,9 @@ class PrinterServer(object):
             elif 'START' in cmd:
                 self._comm.printGCode(self._gcodeList)
             elif 'INFORMATION' in cmd:
-                self.cmd_socket.send(msgpack.packb({"state": self._comm.getState(), "state_string": self._comm.getStateString()}))
+                self.cmd_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
             elif 'SHUTDOWN' in cmd:
-                print "Receie SHUTDOWN"
+                self.mcMessage("Shoutdown printer server")
                 break
 
 
