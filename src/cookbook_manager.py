@@ -23,6 +23,9 @@ class CookbookManager(object):
         if not os.path.exists(path):
             os.makedirs(path)
 
+    def list(self):
+        return os.listdir(self.folder)        
+
     def update(self, cookbook_name, content):
         self.__create_cookbook_folder(cookbook_name) 
 
@@ -33,6 +36,12 @@ class CookbookManager(object):
             f.write(content)
 
         # @ToDo SVG file
+
+    def rename(self, old_name, new_name):
+        old_path = self.__file_path(old_name)
+        new_path = self.__file_path(new_name)
+
+        return os.rename(old_path , new_path)
         
     def read(self, cookbook_name):
         file_path = self.__file_path(cookbook_name)

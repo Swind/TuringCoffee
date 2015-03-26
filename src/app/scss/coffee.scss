@@ -1,0 +1,30 @@
+* {
+    margin:0;
+    padding:0;
+}
+
+body {
+    height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    margin-bottom: 60px;
+
+    div.ui.grid {
+        height: 100%;
+    }
+
+    div.coffee_sidebar {
+        height: 100%;
+        overflow: auto;
+    }
+
+    div.cookbook_list {
+        height: 100%;
+        overflow: auto;
+    }
+
+    div.cookbook_content {
+        height: 100%;
+        overflow: auto;
+    }
+
+}
