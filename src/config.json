@@ -1,4 +1,5 @@
 {
+    "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
     "Emulator": false,
     "Unit": "C",
