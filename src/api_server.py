@@ -6,7 +6,7 @@ from cookbook_manager import CookbookManager
 
 # ===============================================================================
 #
-# Global Variables 
+# Global Variables
 #
 # ===============================================================================
 
@@ -23,8 +23,8 @@ def index():
 # Cookbook Manager API
 #
 # ===============================================================================
-@app.route("/cookbooks", method=["GET"])
-def list_cookbooks(self):
+@app.route("/cookbooks", methods=["GET"])
+def list_cookbooks():
     """
     {
         "cookbooks": ["cookbook1", "cookbook2", "cookbook3"]
@@ -33,8 +33,8 @@ def list_cookbooks(self):
     cookbooks = cmgr.list()
     return jsonify(cookbooks)
 
-@app.route("/cookbooks/<str:name>", method=["GET"])
-def read_cookbook(self, name):
+@app.route("/cookbooks/<string:name>", methods=["GET"])
+def read_cookbook(name):
     """
     {
         "name": "cookbook1",
@@ -44,8 +44,8 @@ def read_cookbook(self, name):
     """
     return cmgr.read(name)
 
-@app.route("/cookbooks/<str:name>", method=["PUT"])
-def update_cookbook(self, name):
+@app.route("/cookbooks/<string:name>", methods=["PUT"])
+def update_cookbook(name):
     """
     {
         "name": "new_cookbook_name"
@@ -53,16 +53,16 @@ def update_cookbook(self, name):
     """
     new_content = request.data
 
-@app.route("/cookbooks/<str:name>/content", method=["GET"])
-def read_cookbook_content(self, name):
+@app.route("/cookbooks/<string:name>/content", methods=["GET"])
+def read_cookbook_content(name):
     pass
 
-@app.route("/cookbooks/<str:name>/content", method=["PUT"])
-def update_cookbook_content(self, name):
+@app.route("/cookbooks/<string:name>/content", methods=["PUT"])
+def update_cookbook_content(name):
     pass
 
-@app.route("/cookbooks/<str:name>", method=["DELETE"])
-def delete_cookbook(self, name):
+@app.route("/cookbooks/<string:name>", methods=["DELETE"])
+def delete_cookbook(name):
     pass
 
 # ===============================================================================
@@ -70,12 +70,12 @@ def delete_cookbook(self, name):
 # Printer API
 #
 # ===============================================================================
-@app.route("/printer", method=["GET"])
-def get_printer_status(self):
+@app.route("/printer", methods=["GET"])
+def get_printer_status():
     pass
 
-@app.route("/printer", method=["PUT"])
-def print_cookbook(self):
+@app.route("/printer", methods=["PUT"])
+def print_cookbook():
     """
     {
         "Command": "Start|Pause|Resume|Stop",
@@ -84,8 +84,8 @@ def print_cookbook(self):
     """
     pass
 
-@app.route("/printer/jog", method=["PUT"])
-def control_printer(self):
+@app.route("/printer/jog", methods=["PUT"])
+def control_printer():
     """
     {
         "X": 0,
@@ -101,30 +101,30 @@ def control_printer(self):
 # Heater API
 #
 # ===============================================================================
-@app.route("/heater", method=["GET"])
-def get_heater_status(self):
+@app.route("/heater", methods=["GET"])
+def get_heater_status():
     pass
 
-@app.route("/heater", method=["PUT"])
-def control_heater(self):
+@app.route("/heater", methods=["PUT"])
+def control_heater():
     """
     {
         "Set Point": 80
     }
     """
-    pass  
+    pass
 
 # ===============================================================================
 #
 # Refill API
 #
 # ===============================================================================
-@app.route("/refill", method=["GET"])
-def get_refill_status(self):
+@app.route("/refill", methods=["GET"])
+def get_refill_status():
     pass
 
-@app.route("/refill", method=["PUT"])
-def control_refill(self):
+@app.route("/refill", methods=["PUT"])
+def control_refill():
     """
     {
         "Command": "Start|Stop"
