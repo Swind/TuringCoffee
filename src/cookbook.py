@@ -64,14 +64,14 @@ class Heading(object):
 class Step(object):
     def __init__(self, heading):
         self.__heading = heading
-        self.name = heading.title
+        self.title = heading.title
 
         self.processes = map(lambda item: Process(item), self.__heading.sub_headings)
 
 class Process(object):
     def __init__(self, heading):
         self.__heading = heading
-        self.name = heading.title
+        self.title = heading.title
 
         self.blocks = []
         for block in heading.content:

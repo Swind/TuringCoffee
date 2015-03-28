@@ -4,10 +4,6 @@ from flask import request
 
 from cookbook_manager import CookbookManager
 
-from printer_server import PrinterServer
-from heater_server import HeaterServer
-from refill_server import RefillServer
-
 from chef import Chef
 
 import json
@@ -16,6 +12,7 @@ from threading import Thread
 
 from utils import channel
 from utils import json_config
+
 # ===============================================================================
 #
 # Global Variables
@@ -25,23 +22,6 @@ from utils import json_config
 app = Flask(__name__)
 cmgr = CookbookManager()
 config = json_config.parse_json("config.json")
-
-printer_cmd_channel = channel.Channel(config["PrinterServer"]["Command_Socket_Address"], "Pair", False)
-
-printer_server = PrinterServer()
-printer_server_thread = Thread(target=printer_server.start)
-printer_server_thread.daemon = True
-printer_server_thread.start()
-
-heater_server = HeaterServer()
-heater_server_thread = Thread(target=heater_server.start)
-heater_server_thread.daemon = True
-heater_server_thread.start()
-
-refill_server = RefillServer()
-refill_server_thread = Thread(target=refill_server.start)
-refill_server_thread.daemon = True
-refill_server_thread.start()
 
 chef = Chef()
 
@@ -130,8 +110,7 @@ def delete_cookbook(name):
 # ===============================================================================
 @app.route("/printer", methods=["GET"])
 def get_printer_status():
-    status = printer_cmd_channel.send({"INFORMATION": True})
-    return jsonify(status)
+    pass
 
 @app.route("/printer", methods=["PUT"])
 def print_cookbook():
@@ -145,6 +124,8 @@ def print_cookbook():
 
     cmd = params["Command"]
     name = params["Cookbook Name"]
+
+    app.logger.debug("{} {} ...".format(cmd, name))
 
     if cmd == "Start":
         chef.cook(name)

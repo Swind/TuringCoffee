@@ -3,6 +3,7 @@ import msgpack
 from nanomsg import (
     PUB,
     SUB,
+    SUB_SUBSCRIBE,
     PAIR,
     DONTWAIT,
     Socket,
@@ -25,6 +26,9 @@ class Channel(object):
             self.__socket.bind(address)
         else:
             self.__socket.connect(address)
+
+            if channel_type == "Sub":
+                self.__socket.set_string_option(SUB, SUB_SUBSCRIBE, '')
 
     def recv(self, blocking=True):
 

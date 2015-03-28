@@ -8,7 +8,6 @@ from test_cookbook_manager_data import data as test_data
 import unittest
 import json
 
-
 class TestAPIServer(unittest.TestCase):
     def setUp(self):
         api_server.app.debug = True

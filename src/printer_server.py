@@ -17,6 +17,8 @@ from utils import machineCom
 from utils import json_config
 from utils import channel
 
+import logging
+logger = logging.getLogger(__name__)
 
 class PrinterServer(object):
 
@@ -30,10 +32,14 @@ class PrinterServer(object):
         self.config = json_config.parse_json("config.json")
 
         # Create nanomsg socket to publish status and receive command
-        self.pub_channel = channel.Channel(self.config["PrinterServer"]["Publish_Socket_Address"], "Pub", True)
+        pub_address = self.config["PrinterServer"]["Publish_Socket_Address"]
+        self.pub_channel = channel.Channel(pub_address, "Pub", True)
+        logger.info("Create the publish channel at {}".format(pub_address))
 
         # Receive the printer command
-        self.cmd_channel = channel.Channel(self.config["PrinterServer"]["Command_Socket_Address"], "Pair", True)
+        cmd_address = self.config["PrinterServer"]["Command_Socket_Address"]
+        self.cmd_channel = channel.Channel(cmd_address, "Pair", True)
+        logger.info("Create the command channel at {}".format(cmd_address))
 
         self._comm = None
         self._gcodeList = []
@@ -75,6 +81,7 @@ class PrinterServer(object):
     def start(self):
         while True:
             cmd = self.cmd_channel.recv()
+            logger.info("Receive a command {}".format(cmd))
 
             if 'STOP' in cmd:
                 self._comm.cancelPrint()

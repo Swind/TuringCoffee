@@ -92,7 +92,7 @@ class VirtualPrinter():
 				return ''
 			if self.readList is None:
 				return ''
-		time.sleep(0.001)
+		#time.sleep(0.001)
 		#print "Recv: %s" % (self.readList[0].rstrip())
 		return self.readList.pop(0)
 
