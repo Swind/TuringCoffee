@@ -18,5 +18,6 @@ class Operations(Process):
     }
 
     def points(self):
-        return map(lambda item: Command(item, None), self.command)
+        result = map(lambda item: Command(item, None), self.command)
+        return result
 

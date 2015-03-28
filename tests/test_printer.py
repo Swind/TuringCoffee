@@ -60,6 +60,8 @@ class TestPrinter(unittest.TestCase):
 
         self.cmd_socket.send(msgpack.packb({"START": True}))
 
+        time.sleep(5)
+
         while True:
             #result = self.pub_socket.recv(flags=DONTWAIT)
             result = self.pub_socket.recv()

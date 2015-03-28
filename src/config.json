@@ -1,7 +1,7 @@
 {
     "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
-    "Emulator": false,
+    "Emulator": true,
     "Unit": "C",
 
     "Heater": {
@@ -54,6 +54,7 @@
 
     "RefillServer":
     {
-        "Command_Socket_Address": "ipc:///tmp/refill_cmd_channel"
+        "Command_Socket_Address": "ipc:///tmp/refill_cmd_channel",
+        "Publish_Socket_Address": "ipc:///tmp/refill_pub_channel"
     }
 }

@@ -2,7 +2,7 @@ import pid_controller
 from utils import json_config
 from utils import channel
 
-class Server(object):
+class HeaterServer(object):
     def __init__(self):
         # Read Config
         self.config = json_config.parse_json("config.json")
@@ -46,7 +46,7 @@ class Server(object):
             "temperature": 26.53
         }
         """
-        print "Publish cycle_time:{}, duty_cycle:{}, set_point:{}".format(cycle_time, duty_cycle, set_point, temperature)
+        #print "Publish cycle_time:{}, duty_cycle:{}, set_point:{}".format(cycle_time, duty_cycle, set_point, temperature)
         self.pub_channel.send({"cycle_time": cycle_time, "duty_cycle": duty_cycle, "set_point": set_point, "temperature": temperature})
 
     def receive_pid_parameters(self):

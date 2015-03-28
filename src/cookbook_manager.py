@@ -37,8 +37,8 @@ class CookbookManager(object):
                 f.write(content)
 
     def rename(self, old_name, new_name):
-        old_path = self.__file_path(old_name)
-        new_path = self.__file_path(new_name)
+        old_path = self.__folder_path(old_name)
+        new_path = self.__folder_path(new_name)
 
         return os.rename(old_path , new_path)
 

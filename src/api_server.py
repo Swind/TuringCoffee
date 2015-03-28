@@ -1,9 +1,21 @@
 from flask import Flask
-from flask import jsonify, Response, render_template, abort
+from flask import jsonify, Response, render_template, abort, make_response
 from flask import request
 
 from cookbook_manager import CookbookManager
 
+from printer_server import PrinterServer
+from heater_server import HeaterServer
+from refill_server import RefillServer
+
+from chef import Chef
+
+import json
+import httplib
+from threading import Thread
+
+from utils import channel
+from utils import json_config
 # ===============================================================================
 #
 # Global Variables
@@ -12,11 +24,30 @@ from cookbook_manager import CookbookManager
 
 app = Flask(__name__)
 cmgr = CookbookManager()
+config = json_config.parse_json("config.json")
+
+printer_cmd_channel = channel.Channel(config["PrinterServer"]["Command_Socket_Address"], "Pair", False)
+
+printer_server = PrinterServer()
+printer_server_thread = Thread(target=printer_server.start)
+printer_server_thread.daemon = True
+printer_server_thread.start()
+
+heater_server = HeaterServer()
+heater_server_thread = Thread(target=heater_server.start)
+heater_server_thread.daemon = True
+heater_server_thread.start()
+
+refill_server = RefillServer()
+refill_server_thread = Thread(target=refill_server.start)
+refill_server_thread.daemon = True
+refill_server_thread.start()
+
+chef = Chef()
 
 @app.route("/")
 def index():
     pass
-
 
 # ===============================================================================
 #
@@ -31,7 +62,7 @@ def list_cookbooks():
     }
     """
     cookbooks = cmgr.list()
-    return jsonify(cookbooks)
+    return jsonify({"cookbooks": cookbooks})
 
 @app.route("/cookbooks/<string:name>", methods=["GET"])
 def read_cookbook(name):
@@ -51,19 +82,46 @@ def update_cookbook(name):
         "name": "new_cookbook_name"
     }
     """
-    new_content = request.data
+    if request.data:
+        params = json.loads(request.data)
+    else:
+        params = {}
+
+    if "name" in params:
+        new_name = params["name"]
+        cmgr.rename(name, new_name)
+    else:
+        # If no name params in the params, create a new cookbook
+        cmgr.update(name)
+
+    resp = make_response()
+    resp.status_code = httplib.CREATED
+
+    return resp
 
 @app.route("/cookbooks/<string:name>/content", methods=["GET"])
 def read_cookbook_content(name):
-    pass
+    content = cmgr.read(name)
+    return content
 
 @app.route("/cookbooks/<string:name>/content", methods=["PUT"])
 def update_cookbook_content(name):
-    pass
+    new_content = request.data
+    cmgr.update(name, new_content)
+
+    resp = make_response()
+    resp.status_code = httplib.OK
+
+    return resp
 
 @app.route("/cookbooks/<string:name>", methods=["DELETE"])
 def delete_cookbook(name):
-    pass
+    cmgr.delete(name)
+
+    resp = make_response()
+    resp.status_code = httplib.NO_CONTENT
+
+    return resp
 
 # ===============================================================================
 #
@@ -72,7 +130,8 @@ def delete_cookbook(name):
 # ===============================================================================
 @app.route("/printer", methods=["GET"])
 def get_printer_status():
-    pass
+    status = printer_cmd_channel.send({"INFORMATION": True})
+    return jsonify(status)
 
 @app.route("/printer", methods=["PUT"])
 def print_cookbook():
@@ -82,7 +141,13 @@ def print_cookbook():
         "Cookbook Name": "Cookbook"
     }
     """
-    pass
+    params = json.loads(request.data)
+
+    cmd = params["Command"]
+    name = params["Cookbook Name"]
+
+    if cmd == "Start":
+        chef.cook(name)
 
 @app.route("/printer/jog", methods=["PUT"])
 def control_printer():
@@ -121,7 +186,7 @@ def control_heater():
 # ===============================================================================
 @app.route("/refill", methods=["GET"])
 def get_refill_status():
-    pass
+    return jsonify({"full": chef.is_water_full})
 
 @app.route("/refill", methods=["PUT"])
 def control_refill():

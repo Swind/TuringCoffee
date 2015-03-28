@@ -1,6 +1,4 @@
-# -*- coding:utf-8 -*-
 
-data = """
 # Step 1: 預浸
 
 預浸需要 60 度 20ml 的水，注水結束之後等待 20 秒
@@ -125,4 +123,3 @@ Command: refill
 ``` heat
 Water Tank: 0 degress C
 ```
-"""

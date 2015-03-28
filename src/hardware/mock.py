@@ -85,3 +85,15 @@ class MockSensor(object):
 
     def read(self):
         return self.__heater.get_temperature()
+
+class MockRefill(object):
+
+    full_flag = False
+
+    def is_water_full(self):
+        return self.full_flag
+
+    def refill_water(self):
+        self.full_flag = False
+        time.sleep(10)
+        self.full_flag = True

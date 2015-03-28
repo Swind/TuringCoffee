@@ -103,8 +103,8 @@ class CodeBlock(object):
         self.lang = lang
         self.params = params
 
-    def gcode(self):
-        return self.lang_map[self.lang](self.params)
+    def points(self):
+        return self.lang_map[self.lang](self.params).points()
 
     def __str__(self):
         return "{} => {}".format(self.lang, self.params)

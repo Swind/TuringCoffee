@@ -18,7 +18,6 @@ from utils import json_config
 from utils import channel
 
 
-
 class PrinterServer(object):
 
     """
@@ -63,15 +62,17 @@ class PrinterServer(object):
         self.pub_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
 
     def mcMessage(self, message):
-        self.pub_channel.send({"message": message})
+        # self.pub_channel.send({"message": message})
+        pass
 
     def mcProgress(self, lineNr):
-        self.pub_channel.send({"progress": lineNr})
+        self.pub_channel.send({"total": len(self._gcodeList), "progress": lineNr})
 
     def mcZChange(self, newZ):
-        self.pub_channel.send({"changeZ": newZ})
+        # self.pub_channel.send({"changeZ": newZ})
+        pass
 
-    def monitorStdin(self):
+    def start(self):
         while True:
             cmd = self.cmd_channel.recv()
 
@@ -89,11 +90,3 @@ class PrinterServer(object):
             elif 'SHUTDOWN' in cmd:
                 self.mcMessage("Shoutdown printer server")
                 break
-
-
-def startMonitor():
-    server = PrinterServer()
-    server.monitorStdin()
-
-if __name__ == '__main__':
-    startMonitor()
