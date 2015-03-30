@@ -33,7 +33,8 @@ class TestPrinter(unittest.TestCase):
         self.cmd_socket.connect(self.config["PrinterServer"]["Command_Socket_Address"])
 
         # Start printer server
-        self.p = Thread(target=printer_server.startMonitor)
+        server = printer_server.PrinterServer()
+        self.p = Thread(target=server.start)
         self.p.daemon = True
         self.p.start()
         time.sleep(1)

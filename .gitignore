@@ -1,6 +1,6 @@
 .ropeproject
 *.pyc
 *.csv
-*.*.swp
+*.*.sw*
 bower_components
 node_modules

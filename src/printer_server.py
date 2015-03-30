@@ -43,6 +43,7 @@ class PrinterServer(object):
 
         self._comm = None
         self._gcodeList = []
+        self._printing_gcodeList = []
 
         port_name = self.config["Printer"]["PortName"]
         baudrate = int(self.config["Printer"]["Baudrate"])
@@ -59,6 +60,7 @@ class PrinterServer(object):
 
     def mcTempUpdate(self, temp, bedTemp, targetTemp, bedTargetTemp):
         # Because now the temperature is not controled by arduino
+        #self.pub_channel.send({"temperature": temp})
         pass
 
     def mcStateChange(self, state):
@@ -68,14 +70,14 @@ class PrinterServer(object):
         self.pub_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
 
     def mcMessage(self, message):
-        # self.pub_channel.send({"message": message})
+        #self.pub_channel.send({"message": message})
         pass
 
     def mcProgress(self, lineNr):
-        self.pub_channel.send({"total": len(self._gcodeList), "progress": lineNr})
+        self.pub_channel.send({"total": len(self._printing_gcodeList), "progress": lineNr})
 
     def mcZChange(self, newZ):
-        # self.pub_channel.send({"changeZ": newZ})
+        #self.pub_channel.send({"changeZ": newZ})
         pass
 
     def start(self):
@@ -91,9 +93,15 @@ class PrinterServer(object):
             elif 'C' in cmd:
                 self._comm.sendCommand(cmd["C"])
             elif 'START' in cmd:
-                self._comm.printGCode(self._gcodeList)
+                self._printing_gcodeList = self._gcodeList
+                self._gcodeList = []
+                self._comm.printGCode(self._printing_gcodeList)
             elif 'INFORMATION' in cmd:
                 self.cmd_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
             elif 'SHUTDOWN' in cmd:
                 self.mcMessage("Shoutdown printer server")
                 break
+
+if __name__ == "__main__":
+    server = PrinterServer()
+    server.start()

@@ -149,6 +149,8 @@ class Chef(object):
 
         for point in points:
 
+            #logger.debug("Handle command {}".format(point))
+
             if type(point) is Point:
                 gcode = self.__convert_to_gcode(point)
                 self.printer_cmd.send({"G": gcode})
@@ -205,7 +207,7 @@ class Chef(object):
             time.sleep(2)
 
     def wait_printer(self, cmd_count):
-        while not (self.printer_progress == cmd_count and self.total_cmd == cmd_count and self.printer_state_string == "Operational"):
+        while not (self.printer_progress == cmd_count and self.total_cmd == cmd_count):
             logger.debug("Now printer total cmd {}, progress {}, wait it to {}".format(self.total_cmd, self.printer_progress, cmd_count))
             time.sleep(1)
 
