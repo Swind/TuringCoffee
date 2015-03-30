@@ -38,7 +38,7 @@ class Refill(object):
 
         self.motor_direct = refill_config["motor_direct"]
 
-    def is_water_fill(self):
+    def is_water_full(self):
         return GPIO.input(self.water_level_pin[1])
 
     def refill_water(self):
@@ -46,7 +46,7 @@ class Refill(object):
         GPIO.output(self.motor_pin[1], self.motor_direct)
 
         try:
-            while (not self.is_water_fill() and not self.stop):
+            while (not self.is_water_full() and not self.stop):
 
                 # Every 200 steps check water level and stop flag
                 for index in range(0, 200):

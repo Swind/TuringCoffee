@@ -44,6 +44,7 @@ class Circle(Process):
         points = self.__point_xy(points, start_angle)
         points = self.__point_e(points)
         points = self.__point_z(points)
+	points = self.__point_f(points)
 
         return points
 
@@ -79,6 +80,12 @@ class Circle(Process):
         for index, point in enumerate(points):
             point.z = z_start + (z_per_point * index)
 
+        return points
+
+    def __point_f(self, points):
+        f = self.feedrate
+	for point in points:
+	    point.f = f
         return points
 
 if __name__ == "__main__":

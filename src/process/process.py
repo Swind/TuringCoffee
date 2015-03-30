@@ -5,12 +5,13 @@ Point = namedtuple('Point', ['x', 'y', 'z', 'e1', 'e2'])
 
 
 class Point(object):
-    def __init__(self, x=None, y=None, z=None, e1=None, e2=None):
+    def __init__(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         self.x = x
         self.y = y
         self.z = z
         self.e1 = e1
         self.e2 = e2
+	self.f = f
 
     def __str__(self):
         return "x:{} y:{} z:{} e1:{} e2:{}".format(self.x, self.y, self.z, self.e1, self.e2)

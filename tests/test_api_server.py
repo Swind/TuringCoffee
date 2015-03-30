@@ -2,8 +2,11 @@ import os
 import sys
 sys.path.insert(0, "../src")
 
+os.chdir("../src")
+
 import api_server
-from test_cookbook_manager_data import data as test_data
+#from test_cookbook_manager_data import data as test_data
+from test_circle_data import data as test_data
 
 import unittest
 import json

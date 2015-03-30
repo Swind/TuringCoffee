@@ -1,7 +1,7 @@
 {
     "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
-    "Emulator": true,
+    "Emulator": false,
     "Unit": "C",
 
     "Heater": {
@@ -29,7 +29,7 @@
     },
 
     "Printer":{
-        "PortName": "VIRTUAL",
+        "PortName": "/dev/ttyACM0",
         "Baudrate": 115200
     },
 

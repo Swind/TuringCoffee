@@ -142,6 +142,9 @@ class Chef(object):
         if point.e1 is not None:
             gcode = gcode + " E{}".format(point.e1)
 
+        if point.f is not None:
+            gcode = gcode + " F{}".format(point.f)
+
         return gcode
 
     def handle(self, points):
@@ -149,7 +152,7 @@ class Chef(object):
 
         for point in points:
 
-            #logger.debug("Handle command {}".format(point))
+            logger.debug("Handle command {}".format(point))
 
             if type(point) is Point:
                 gcode = self.__convert_to_gcode(point)
