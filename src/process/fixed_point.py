@@ -32,6 +32,7 @@ class FixedPoint(Process):
 
         points = self.__point_x_y(points)
         points = self.__point_z(points)
+        points = self.__point_e1(points)
 
         return points
 
@@ -51,5 +52,13 @@ class FixedPoint(Process):
 
         for index, point in enumerate(points):
             point.z = z_start + (z_per_point * index)
+
+        return points
+
+    def __point_e1(self, points):
+        e1 = self.extrudate
+
+        for point in points:
+            point.e1 = e1
 
         return points
