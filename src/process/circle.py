@@ -80,6 +80,10 @@ class Circle(Process):
         for index, point in enumerate(points):
             point.z = z_start + (z_per_point * index)
 
+        # Quick move to the z start point
+        quick_move = Point(z=z_start, f=1000)
+        points.insert(0, quick_move)
+
         return points
 
     def __point_f(self, points):

@@ -4,9 +4,12 @@ sys.path.insert(0, "../src")
 
 os.chdir("../src")
 
+import time
 import api_server
 #from test_cookbook_manager_data import data as test_data
 from test_circle_data import data as test_data
+#from test_fixed_point_data import data as test_data
+#from test_spiral_data import data as test_data
 
 import unittest
 import json
@@ -38,6 +41,7 @@ class TestAPIServer(unittest.TestCase):
             "Cookbook Name": "test_cookbook_manager"
         }
         self.app.put("/printer", data=json.dumps(payload))
+        time.sleep(10)
 
         # Delete the cookbook
         self.app.delete("/cookbooks/new_test_cookbook_manager")

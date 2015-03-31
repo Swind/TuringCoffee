@@ -57,6 +57,7 @@ class PrinterServer(object):
     # ================================================================================
     def mcLog(self, message):
         self.pub_channel.send({"log": message})
+        pass
 
     def mcTempUpdate(self, temp, bedTemp, targetTemp, bedTargetTemp):
         # Because now the temperature is not controled by arduino
@@ -70,7 +71,7 @@ class PrinterServer(object):
         self.pub_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
 
     def mcMessage(self, message):
-        #self.pub_channel.send({"message": message})
+        self.pub_channel.send({"message": message})
         pass
 
     def mcProgress(self, lineNr):
@@ -80,24 +81,33 @@ class PrinterServer(object):
         #self.pub_channel.send({"changeZ": newZ})
         pass
 
+
+    # ================================================================================
+    #
+    #   Printer Server API
+    #
+    # ================================================================================
     def start(self):
         while True:
             cmd = self.cmd_channel.recv()
-            logger.info("Receive a command {}".format(cmd))
-
             if 'STOP' in cmd:
                 self._comm.cancelPrint()
                 self._gcodeList = ['M110']
+
             elif 'G' in cmd:
                 self._gcodeList.append(cmd["G"])
+
             elif 'C' in cmd:
                 self._comm.sendCommand(cmd["C"])
+
             elif 'START' in cmd:
                 self._printing_gcodeList = self._gcodeList
                 self._gcodeList = []
                 self._comm.printGCode(self._printing_gcodeList)
+
             elif 'INFORMATION' in cmd:
                 self.cmd_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
+
             elif 'SHUTDOWN' in cmd:
                 self.mcMessage("Shoutdown printer server")
                 break

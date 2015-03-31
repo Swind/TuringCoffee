@@ -130,6 +130,11 @@ def print_cookbook():
     if cmd == "Start":
         chef.cook(name)
 
+    resp = make_response()
+    resp.status_code = httplib.OK
+
+    return resp
+
 @app.route("/printer/jog", methods=["PUT"])
 def control_printer():
     """

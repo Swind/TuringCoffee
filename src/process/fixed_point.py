@@ -33,6 +33,7 @@ class FixedPoint(Process):
         points = self.__point_x_y(points)
         points = self.__point_z(points)
         points = self.__point_e1(points)
+	points = self.__point_f(points)
 
         return points
 
@@ -61,4 +62,10 @@ class FixedPoint(Process):
         for point in points:
             point.e1 = e1
 
+        return points
+
+    def __point_f(self, points):
+        f = self.feedrate
+	for point in points:
+            point.f = f
         return points

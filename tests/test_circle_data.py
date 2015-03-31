@@ -16,11 +16,11 @@ Test
 每個吐水的點間距 0.01 mm
 
 ``` circle
-Radius: 1 cm
-Total Water: 40 ml
-High: 80 mm to 70 mm
+Radius: 2 cm
+Total Water: 60 ml
+High: 170 mm to 150 mm
 Feedrate： 80 mm/min
-Extrudate: 1 ml/mm
+Extrudate: 0.2 ml/mm
 Point interval: 0.1 mm
 ```
 """

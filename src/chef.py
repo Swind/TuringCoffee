@@ -2,6 +2,7 @@ from utils import json_config
 import msgpack
 
 from threading import Thread
+import Queue
 import time
 
 from cookbook_manager import CookbookManager
@@ -39,6 +40,8 @@ class Chef(object):
         self.printer_progress = 0
         self.printer_state = 0
         self.printer_state_string = ""
+
+        self.cook_queue = Queue.Queue()
 
         logger.info("Start printer server ...")
         printer_server = PrinterServer()
@@ -86,6 +89,10 @@ class Chef(object):
         self.printer_worker.daemon = True
         self.printer_worker.start()
 
+        self.cook_worker = Thread(target=self.__cook_worker)
+        self.cook_worker.daemon = True
+        self.cook_worker.start()
+
     def __temperature_monitor(self):
         while True:
             resp = self.heater_pub.recv()
@@ -114,11 +121,18 @@ class Chef(object):
                 self.printer_state = data["state"]
                 self.printer_state_string = data["state_string"]
 
+    def __cook_process(self):
+
+        pass
+
     def cook(self, cookbook_name):
         cmgr = CookbookManager()
         cookbook = Cookbook(cookbook_name, cmgr.read(cookbook_name))
 
         logger.debug("Chef look the cookbook")
+        self.wait_printer_operational()
+
+        self.__init_printer()
         for step in cookbook.steps():
             logger.debug("# Start step {}".format(step.title))
             for process in step.processes:
@@ -127,6 +141,12 @@ class Chef(object):
                     logger.debug("### Start block {}".format(block.lang))
                     points = block.points()
                     self.handle(points)
+
+    def __init_printer(self):
+        self.printer_cmd.send({"C": "G21"})
+        self.printer_cmd.send({"C": "G28"})
+        self.printer_cmd.send({"C": "G90"})
+        self.printer_cmd.send({"C": "M83"})
 
     def __convert_to_gcode(self, point):
         gcode = "G1"
@@ -152,10 +172,10 @@ class Chef(object):
 
         for point in points:
 
-            logger.debug("Handle command {}".format(point))
-
             if type(point) is Point:
                 gcode = self.__convert_to_gcode(point)
+                logger.debug("send command {}".format(gcode))
+
                 self.printer_cmd.send({"G": gcode})
                 cmd_count = cmd_count + 1
 

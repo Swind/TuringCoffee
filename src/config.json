@@ -1,7 +1,7 @@
 {
     "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
-    "Emulator": false,
+    "Emulator": true,
     "Unit": "C",
 
     "Heater": {
@@ -29,7 +29,7 @@
     },
 
     "Printer":{
-        "PortName": "/dev/ttyACM0",
+        "PortName": "/dev/tty.usbmodem1431",
         "Baudrate": 115200
     },
 
@@ -56,5 +56,10 @@
     {
         "Command_Socket_Address": "ipc:///tmp/refill_cmd_channel",
         "Publish_Socket_Address": "ipc:///tmp/refill_pub_channel"
+    },
+
+    "Chef":
+    {
+        "Inprocess_Socket_Address": "inproc://cook_process"
     }
 }
