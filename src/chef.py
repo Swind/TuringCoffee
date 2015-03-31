@@ -121,9 +121,10 @@ class Chef(object):
                 self.printer_state = data["state"]
                 self.printer_state_string = data["state_string"]
 
-    def __cook_process(self):
-
-        pass
+    def __cook_worker(self):
+        while True:
+            cookbook_name = self.cook_queue.get()
+            self.cook(cookbook_name)
 
     def cook(self, cookbook_name):
         cmgr = CookbookManager()
@@ -170,14 +171,13 @@ class Chef(object):
     def handle(self, points):
         cmd_count = 0
 
+        gcodes = []
         for point in points:
 
             if type(point) is Point:
                 gcode = self.__convert_to_gcode(point)
                 logger.debug("send command {}".format(gcode))
-
-                self.printer_cmd.send({"G": gcode})
-                cmd_count = cmd_count + 1
+                gcodes.append(gcode)
 
             elif type(point) is Command:
 
@@ -195,8 +195,9 @@ class Chef(object):
                     # Wait temperature to target temperature
                     self.wait_temperature(value)
 
-        if cmd_count:
+        if gcodes:
             self.wait_printer_operational()
+            self.printer_cmd.send({"G": gcodes})
             self.printer_cmd.send({"START": True})
             self.wait_printer(cmd_count)
 

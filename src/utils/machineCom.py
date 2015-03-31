@@ -401,7 +401,9 @@ class MachineCom(object):
 
 	def printGCode(self, gcodeList):
 		if not self.isOperational() or self.isPrinting():
-			return
+		    self._log("The printer state is {} can't print".format(self.getStateString()))
+                    return
+
 		self._gcodeList = gcodeList
 		self._gcodePos = 0
 		self._printStartTime100 = None
@@ -440,23 +442,27 @@ class VirtualPrinter():
 		self.bedTargetTemp = 1.0
 
 	def write(self, data):
-		if self.readList is None:
-			return
-		#print "Send: %s" % (data.rstrip())
-		if 'M104' in data or 'M109' in data:
-			try:
-				self.targetTemp = float(re.search('S([0-9]+)', data).group(1))
-			except:
-				pass
-		if 'M140' in data or 'M190' in data:
-			try:
-				self.bedTargetTemp = float(re.search('S([0-9]+)', data).group(1))
-			except:
-				pass
-		if 'M105' in data:
-			self.readList.append("ok T:%.2f /%.2f B:%.2f /%.2f @:64\n" % (self.temp, self.targetTemp, self.bedTemp, self.bedTargetTemp))
-		elif len(data.strip()) > 0:
-			self.readList.append("ok\n")
+            if self.readList is None:
+                    return
+
+            #print "Send: %s" % (data.rstrip())
+            if 'M104' in data or 'M109' in data:
+                try:
+                    self.targetTemp = float(re.search('S([0-9]+)', data).group(1))
+                except:
+                    pass
+
+            if 'M140' in data or 'M190' in data:
+                try:
+                    self.bedTargetTemp = float(re.search('S([0-9]+)', data).group(1))
+                except:
+                    pass
+
+            if 'M105' in data:
+                self.readList.append("ok T:%.2f /%.2f B:%.2f /%.2f @:64\n" % (self.temp, self.targetTemp, self.bedTemp, self.bedTargetTemp))
+
+            elif len(data.strip()) > 0:
+                self.readList.append("ok\n")
 
 	def readline(self):
 		if self.readList is None:
@@ -475,7 +481,7 @@ class VirtualPrinter():
 				return ''
 			if self.readList is None:
 				return ''
-		#time.sleep(0.001)
+		time.sleep(0.001)
 		#print "Recv: %s" % (self.readList[0].rstrip())
 		return self.readList.pop(0)
 

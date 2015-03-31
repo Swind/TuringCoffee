@@ -57,7 +57,6 @@ class PrinterServer(object):
     # ================================================================================
     def mcLog(self, message):
         self.pub_channel.send({"log": message})
-        pass
 
     def mcTempUpdate(self, temp, bedTemp, targetTemp, bedTargetTemp):
         # Because now the temperature is not controled by arduino
@@ -72,7 +71,6 @@ class PrinterServer(object):
 
     def mcMessage(self, message):
         self.pub_channel.send({"message": message})
-        pass
 
     def mcProgress(self, lineNr):
         self.pub_channel.send({"total": len(self._printing_gcodeList), "progress": lineNr})
@@ -90,12 +88,13 @@ class PrinterServer(object):
     def start(self):
         while True:
             cmd = self.cmd_channel.recv()
+
             if 'STOP' in cmd:
                 self._comm.cancelPrint()
                 self._gcodeList = ['M110']
 
             elif 'G' in cmd:
-                self._gcodeList.append(cmd["G"])
+                self._gcodeList.extend(cmd["G"])
 
             elif 'C' in cmd:
                 self._comm.sendCommand(cmd["C"])
