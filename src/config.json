@@ -29,7 +29,7 @@
     },
 
     "Printer":{
-        "PortName": "/dev/tty.usbmodem1431",
+        "PortName": "VIRTUAL",
         "Baudrate": 115200
     },
 

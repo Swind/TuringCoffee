@@ -32,84 +32,90 @@ import logging.config
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger(__name__)
 
-class Chef(object):
+class Barista(object):
+    IDLE = "Idle"
+    BREWING = "Brewing"
+
     def __init__(self):
         self.heater_temperature = 0
         self.is_water_full = False
         self.total_cmd = 0
+        self.state = self.IDLE
         self.printer_progress = 0
         self.printer_state = 0
         self.printer_state_string = ""
 
-        self.cook_queue = Queue.Queue()
+        self.now_cookbook_name = ""
+        self.now_step = ""
+        self.now_step_index = 0
+        self.now_process = ""
+        self.now_process_index = 0
+
+        self.brew_queue = Queue.Queue()
 
         logger.info("Start printer server ...")
         printer_server = PrinterServer()
-        printer_server_thread = Thread(target=printer_server.start)
-        printer_server_thread.daemon = True
-        printer_server_thread.start()
+        printer_server_thread = self.__start_worker(target=printer_server.start)
 
         logger.info("Start heater server ...")
         heater_server = HeaterServer()
-        heater_server_thread = Thread(target=heater_server.start)
-        heater_server_thread.daemon = True
-        heater_server_thread.start()
+        heater_server_thread = self.__start_worker(target=heater_server.start)
 
         logger.info("Start refill server ...")
         refill_server = RefillServer()
-        refill_server_thread = Thread(target=refill_server.start)
-        refill_server_thread.daemon = True
-        refill_server_thread.start()
+        refill_server_thread = self.__start_worker(target=refill_server.start)
 
         # Read config
         self.config = json_config.parse_json("config.json")
 
         # Create nanomsg socket to publish status and receive command
+        logger.info("Connect to printer server ...")
         cfg = self.config["PrinterServer"]
         self.printer_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
         self.printer_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
 
+        logger.info("Connect to heater server ...")
         cfg = self.config["HeaterServer"]
         self.heater_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
         self.heater_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
 
+        logger.info("Connect to refill server ...")
         cfg = self.config["RefillServer"]
         self.refill_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
         self.refill_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
 
-        self.temperature_worker = Thread(target=self.__temperature_monitor)
-        self.temperature_worker.daemon = True
-        self.temperature_worker.start()
+        logger.info("Start monitor workers ...")
+        self.temperature_worker = self.__start_worker(self.__temperature_monitor)
+        self.water_level_worker = self.__start_worker(self.__water_level_monitor)
+        self.printer_worker = self.__start_worker(self.__printer_monitor)
+        self.brew_worker = self.__start_worker(self.__brew_worker)
 
-        self.water_level_worker = Thread(target=self.__water_level_monitor)
-        self.water_level_worker.daemon = True
-        self.water_level_worker.start()
+    def __start_worker(self, target):
+        worker = Thread(target=target)
+        worker.daemon = True
+        worker.start()
 
-        self.printer_worker = Thread(target=self.__printer_monitor)
-        self.printer_worker.daemon = True
-        self.printer_worker.start()
-
-        self.cook_worker = Thread(target=self.__cook_worker)
-        self.cook_worker.daemon = True
-        self.cook_worker.start()
+        return worker
 
     def __temperature_monitor(self):
         while True:
             resp = self.heater_pub.recv()
-            temperature = resp["temperature"]
-            logger.debug("Now temperature {}".format(resp))
+            temperature = resp.get("temperature", None)
             self.heater_temperature = temperature
+
+            logger.debug("Receive new temperature {}".format(resp))
 
     def __water_level_monitor(self):
         while True:
-            logger.info("Now water level {}".format(self.is_water_full))
-            is_water_full = self.refill_pub.recv()["full"]
-            self.is_water_full = is_water_full
+            resp = self.refill_pub.recv()
+            self.is_water_full = resp.get("full", None)
+
+            logger.debug("Receive new water level {}".format(self.is_water_full))
 
     def __printer_monitor(self):
         while True:
             data = self.printer_pub.recv()
-            logging.debug("Printer monitor receive {}".format(data))
+            logging.debug("Receive message from printer: {}".format(data))
 
             if "total" in data:
                 self.total_cmd = data["total"]
@@ -121,27 +127,47 @@ class Chef(object):
                 self.printer_state = data["state"]
                 self.printer_state_string = data["state_string"]
 
-    def __cook_worker(self):
-        while True:
-            cookbook_name = self.cook_queue.get()
-            self.cook(cookbook_name)
+    def __change_state(self, state):
+        logger.info("Barista change state from {} to {}".format(self.state, state))
+        self.state = state
 
-    def cook(self, cookbook_name):
+    def __brew_worker(self):
+        while True:
+            cookbook_name = self.brew_queue.get()
+
+            logger.info("Start to cook {}".format(cookbook_name))
+            self.__change_state(self.BREWING)
+            self.now_cookbook_name = cookbook_name
+            self.__brew(cookbook_name)
+            self.__change_state(self.IDLE)
+
+    def __brew(self, cookbook_name):
         cmgr = CookbookManager()
         cookbook = Cookbook(cookbook_name, cmgr.read(cookbook_name))
 
-        logger.debug("Chef look the cookbook")
+        logger.debug("Barista look the cookbook")
         self.wait_printer_operational()
 
         self.__init_printer()
-        for step in cookbook.steps():
+        for step_index, step in enumerate(cookbook.steps()):
             logger.debug("# Start step {}".format(step.title))
-            for process in step.processes:
+            self.now_step = step.title
+            self.now_step_index = step_index
+
+            for process_index, process in enumerate(step.processes):
                 logger.debug("## Start process {}".format(process.title))
+                self.now_process = process.title
+                self.now_process_index = process_index
+
                 for block in process.blocks:
                     logger.debug("### Start block {}".format(block.lang))
-                    points = block.points()
-                    self.handle(points)
+                    self.handle_block(block)
+
+        self.now_step = ""
+        self.now_step_index = 0
+
+        self.now_process = ""
+        self.now_process_index = 0
 
     def __init_printer(self):
         self.printer_cmd.send({"C": "G21"})
@@ -168,7 +194,11 @@ class Chef(object):
 
         return gcode
 
-    def handle(self, points):
+    def brew(self, name):
+        self.brew_queue.put(name)
+
+    def handle_block(self, block):
+        points = block.points()
         cmd_count = 0
 
         gcodes = []
@@ -201,6 +231,15 @@ class Chef(object):
             self.printer_cmd.send({"START": True})
             self.wait_printer(cmd_count)
 
+    def printer_jog(self, x, y, z, e1, e2, f):
+        point = Point(x, y, z, e1, e2, f)
+        self.printer_cmd.send({"C": self.__convert_to_gcode(point)})
+        return
+    # ===============================================================================
+    #
+    # Waitting
+    #
+    # ===============================================================================
     def wait_printer_operational(self):
         while self.printer_state_string != "Operational":
             logger.debug("Wait printer state from {} to Operational".format(self.printer_state_string))
@@ -219,7 +258,7 @@ class Chef(object):
 
         # Wait the tempature
         while not ((value - 0.5) < self.temperature < (value + 0.5)):
-            logger.debug("Now temperature {}, waiting to {}".format(self.temperature, value))
+            logger.debug("Waiting temperature to {}".format(self.temperature, value))
             time.sleep(2)
 
     def wait_refill(self):

@@ -30,27 +30,48 @@ class TestAPIServer(unittest.TestCase):
         self.app.put("/cookbooks/test_cookbook_manager/content", data=test_data)
 
         # Rename the cookbook
-        #payload = {
-        #    "name": "new_test_cookbook_manager"
-        #}
-        #self.app.put("/cookbooks/test_cookbook_manager", data=json.dumps(payload))
-
-        # Cook
         payload = {
-            "Command": "Start",
-            "Cookbook Name": "test_cookbook_manager"
+            "name": "new_test_cookbook_manager"
         }
-        self.app.put("/printer", data=json.dumps(payload))
-        time.sleep(10)
+        self.app.put("/cookbooks/test_cookbook_manager", data=json.dumps(payload))
 
         # Delete the cookbook
         self.app.delete("/cookbooks/new_test_cookbook_manager")
+
+    def test_brew(self):
+        # Create a new cookbook
+        self.app.put("/cookbooks/test_cookbook_manager")
+
+        # Update the cookbook content
+        self.app.put("/cookbooks/test_cookbook_manager/content", data=test_data)
+
+        # Brew
+        payload = {
+            "Command": "Start",
+            "Name": "test_cookbook_manager"
+        }
+        self.app.put("/barista", data=json.dumps(payload))
+
+        # Wait
+        while True:
+            resp = json.loads(self.app.get("/barista").data)
+            state = resp["State"]
+            now_name = resp["Now cookbook name"]
+
+            if state == "Idle" and now_name == "test_cookbook_manager":
+                break
+
+            time.sleep(0.1)
+
+        # Delete the cookbook
+        self.app.delete("/cookbooks/test_cookbook_manager")
 
     def tearDown(self):
         pass
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestAPIServer("test_cookbook_manager"))
+    #suite.addTest(TestAPIServer("test_cookbook_manager"))
+    suite.addTest(TestAPIServer("test_brew"))
 
     unittest.TextTestRunner().run(suite)
