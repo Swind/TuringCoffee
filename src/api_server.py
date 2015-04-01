@@ -27,7 +27,7 @@ barista = Barista()
 
 @app.route("/")
 def index():
-    pass
+    return render_template("index.jinja2")
 
 # ===============================================================================
 #
@@ -244,3 +244,6 @@ def control_refill():
     }
     """
     pass
+
+if __name__ == "__main__":
+    app.run()

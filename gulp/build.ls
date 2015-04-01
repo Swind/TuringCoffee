@@ -17,12 +17,12 @@ handleError = (err) ->
 gulp.task 'build', ['copy-js', 'copy-css', 'build-livescript', 'sass', 'browserify'] ->
 
 gulp.task 'sass' ->
-    return gulp.src "#root_path/static/scss/*.scss"
+    return gulp.src "#root_path/app/scss/*.scss"
            .pipe sass!
            .pipe gulp.dest "#root_path/static/css"
 
 gulp.task 'build-livescript' ->
-    return gulp.src "#root_path/app/ls/**/*.ls", {base: 'app/ls'}
+    return gulp.src "#root_path/app/ls/**/*.ls"
            .pipe livescript bare: true
            .on 'error', handleError
            .pipe gulp.dest '.tmpjs'
