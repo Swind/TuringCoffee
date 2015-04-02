@@ -11,12 +11,14 @@ class TestCookbook(unittest.TestCase):
         with open("test.md", "r") as f:
             cookbook = Cookbook("test", f.read())
 
-        steps = cookbook.steps()
+        steps = cookbook.steps
+        print "Description {}".format(cookbook.description)
+
 
         for step in steps:
             for process in step.processes:
                 for block in process.blocks:
-                    print block.gcode()
+                    block.points()
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()

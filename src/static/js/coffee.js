@@ -1,5 +1,77 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var printer, icon_button;
+printer = {};
+printer.control = function(){
+  var control;
+  control = {};
+  control.printhead_request = function(payload){
+    return m.request({
+      method: "POST",
+      url: "/api/printer/printhead",
+      data: payload
+    });
+  };
+  control.printhead_cmds = {};
+  control.printhead_cmds.jog = function(x, y, z){
+    var payload;
+    x == null && (x = 0);
+    y == null && (y = 0);
+    z == null && (z = 0);
+    payload = {
+      "command": "jog",
+      "x": x,
+      "y": y,
+      "z": z
+    };
+    return control.printhead_request(payload);
+  };
+  control.printhead_cmds.home = function(axes){
+    var payload;
+    payload = {
+      "command": "home",
+      "axes": axes
+    };
+    return control.printhead_request(payload);
+  };
+  control.x = {};
+  control.x.jog = function(x){
+    return control.printhead_cmds.jog(x, 0, 0);
+  };
+  control.x.home = function(){
+    return control.printhead_cmds.home("[x]");
+  };
+  control.y = {};
+  control.y.jog = function(y){
+    return control.printhead_cmds.jog(0, y, 0);
+  };
+  control.y.home = function(){
+    return control.printhead_cmds.home("[y]");
+  };
+  control.z = {};
+  control.z.jog = function(z){
+    return control.printhead_cmds.jog(0, 0, z);
+  };
+  control.z.home = function(){
+    return control.printhead_cmds.home("[z]");
+  };
+  return control;
+}();
+icon_button = function(icon_name, onclick){
+  return m("div.ui.icon.button", {
+    onclick: onclick
+  }, [m("i." + icon_name + ".icon")]);
+};
+printer.view = function(ctrl){
+  return m("div.row", [icon_button("right.arrow"), icon_button("up.arrow"), icon_button("down.arrow"), icon_button("left.arrow"), icon_button("home.arrow")]);
+};
+printer.controller = function(){
+  return;
+};
+module.exports = printer;
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/barista.js","/components")
+},{"1YiZ5S":9,"buffer":6}],2:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_list, cookbook_content, cookbook, CookbookItem, submodule;
 cookbook_list = require('components/cookbook_list.js');
 cookbook_content = require('components/cookbook_content.js');
@@ -97,7 +169,7 @@ function in$(x, xs){
   return false;
 }
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
-},{"1YiZ5S":9,"buffer":6,"components/cookbook_content.js":2,"components/cookbook_list.js":3}],2:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6,"components/cookbook_content.js":3,"components/cookbook_list.js":4}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_content, codemirror_editor;
 cookbook_content = {};
@@ -149,7 +221,7 @@ cookbook_content.controller = function(vm){
 };
 module.exports = cookbook_content;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook_content.js","/components")
-},{"1YiZ5S":9,"buffer":6}],3:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_list;
 cookbook_list = {};
@@ -182,89 +254,17 @@ cookbook_list.controller = function(vm){
 };
 module.exports = cookbook_list;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook_list.js","/components")
-},{"1YiZ5S":9,"buffer":6}],4:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var printer, icon_button;
-printer = {};
-printer.control = function(){
-  var control;
-  control = {};
-  control.printhead_request = function(payload){
-    return m.request({
-      method: "POST",
-      url: "/api/printer/printhead",
-      data: payload
-    });
-  };
-  control.printhead_cmds = {};
-  control.printhead_cmds.jog = function(x, y, z){
-    var payload;
-    x == null && (x = 0);
-    y == null && (y = 0);
-    z == null && (z = 0);
-    payload = {
-      "command": "jog",
-      "x": x,
-      "y": y,
-      "z": z
-    };
-    return control.printhead_request(payload);
-  };
-  control.printhead_cmds.home = function(axes){
-    var payload;
-    payload = {
-      "command": "home",
-      "axes": axes
-    };
-    return control.printhead_request(payload);
-  };
-  control.x = {};
-  control.x.jog = function(x){
-    return control.printhead_cmds.jog(x, 0, 0);
-  };
-  control.x.home = function(){
-    return control.printhead_cmds.home("[x]");
-  };
-  control.y = {};
-  control.y.jog = function(y){
-    return control.printhead_cmds.jog(0, y, 0);
-  };
-  control.y.home = function(){
-    return control.printhead_cmds.home("[y]");
-  };
-  control.z = {};
-  control.z.jog = function(z){
-    return control.printhead_cmds.jog(0, 0, z);
-  };
-  control.z.home = function(){
-    return control.printhead_cmds.home("[z]");
-  };
-  return control;
-}();
-icon_button = function(icon_name, onclick){
-  return m("div.ui.icon.button", {
-    onclick: onclick
-  }, [m("i." + icon_name + ".icon")]);
-};
-printer.view = function(ctrl){
-  return m("div.row", [icon_button("right.arrow"), icon_button("up.arrow"), icon_button("down.arrow"), icon_button("left.arrow"), icon_button("home.arrow")]);
-};
-printer.controller = function(){
-  return;
-};
-module.exports = printer;
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/printer.js","/components")
 },{"1YiZ5S":9,"buffer":6}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook, printer;
+var cookbook, barista;
 cookbook = require('components/cookbook.js');
-printer = require('components/printer.js');
+barista = require('components/barista.js');
 m.route(document.getElementById("wrapper"), "/", {
   "/": cookbook,
-  "/printer": printer
+  "/barista": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_fac70fc9.js","/")
-},{"1YiZ5S":9,"buffer":6,"components/cookbook.js":1,"components/printer.js":4}],6:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b25ece89.js","/")
+},{"1YiZ5S":9,"buffer":6,"components/barista.js":1,"components/cookbook.js":2}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.

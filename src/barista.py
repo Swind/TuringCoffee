@@ -143,13 +143,13 @@ class Barista(object):
 
     def __brew(self, cookbook_name):
         cmgr = CookbookManager()
-        cookbook = Cookbook(cookbook_name, cmgr.read(cookbook_name))
+        cookbook = cmgr.get(cookbook_name)
 
         logger.debug("Barista look the cookbook")
         self.wait_printer_operational()
 
         self.__init_printer()
-        for step_index, step in enumerate(cookbook.steps()):
+        for step_index, step in enumerate(cookbook.steps):
             logger.debug("# Start step {}".format(step.title))
             self.now_step = step.title
             self.now_step_index = step_index

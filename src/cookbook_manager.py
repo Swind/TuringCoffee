@@ -3,6 +3,8 @@ from utils import json_config
 import os
 import shutil
 
+from cookbook import Cookbook
+
 class CookbookManager(object):
 
     def __init__(self):
@@ -49,6 +51,9 @@ class CookbookManager(object):
             content = f.read()
 
         return content
+
+    def get(self, cookbook_name):
+        return Cookbook(cookbook_name, self.read(cookbook_name))
 
     def delete(self, cookbook_name):
         folder_path = self.__folder_path(cookbook_name)

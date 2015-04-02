@@ -14,18 +14,27 @@ class Cookbook(object):
     def __init__(self, name, content):
         self.name = name
         self.content = content
+        self.description = ""
         self.md = mistune.Markdown()
 
-    def steps(self):
         tokens = self.md.block(self.content)
 
         block_start = 0
         block_end = 0
 
+        # If there are paragraphs before the first head
+        # Save this paragraphs as description
+        for index, token in enumerate(tokens):
+            if token["type"] == "heading":
+                break
+
+        self.description = "\n".join(map(lambda item: item["text"], tokens[:index]))
+
         tree = Heading.heading_tree(tokens)
         steps = map(lambda item: Step(item), tree)
 
-        return steps
+        self.steps = steps
+
 
     # Save the cookbook script to file and generate a gcode file
     # This function is used by Octoprint file manager
@@ -133,4 +142,3 @@ if __name__ == "__main__":
         content = data.read()
 
     cookbook = Cookbook("test", content)
-    cookbook.gcode()

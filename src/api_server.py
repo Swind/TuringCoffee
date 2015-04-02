@@ -53,7 +53,14 @@ def read_cookbook(name):
         "description": ""
     }
     """
-    return cmgr.read(name)
+    cookbook = cmgr.get(name)
+
+    data = {
+        "name": name,
+        "description": cookbook.description
+    }
+
+    return jsonify(data)
 
 @app.route("/cookbooks/<string:name>", methods=["PUT"])
 def update_cookbook(name):
@@ -81,8 +88,8 @@ def update_cookbook(name):
 
 @app.route("/cookbooks/<string:name>/content", methods=["GET"])
 def read_cookbook_content(name):
-    content = cmgr.read(name)
-    return content
+    cookbook = cmgr.get(name)
+    return cookbook.content
 
 @app.route("/cookbooks/<string:name>/content", methods=["PUT"])
 def update_cookbook_content(name):

@@ -2,6 +2,8 @@ import os
 import sys
 sys.path.insert(0, "../src")
 
+os.chdir("../src")
+
 import unittest
 
 from test_cookbook_manager_data import data
@@ -14,8 +16,8 @@ class TestCookbookManager(unittest.TestCase):
         manager = CookbookManager()
         manager.update(name, data)
 
-        content = manager.read(name)
-        self.assertEqual(content, data)
+        cookbook = manager.get(name)
+        self.assertEqual(cookbook.content, data)
 
         manager.delete(name)
 
