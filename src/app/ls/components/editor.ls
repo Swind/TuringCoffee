@@ -1,60 +1,24 @@
 cookbook_content = {}
 # ================================================================================
 #
-#   CodeMirror Editor 
-#
-# ================================================================================
-codemirror_editor = (value, opts) ->
-
-    setup_codemirror = (elem, isInitialized, ctx) ->
-
-        editor = ctx.CodeMirror
-
-        if !isInitialized
-            editor = CodeMirror(elem, {
-                value: value!,
-                lineNumbers: true,
-                mode: "markdown", 
-                lineWrapping: true,
-                viewportMargin: Infinity
-            })
-
-            ctx.last_value = value!
-            ctx.CodeMirror = editor
-
-            do
-                (editor, changeObj) <-! editor.on "change"
-                m.startComputation!
-                value(editor.getValue!)
-                ctx.last_value = value!
-                m.endComputation!
-
-            do
-                <- setTimeout _, 0
-                editor.refresh!
-        else
-            if ctx.last_value != value!
-                ctx.last_value = value!
-                editor.setValue value!
-
-    opts = opts || {}
-    opts.config = setup_codemirror
-
-    return m "div\#cookbook-content", opts
-
-codemirror_toolbar = ! -> 
-
-    setup_codemirror = (elem, isInitialized, ctx) ->
-
-        editor = ctx.CodeMirror
-
-# ================================================================================
-#
 #   View 
 #
 # ================================================================================
-cookbook_content.view = (ctrl) -> 
-    (m "div.column", {id: "editor"}, [codemirror_editor(cookbook_content.vm.content, {})])
+cookbook_content.view = (ctrl) -> [
+    (m "div.column", {id: "editor"}, [
+        (m "div.ui.buttons", [
+            (m "div.ui.icon.button", [(m "i.save.icon"), "Save"]),
+            (m "div.ui.icon.button", [(m "i.print.icon"), "Print"])
+        ]),
+        (m "div.ui.buttons", [
+            (m "div.ui.icon.button", (m "i.header.icon")),
+            (m "div.ui.icon.button", (m "i.code.icon")),
+            (m "div.ui.icon.button", (m "i.list.icon")),
+            (m "div.ui.icon.button", (m "i.ordered.list.icon")),
+        ]),
+        (m 'div#cookbook-content' {config: ctrl.config_editor})
+    ])
+]
 
 # ================================================================================
 #
@@ -64,10 +28,13 @@ cookbook_content.view = (ctrl) ->
 cookbook_content.vm = do ->
     vm = {}
 
+    # Create the cookbook name and content properties
+    # These will be used by codemirror editor and toolbar
     vm.init = ! ->
         vm.name = m.prop ""
-        vm.content = m.prop "" 
+        vm.content = m.prop ""
 
+    # Send a request to get the cookbook content and update the content to trigger the editor refresh 
     vm.load_content = (name) ->
         return m.request(
             {
@@ -85,8 +52,18 @@ cookbook_content.vm = do ->
 cookbook_content.controller = ! ->
     cookbook_content.vm.init!
 
+    # Get the route param and load the cookbook content by name
     @cookbook_name = m.route.param "name"
     cookbook_content.vm.load_content(@cookbook_name)
 
+    # Create Codemirror editor and save the editor instance to the view model 
+    @config_editor = (elem, isInitialized, ctx) ->
+        cookbook_content.vm.editor = CodeMirror(elem, {
+            value: cookbook_content.vm.content!,
+            lineNumbers: true,
+            mode: "markdown",
+            lineWrapping: true,
+            viewportMargin: Infinity
+        })
 
 module.exports = cookbook_content

@@ -41,10 +41,9 @@ cookbook.view = (ctrl) ->
     generate_card = (cookbook) ->
         m "div.ui.card", [
             (m "div.content", [
-                (m "i.right.floated.edit.icon"),
                 (m "i.right.floated.delete.icon")
-                (m "a.header[href='/editor/#{cookbook.name}']", {config: m.route}, cookbook.name),
-                (m "div.description" cookbook.description),
+                (m "a.header[href='/editor/#{cookbook.name}']", {config: m.route}, cookbook.name)
+                (m "div.description" cookbook.description)
             ])
         ]
 

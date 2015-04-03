@@ -110,7 +110,7 @@ cookbook.view = function(ctrl){
   var generate_card, cards;
   generate_card = function(cookbook){
     return m("div.ui.card", [m("div.content", [
-      m("i.right.floated.edit.icon"), m("i.right.floated.delete.icon"), m("a.header[href='/editor/" + cookbook.name + "']", {
+      m("i.right.floated.delete.icon"), m("a.header[href='/editor/" + cookbook.name + "']", {
         config: m.route
       }, cookbook.name), m("div.description", cookbook.description)
     ])]);
@@ -136,54 +136,16 @@ module.exports = cookbook;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
 },{"1YiZ5S":8,"buffer":5}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook_content, codemirror_editor, codemirror_toolbar;
+var cookbook_content;
 cookbook_content = {};
-codemirror_editor = function(value, opts){
-  var setup_codemirror;
-  setup_codemirror = function(elem, isInitialized, ctx){
-    var editor;
-    editor = ctx.CodeMirror;
-    if (!isInitialized) {
-      editor = CodeMirror(elem, {
-        value: value(),
-        lineNumbers: true,
-        mode: "markdown",
-        lineWrapping: true,
-        viewportMargin: Infinity
-      });
-      ctx.last_value = value();
-      ctx.CodeMirror = editor;
-      editor.on("change", function(editor, changeObj){
-        m.startComputation();
-        value(editor.getValue());
-        ctx.last_value = value();
-        m.endComputation();
-      });
-      return setTimeout(function(){
-        return editor.refresh();
-      }, 0);
-    } else {
-      if (ctx.last_value !== value()) {
-        ctx.last_value = value();
-        return editor.setValue(value());
-      }
-    }
-  };
-  opts = opts || {};
-  opts.config = setup_codemirror;
-  return m("div#cookbook-content", opts);
-};
-codemirror_toolbar = function(){
-  var setup_codemirror;
-  setup_codemirror = function(elem, isInitialized, ctx){
-    var editor;
-    return editor = ctx.CodeMirror;
-  };
-};
 cookbook_content.view = function(ctrl){
-  return m("div.column", {
+  return [m("div.column", {
     id: "editor"
-  }, [codemirror_editor(cookbook_content.vm.content, {})]);
+  }, [
+    m("div.ui.buttons", [m("div.ui.icon.button", [m("i.save.icon"), "Save"]), m("div.ui.icon.button", [m("i.print.icon"), "Print"])]), m("div.ui.buttons", [m("div.ui.icon.button", m("i.header.icon")), m("div.ui.icon.button", m("i.code.icon")), m("div.ui.icon.button", m("i.list.icon")), m("div.ui.icon.button", m("i.ordered.list.icon"))]), m('div#cookbook-content', {
+      config: ctrl.config_editor
+    })
+  ])];
 };
 cookbook_content.vm = function(){
   var vm;
@@ -209,6 +171,15 @@ cookbook_content.controller = function(){
   cookbook_content.vm.init();
   this.cookbook_name = m.route.param("name");
   cookbook_content.vm.load_content(this.cookbook_name);
+  this.config_editor = function(elem, isInitialized, ctx){
+    return cookbook_content.vm.editor = CodeMirror(elem, {
+      value: cookbook_content.vm.content(),
+      lineNumbers: true,
+      mode: "markdown",
+      lineWrapping: true,
+      viewportMargin: Infinity
+    });
+  };
 };
 module.exports = cookbook_content;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/editor.js","/components")
@@ -223,7 +194,7 @@ m.route(document.getElementById("wrapper"), "/", {
   "/editor/:name": editor,
   "/barista": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ebd26bcf.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_3a8ad6c8.js","/")
 },{"1YiZ5S":8,"buffer":5,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
