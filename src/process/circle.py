@@ -48,6 +48,12 @@ class Circle(Process):
 
         return points
 
+    def total_water(self):
+        return self.total_water
+
+    def total_length(self):
+        return (self.total_water / self.extrudate) + math.fabs((self.high[1] - self.high[0]))
+
     def __point_xy(self, points, start_angle):
         circumference = 2 * math.pi * self.radius
         total_length = self.total_water / self.extrudate

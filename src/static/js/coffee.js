@@ -70,35 +70,17 @@ printer.controller = function(){
 };
 module.exports = printer;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/barista.js","/components")
-},{"1YiZ5S":9,"buffer":6}],2:[function(require,module,exports){
+},{"1YiZ5S":8,"buffer":5}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook_list, cookbook_content, cookbook, CookbookItem, submodule;
-cookbook_list = require('components/cookbook_list.js');
-cookbook_content = require('components/cookbook_content.js');
+var cookbook, CookbookItem;
 cookbook = {};
 CookbookItem = (function(){
   CookbookItem.displayName = 'CookbookItem';
   var prototype = CookbookItem.prototype, constructor = CookbookItem;
-  function CookbookItem(metadata){
-    this['import'](metadata);
+  function CookbookItem(name, data){
+    this.name = name;
+    this.description = data["description"];
   }
-  prototype['import'] = function(metadata){
-    this.id = metadata["id"];
-    this.name = metadata["name"];
-    this.created_date = this.format_date(metadata['date']);
-    this.estimated_time = metadata["analysis"]["estimatedPrintTime"].toFixed(2);
-    this.length = metadata["analysis"]["filament"]["tool0"]["length"].toFixed(2);
-    if (in$("content", metadata)) {
-      return this.content = metadata["content"];
-    } else {
-      return this.content = "Empty";
-    }
-  };
-  prototype.format_date = function(date_time){
-    var dd;
-    dd = new Date(date_time * 1000);
-    return dd.getFullYear() + '/' + (dd.getMonth() + 1) + "/" + dd.getDate() + " " + dd.getHours() + ":" + dd.getMinutes() + ":" + dd.getSeconds();
-  };
   return CookbookItem;
 }());
 cookbook.vm = function(){
@@ -106,99 +88,84 @@ cookbook.vm = function(){
   vm = {};
   vm.init = function(){
     vm.cookbooks = m.prop({});
-    vm.selected = m.prop({
-      content: ""
-    });
   };
   vm.list = function(){
     return m.request({
       method: 'GET',
-      url: '/plugin/coffee/cookbooks'
+      url: '/cookbooks'
     }).then(function(raw_data){
-      var cookbooks, res$, id, metadata;
+      var cookbooks, res$, name, data;
       res$ = [];
-      for (id in raw_data) {
-        metadata = raw_data[id];
-        res$.push(new CookbookItem(metadata));
+      for (name in raw_data) {
+        data = raw_data[name];
+        res$.push(new CookbookItem(name, data));
       }
       cookbooks = res$;
       return vm.cookbooks(cookbooks);
     });
   };
-  vm.select_cookbook = function(selected_cookbook){
-    var response;
-    return response = m.request({
-      method: 'GET',
-      url: '/plugin/coffee/cookbooks/' + selected_cookbook.id
-    }).then(vm.selected);
-  };
-  vm.save_selected_cookbook = function(){
-    m.request({
-      method: 'PUT',
-      url: '/plugin/coffee/cookbooks/' + vm.selected().id,
-      data: vm.selected().content
-    });
-  };
   return vm;
 }();
 cookbook.view = function(ctrl){
-  return [
-    m("div.four.wide.column", {
-      id: "sidebar-wrapper"
-    }, [m("div", {
-      id: "sidebar"
-    }, [ctrl.cookbook_list()])]), m("div.twelve.wide.column", {
-      id: "main-wrapper"
-    }, [m("div", {
-      id: "main"
-    }, [ctrl.cookbook_content()])])
-  ];
-};
-submodule = function(module, args){
-  return module.view.bind(this, new module.controller(args));
+  var generate_card, cards;
+  generate_card = function(cookbook){
+    return m("div.ui.card", [m("div.content", [
+      m("i.right.floated.edit.icon"), m("i.right.floated.delete.icon"), m("a.header[href='/editor/" + cookbook.name + "']", {
+        config: m.route
+      }, cookbook.name), m("div.description", cookbook.description)
+    ])]);
+  };
+  cards = function(cookbooks){
+    var cookbook;
+    return m("div.ui.three.cards", (function(){
+      var i$, ref$, len$, results$ = [];
+      for (i$ = 0, len$ = (ref$ = cookbooks).length; i$ < len$; ++i$) {
+        cookbook = ref$[i$];
+        results$.push(generate_card(cookbook));
+      }
+      return results$;
+    }()));
+  };
+  return [m("div.column", [cards(cookbook.vm.cookbooks())])];
 };
 cookbook.controller = function(){
   cookbook.vm.init();
-  this.cookbook_list = submodule(cookbook_list, cookbook.vm);
-  this.cookbook_content = submodule(cookbook_content, cookbook.vm);
+  cookbook.vm.list();
 };
 module.exports = cookbook;
-function in$(x, xs){
-  var i = -1, l = xs.length >>> 0;
-  while (++i < l) if (x === xs[i]) return true;
-  return false;
-}
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
-},{"1YiZ5S":9,"buffer":6,"components/cookbook_content.js":3,"components/cookbook_list.js":4}],3:[function(require,module,exports){
+},{"1YiZ5S":8,"buffer":5}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook_content, codemirror_editor;
+var cookbook_content, codemirror_editor, codemirror_toolbar;
 cookbook_content = {};
-codemirror_editor = function(mode, value, opts){
+codemirror_editor = function(value, opts){
   var setup_codemirror;
   setup_codemirror = function(elem, isInitialized, ctx){
     var editor;
     editor = ctx.CodeMirror;
     if (!isInitialized) {
       editor = CodeMirror(elem, {
-        value: value().content,
+        value: value(),
         lineNumbers: true,
-        mode: mode
+        mode: "markdown",
+        lineWrapping: true,
+        viewportMargin: Infinity
       });
-      ctx.last_value = value().content;
+      ctx.last_value = value();
       ctx.CodeMirror = editor;
       editor.on("change", function(editor, changeObj){
         m.startComputation();
-        value().content = editor.getValue();
-        ctx.last_value = value().content;
+        value(editor.getValue());
+        ctx.last_value = value();
         m.endComputation();
       });
       return setTimeout(function(){
         return editor.refresh();
       }, 0);
     } else {
-      if (ctx.last_value !== value().content) {
-        ctx.last_value = value().content;
-        return editor.setValue(value().content);
+      if (ctx.last_value !== value()) {
+        ctx.last_value = value();
+        return editor.setValue(value());
       }
     }
   };
@@ -206,65 +173,58 @@ codemirror_editor = function(mode, value, opts){
   opts.config = setup_codemirror;
   return m("div#cookbook-content", opts);
 };
-cookbook_content.view = function(ctrl){
-  return [
-    m("div.ui.header", ctrl.vm.selected().id), m("div.ui.button", "Print"), m("div.ui.button", {
-      onclick: function(){
-        ctrl.vm.save_selected_cookbook();
-      }
-    }, "Save"), m("div.ui.button", "Delete"), codemirror_editor("markdown", ctrl.vm.selected, {})
-  ];
+codemirror_toolbar = function(){
+  var setup_codemirror;
+  setup_codemirror = function(elem, isInitialized, ctx){
+    var editor;
+    return editor = ctx.CodeMirror;
+  };
 };
-cookbook_content.controller = function(vm){
-  this.vm = vm;
-  return this;
+cookbook_content.view = function(ctrl){
+  return m("div.column", {
+    id: "editor"
+  }, [codemirror_editor(cookbook_content.vm.content, {})]);
+};
+cookbook_content.vm = function(){
+  var vm;
+  vm = {};
+  vm.init = function(){
+    vm.name = m.prop("");
+    vm.content = m.prop("");
+  };
+  vm.load_content = function(name){
+    return m.request({
+      method: 'GET',
+      url: "/cookbooks/" + name + "/content",
+      deserialize: function(value){
+        return value;
+      }
+    }).then(function(content){
+      return vm.content(content);
+    });
+  };
+  return vm;
+}();
+cookbook_content.controller = function(){
+  cookbook_content.vm.init();
+  this.cookbook_name = m.route.param("name");
+  cookbook_content.vm.load_content(this.cookbook_name);
 };
 module.exports = cookbook_content;
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook_content.js","/components")
-},{"1YiZ5S":9,"buffer":6}],4:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/editor.js","/components")
+},{"1YiZ5S":8,"buffer":5}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook_list;
-cookbook_list = {};
-cookbook_list.view = function(ctrl){
-  var generate_item, cookbook;
-  generate_item = function(cookbook){
-    return m("div.ui.item", {
-      id: "cookbook-item",
-      onclick: function(){
-        ctrl.select_cookbook(cookbook);
-      }
-    }, [m("div.content", [m("a.header", cookbook.id), m("div.meta", cookbook.created_date), m("div.description", [m("div", cookbook.estimated_time), m("div", cookbook.length)])])]);
-  };
-  return m("div.ui.items.divided", (function(){
-    var i$, ref$, len$, results$ = [];
-    for (i$ = 0, len$ = (ref$ = ctrl.vm.cookbooks()).length; i$ < len$; ++i$) {
-      cookbook = ref$[i$];
-      results$.push(generate_item(cookbook));
-    }
-    return results$;
-  }()));
-};
-cookbook_list.controller = function(vm){
-  this.vm = vm;
-  this.vm.list();
-  this.select_cookbook = function(selected_cookbook){
-    return this.vm.select_cookbook(selected_cookbook);
-  };
-  return this;
-};
-module.exports = cookbook_list;
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook_list.js","/components")
-},{"1YiZ5S":9,"buffer":6}],5:[function(require,module,exports){
-(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook, barista;
+var cookbook, barista, editor;
 cookbook = require('components/cookbook.js');
 barista = require('components/barista.js');
+editor = require('components/editor.js');
 m.route(document.getElementById("wrapper"), "/", {
   "/": cookbook,
+  "/editor/:name": editor,
   "/barista": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b25ece89.js","/")
-},{"1YiZ5S":9,"buffer":6,"components/barista.js":1,"components/cookbook.js":2}],6:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ebd26bcf.js","/")
+},{"1YiZ5S":8,"buffer":5,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1377,7 +1337,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":9,"base64-js":7,"buffer":6,"ieee754":8}],7:[function(require,module,exports){
+},{"1YiZ5S":8,"base64-js":6,"buffer":5,"ieee754":7}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -1505,7 +1465,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":9,"buffer":6}],8:[function(require,module,exports){
+},{"1YiZ5S":8,"buffer":5}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -1593,7 +1553,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":9,"buffer":6}],9:[function(require,module,exports){
+},{"1YiZ5S":8,"buffer":5}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -1660,4 +1620,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":9,"buffer":6}]},{},[5])
+},{"1YiZ5S":8,"buffer":5}]},{},[4])

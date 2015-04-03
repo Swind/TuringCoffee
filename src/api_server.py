@@ -38,11 +38,21 @@ def index():
 def list_cookbooks():
     """
     {
-        "cookbooks": ["cookbook1", "cookbook2", "cookbook3"]
+        "cookbook1":{
+            "name": "cookbook1",
+            "description": "cookbook description"
+        }
     }
     """
     cookbooks = cmgr.list()
-    return jsonify({"cookbooks": cookbooks})
+
+    resp = {}
+    for cookbook in cookbooks:
+        resp[cookbook.name] = {
+            "name": cookbook.name,
+            "description": cookbook.description
+        }
+    return jsonify(resp)
 
 @app.route("/cookbooks/<string:name>", methods=["GET"])
 def read_cookbook(name):

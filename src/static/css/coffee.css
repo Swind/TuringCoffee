@@ -17,3 +17,8 @@ body {
   body div.cookbook_content {
     height: 100%;
     overflow: auto; }
+  body .CodeMirror {
+    height: 100%; }
+  body div.editor {
+    height: 100%;
+    overflow: auto; }

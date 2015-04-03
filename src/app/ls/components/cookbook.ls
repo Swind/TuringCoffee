@@ -1,8 +1,3 @@
-require! {
-    "components/cookbook_list.js": cookbook_list 
-    "components/cookbook_content.js": cookbook_content
-}
-
 cookbook = {}
 
 # ================================================================================
@@ -11,62 +6,29 @@ cookbook = {}
 #
 # ================================================================================
 class CookbookItem 
-    (metadata) ->
-        @import(metadata)
-
-    import: (metadata) ->
-        @id = metadata["id"] 
-        @name = metadata["name"]
-        @created_date = @format_date(metadata['date'])
-        @estimated_time = metadata["analysis"]["estimatedPrintTime"].toFixed(2)
-        @length = metadata["analysis"]["filament"]["tool0"]["length"].toFixed(2)
-
-        if "content" in metadata
-            @content = metadata["content"]
-        else
-            @content = "Empty"
-
-    format_date: (date_time) ->
-        dd = new Date(date_time * 1000)
-        dd.getFullYear! + '/' + (dd.getMonth! + 1) + "/" + dd.getDate! + " " +
-            dd.getHours! + ":" + dd.getMinutes! + ":" + dd.getSeconds!
+    (name, data) ->
+        @name = name
+        @description = data["description"]
 
 cookbook.vm = do ->
     vm = {}
 
     vm.init = ! ->
         vm.cookbooks = m.prop {}
-        vm.selected = m.prop {content: ""}
 
+    # Get cookbook list
     vm.list = ! ->
         return m.request(
             {
                 method: 'GET',
-                url: '/plugin/coffee/cookbooks'
+                url: '/cookbooks'
             }
         )
         .then((raw_data) ->
-            cookbooks = for id, metadata of raw_data
-                new CookbookItem(metadata)
+            cookbooks = for name, data of raw_data
+                new CookbookItem(name, data)
 
             vm.cookbooks(cookbooks)
-        )
-
-    vm.select_cookbook = (selected_cookbook) ->
-        response = m.request(
-            {
-                method: 'GET',
-                url: '/plugin/coffee/cookbooks/' + selected_cookbook.id
-            }
-        ).then(vm.selected)
-
-    vm.save_selected_cookbook = ! ->
-        m.request(
-            {
-                method: 'PUT',
-                url: '/plugin/coffee/cookbooks/' + vm.selected!.id,
-                data: vm.selected!.content 
-            }
         )
 
     vm
@@ -76,13 +38,22 @@ cookbook.vm = do ->
 #
 # ================================================================================
 cookbook.view = (ctrl) ->
+    generate_card = (cookbook) ->
+        m "div.ui.card", [
+            (m "div.content", [
+                (m "i.right.floated.edit.icon"),
+                (m "i.right.floated.delete.icon")
+                (m "a.header[href='/editor/#{cookbook.name}']", {config: m.route}, cookbook.name),
+                (m "div.description" cookbook.description),
+            ])
+        ]
+
+    cards = (cookbooks) ->
+        m "div.ui.three.cards", for cookbook in cookbooks
+            generate_card(cookbook)
+
     [
-        (m "div.four.wide.column", {id: "sidebar-wrapper"}, [
-            (m "div", {id: "sidebar"}, [ctrl.cookbook_list!])
-        ]),
-        (m "div.twelve.wide.column", {id: "main-wrapper"}, [
-            (m "div", {id: "main"}, [ctrl.cookbook_content!])
-        ])
+        (m "div.column", [cards(cookbook.vm.cookbooks!)])
     ]
 
 # ================================================================================
@@ -90,13 +61,8 @@ cookbook.view = (ctrl) ->
 #   Controller 
 #
 # ================================================================================
-submodule = (module, args) ->
-    return module.view.bind(this, new module.controller(args))
-
 cookbook.controller = ! ->
     cookbook.vm.init!
-
-    @cookbook_list = submodule(cookbook_list, cookbook.vm)
-    @cookbook_content = submodule(cookbook_content, cookbook.vm)
+    cookbook.vm.list!
 
 module.exports = cookbook

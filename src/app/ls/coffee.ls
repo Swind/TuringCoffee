@@ -1,9 +1,11 @@
 require! {
     "components/cookbook.js": cookbook
-    "components/barista.js": barista 
+    "components/barista.js": barista
+    "components/editor.js": editor 
 }
 
 m.route (document.getElementById "wrapper"), "/", {
-    "/": cookbook,
-    "/barista": barista 
+    "/": cookbook
+    "/editor/:name": editor
+    "/barista": barista
 }

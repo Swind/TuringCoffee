@@ -215,3 +215,18 @@ class Process(object):
                     result[key] = value_result
 
         return result
+
+
+    # ==========================================================================
+    #
+    # Process Interface
+    #
+    # ==========================================================================
+    def points(self):
+        return []
+
+    def total_water(self):
+        return 0
+
+    def total_length(self):
+        return 0

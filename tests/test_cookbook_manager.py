@@ -12,15 +12,16 @@ from cookbook_manager import CookbookManager
 class TestCookbookManager(unittest.TestCase):
 
     def test_cookbook_CRUD(self):
-        name = "test_cookbook"
+        name_temp = "test_cookbook_{}"
         manager = CookbookManager()
-        manager.update(name, data)
 
-        cookbook = manager.get(name)
-        self.assertEqual(cookbook.content, data)
-
-        manager.delete(name)
-
+        for index in range(0, 36):
+            name = name_temp.format(index)
+            manager.update(name.format(index), data)
+            cookbook = manager.get(name)
+            print cookbook.description
+            self.assertEqual(cookbook.content, data)
+            #manager.delete(name)
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()

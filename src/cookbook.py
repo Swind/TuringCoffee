@@ -1,6 +1,7 @@
 import StringIO
 
 import sys
+import os
 import mistune
 
 from process import circle
@@ -9,15 +10,55 @@ from process import spiral
 from process import fixed_point
 from process import heat
 
+
 class Cookbook(object):
 
-    def __init__(self, name, content):
+    def __init__(self, name, folder_path):
+        self.folder_path = folder_path
         self.name = name
-        self.content = content
-        self.description = ""
-        self.md = mistune.Markdown()
 
-        tokens = self.md.block(self.content)
+        self.__content = None
+        self.__description = None
+        self.__steps = None
+
+    @property
+    def content(self):
+        if self.__content is None:
+            with open(self.__content_path(), "r") as f:
+                self.__content = f.read()
+
+        return self.__content
+
+    @content.setter
+    def content(self, value):
+        with open(self.__content_path(), "w") as f:
+            f.write(value)
+
+        self.__clean()
+
+    def __clean(self):
+        self.__content = None
+        self.__description = None
+        self.__steps = None
+
+    @property
+    def steps(self):
+        if self.__steps is None:
+            self.__parse()
+
+        return self.__steps
+
+    @property
+    def description(self):
+        if self.__description is None:
+            self.__parse()
+
+        return self.__description
+
+    def __parse(self):
+        md = mistune.Markdown()
+
+        tokens = md.block(self.content)
 
         block_start = 0
         block_end = 0
@@ -27,21 +68,15 @@ class Cookbook(object):
         for index, token in enumerate(tokens):
             if token["type"] == "heading":
                 break
+        self.__description = "\n".join(map(lambda item: item["text"], tokens[:index]))
 
-        self.description = "\n".join(map(lambda item: item["text"], tokens[:index]))
-
+        # Parse all lv 1 heading as step and lv 2 heading as process
         tree = Heading.heading_tree(tokens)
         steps = map(lambda item: Step(item), tree)
+        self.__steps = steps
 
-        self.steps = steps
-
-
-    # Save the cookbook script to file and generate a gcode file
-    # This function is used by Octoprint file manager
-    def save(self, path):
-        with open(path, "w") as file:
-            file.write(self.content)
-
+    def __content_path(self):
+        return os.path.join(self.folder_path, "content.md")
 
 class Heading(object):
 

@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 
 data = """
+這是測試用的 Cookbook 資料，
+顯示在這邊的是此 Cookbook 的 Description
+
 # Step 1: 預浸
 
 預浸需要 60 度 20ml 的水，注水結束之後等待 20 秒
