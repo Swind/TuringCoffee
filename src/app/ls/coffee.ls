@@ -7,5 +7,5 @@ require! {
 m.route (document.getElementById "wrapper"), "/", {
     "/": cookbook
     "/editor/:name": editor
-    "/barista": barista
+    "/brew": barista
 }

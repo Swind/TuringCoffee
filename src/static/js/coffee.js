@@ -1,76 +1,20 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var printer, icon_button;
-printer = {};
-printer.control = function(){
-  var control;
-  control = {};
-  control.printhead_request = function(payload){
-    return m.request({
-      method: "POST",
-      url: "/api/printer/printhead",
-      data: payload
-    });
-  };
-  control.printhead_cmds = {};
-  control.printhead_cmds.jog = function(x, y, z){
-    var payload;
-    x == null && (x = 0);
-    y == null && (y = 0);
-    z == null && (z = 0);
-    payload = {
-      "command": "jog",
-      "x": x,
-      "y": y,
-      "z": z
-    };
-    return control.printhead_request(payload);
-  };
-  control.printhead_cmds.home = function(axes){
-    var payload;
-    payload = {
-      "command": "home",
-      "axes": axes
-    };
-    return control.printhead_request(payload);
-  };
-  control.x = {};
-  control.x.jog = function(x){
-    return control.printhead_cmds.jog(x, 0, 0);
-  };
-  control.x.home = function(){
-    return control.printhead_cmds.home("[x]");
-  };
-  control.y = {};
-  control.y.jog = function(y){
-    return control.printhead_cmds.jog(0, y, 0);
-  };
-  control.y.home = function(){
-    return control.printhead_cmds.home("[y]");
-  };
-  control.z = {};
-  control.z.jog = function(z){
-    return control.printhead_cmds.jog(0, 0, z);
-  };
-  control.z.home = function(){
-    return control.printhead_cmds.home("[z]");
-  };
-  return control;
-}();
-icon_button = function(icon_name, onclick){
-  return m("div.ui.icon.button", {
-    onclick: onclick
-  }, [m("i." + icon_name + ".icon")]);
+var temperature, barista, submodule;
+temperature = require('components/temperature.js');
+barista = {};
+barista.view = function(ctrl){
+  return [m("div.column", [ctrl.temperature_chart()])];
 };
-printer.view = function(ctrl){
-  return m("div.row", [icon_button("right.arrow"), icon_button("up.arrow"), icon_button("down.arrow"), icon_button("left.arrow"), icon_button("home.arrow")]);
+submodule = function(module, args){
+  return module.view.bind(this, new module.controller(args));
 };
-printer.controller = function(){
-  return;
+barista.controller = function(){
+  this.temperature_chart = submodule(temperature, {});
 };
-module.exports = printer;
+module.exports = barista;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/barista.js","/components")
-},{"1YiZ5S":8,"buffer":5}],2:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6,"components/temperature.js":4}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook, CookbookItem;
 cookbook = {};
@@ -134,7 +78,7 @@ cookbook.controller = function(){
 };
 module.exports = cookbook;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
-},{"1YiZ5S":8,"buffer":5}],3:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_content;
 cookbook_content = {};
@@ -183,7 +127,85 @@ cookbook_content.controller = function(){
 };
 module.exports = cookbook_content;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/editor.js","/components")
-},{"1YiZ5S":8,"buffer":5}],4:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6}],4:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var temperature;
+temperature = {};
+temperature.view = function(ctrl){
+  return m('#plot[style=height:400px]', {
+    config: ctrl.config_chart
+  });
+};
+temperature.controller = function(){
+  this.config_chart = function(elem, isInitialized, ctx){
+    var chart;
+    chart = ctx.Chart;
+    if (!isInitialized) {
+      ctx.chart = new Highcharts.Chart({
+        chart: {
+          type: 'spline',
+          renderTo: 'plot',
+          animation: Highcharts.svg,
+          marginRight: 10,
+          events: {
+            load: function(){
+              var series;
+              series = this.series[0];
+              setInterval(function(){
+                var x, y;
+                x = new Date().getTime();
+                y = Math.random();
+                series.addPoint([x, y], true, true);
+              }, 1000);
+            }
+          }
+        },
+        title: {
+          text: "Live random data"
+        },
+        xAxis: {
+          type: "datetime",
+          tickPixelInterval: 150
+        },
+        yAxis: {
+          title: {
+            text: "Value"
+          },
+          plotLines: [{
+            value: 0,
+            width: 1,
+            color: "#808080"
+          }]
+        },
+        legend: {
+          enabled: false
+        },
+        exporting: {
+          enabled: false
+        },
+        series: [{
+          name: "Random data",
+          data: function(){
+            var data, time, i$, i;
+            data = [];
+            time = new Date().getTime();
+            for (i$ = -19; i$ <= 0; ++i$) {
+              i = i$;
+              data.push({
+                x: time + i * 1000,
+                y: Math.random()
+              });
+            }
+            return data;
+          }()
+        }]
+      });
+    }
+  };
+};
+module.exports = temperature;
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/temperature.js","/components")
+},{"1YiZ5S":9,"buffer":6}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook, barista, editor;
 cookbook = require('components/cookbook.js');
@@ -192,10 +214,10 @@ editor = require('components/editor.js');
 m.route(document.getElementById("wrapper"), "/", {
   "/": cookbook,
   "/editor/:name": editor,
-  "/barista": barista
+  "/brew": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_3a8ad6c8.js","/")
-},{"1YiZ5S":8,"buffer":5,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],5:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bbfcd157.js","/")
+},{"1YiZ5S":9,"buffer":6,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1308,7 +1330,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":8,"base64-js":6,"buffer":5,"ieee754":7}],6:[function(require,module,exports){
+},{"1YiZ5S":9,"base64-js":7,"buffer":6,"ieee754":8}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -1436,7 +1458,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":8,"buffer":5}],7:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -1524,7 +1546,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":8,"buffer":5}],8:[function(require,module,exports){
+},{"1YiZ5S":9,"buffer":6}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -1591,4 +1613,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":8,"buffer":5}]},{},[4])
+},{"1YiZ5S":9,"buffer":6}]},{},[5])

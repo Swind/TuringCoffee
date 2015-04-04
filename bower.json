@@ -5,6 +5,7 @@
     "bootstrap": "",
     "mithril": "",
     "codemirror": "",
-    "semantic-ui": ""
+    "semantic-ui": "",
+    "highcharts": ""
   }
 }
