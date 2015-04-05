@@ -125,22 +125,29 @@ cookbook_content.controller = function(){
   cookbook_name = m.route.param("name");
   cookbook_content.vm.load_content(cookbook_name);
   this.config_editor = function(elem, isInitialized, ctx){
-    return cookbook_content.vm.editor = CodeMirror(elem, {
-      value: cookbook_content.vm.content(),
-      lineNumbers: true,
-      mode: "markdown",
-      lineWrapping: true,
-      viewportMargin: Infinity
-    });
+    if (!isInitialized) {
+      return cookbook_content.vm.editor = CodeMirror(elem, {
+        value: cookbook_content.vm.content(),
+        lineNumbers: true,
+        mode: "markdown",
+        lineWrapping: true,
+        viewportMargin: Infinity
+      });
+    }
   };
   this.brew_onclick = function(){
     m.route("/brew/" + cookbook_name);
   };
   this.save_onclick = function(){
+    var value;
+    value = cookbook_content.vm.editor.getValue();
     return m.request({
       method: "PUT",
       url: "/cookbooks/" + cookbook_name + "/content",
-      data: cookbook_content.vm.editor.getValue()
+      serialize: function(data){
+        return data;
+      },
+      data: value
     });
   };
 };
@@ -319,9 +326,9 @@ editor = require('components/editor.js');
 m.route(document.getElementById("wrapper"), "/", {
   "/": cookbook,
   "/editor/:name": editor,
-  "/brew": barista
+  "/brew/:name": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_268bd17f.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_12574dfa.js","/")
 },{"1YiZ5S":10,"buffer":7,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!

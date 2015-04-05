@@ -58,23 +58,27 @@ cookbook_content.controller = ! ->
 
     # Create Codemirror editor and save the editor instance to the view model 
     @config_editor = (elem, isInitialized, ctx) ->
-        cookbook_content.vm.editor = CodeMirror(elem, {
-            value: cookbook_content.vm.content!,
-            lineNumbers: true,
-            mode: "markdown",
-            lineWrapping: true,
-            viewportMargin: Infinity
-        })
+
+        if not isInitialized
+            cookbook_content.vm.editor = CodeMirror(elem, {
+                value: cookbook_content.vm.content!,
+                lineNumbers: true,
+                mode: "markdown",
+                lineWrapping: true,
+                viewportMargin: Infinity
+            })
 
     @brew_onclick = ! ->
         m.route("/brew/#cookbook_name")
 
     @save_onclick = ! ->
+        value = cookbook_content.vm.editor.getValue!
         return m.request(
             {
                 method: "PUT",
-                url: "/cookbooks/#cookbook_name/content",
-                data: cookbook_content.vm.editor.getValue!
+                url: "/cookbooks/#cookbook_name/content"
+                serialize: (data) -> data
+                data: value
             }
         )
 
