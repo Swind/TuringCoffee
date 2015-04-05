@@ -220,7 +220,6 @@ class Barista(object):
 
     def handle_block(self, block):
         points = block.points()
-        cmd_count = 0
 
         gcodes = []
         for point in points:
@@ -254,7 +253,7 @@ class Barista(object):
             self.wait_printer_operational()
             self.printer_cmd.send({"G": gcodes})
             self.printer_cmd.send({"START": True})
-            self.wait_printer(cmd_count)
+            self.wait_printer(len(gcodes))
 
     def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)

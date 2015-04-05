@@ -56,7 +56,8 @@ class PrinterServer(object):
     #
     # ================================================================================
     def mcLog(self, message):
-        self.pub_channel.send({"log": message})
+        #self.pub_channel.send({"log": message})
+	pass
 
     def mcTempUpdate(self, temp, bedTemp, targetTemp, bedTargetTemp):
         # Because now the temperature is not controled by arduino
@@ -70,7 +71,8 @@ class PrinterServer(object):
         self.pub_channel.send({"state": self._comm.getState(), "state_string": self._comm.getStateString()})
 
     def mcMessage(self, message):
-        self.pub_channel.send({"message": message})
+        #self.pub_channel.send({"message": message})
+	pass
 
     def mcProgress(self, lineNr):
         self.pub_channel.send({"total": len(self._printing_gcodeList), "progress": lineNr})
