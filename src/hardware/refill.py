@@ -35,10 +35,10 @@ class Refill(object):
         self.motor_direct = refill_config["motor_direct"]
 
     def is_water_full(self):
-	result = GPIO.input(self.water_level_pin[1])
-	logger.debug("Read water level pin: {}".format(result))
-	if result:
-	   return True	
+        result = self.water_level_pin[1]
+        logger.debug("Read water level pin value: {}".format(result))
+	if GPIO.input(result):
+	   return True
 	else:
 	   return False
 

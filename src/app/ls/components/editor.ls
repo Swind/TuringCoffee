@@ -7,8 +7,8 @@ cookbook_content = {}
 cookbook_content.view = (ctrl) -> [
     (m "div.column", {id: "editor"}, [
         (m "div.ui.buttons", [
-            (m "div.ui.icon.button", [(m "i.save.icon"), "Save"]),
-            (m "div.ui.icon.button", [(m "i.print.icon"), "Print"])
+            (m "div.ui.icon.button" {onclick: ctrl.save_onclick}, [(m "i.save.icon"), "Save"]),
+            (m "div.ui.icon.button" {onclick: ctrl.brew_onclick}, [(m "i.print.icon"), "Brew"])
         ]),
         (m "div.ui.buttons", [
             (m "div.ui.icon.button", (m "i.header.icon")),
@@ -53,8 +53,8 @@ cookbook_content.controller = ! ->
     cookbook_content.vm.init!
 
     # Get the route param and load the cookbook content by name
-    @cookbook_name = m.route.param "name"
-    cookbook_content.vm.load_content(@cookbook_name)
+    cookbook_name = m.route.param "name"
+    cookbook_content.vm.load_content(cookbook_name)
 
     # Create Codemirror editor and save the editor instance to the view model 
     @config_editor = (elem, isInitialized, ctx) ->
@@ -65,5 +65,18 @@ cookbook_content.controller = ! ->
             lineWrapping: true,
             viewportMargin: Infinity
         })
+
+    @brew_onclick = ! ->
+        m.route("/brew/#cookbook_name")
+
+    @save_onclick = ! ->
+        return m.request(
+            {
+                method: "PUT",
+                url: "/cookbooks/#cookbook_name/content",
+                data: cookbook_content.vm.editor.getValue!
+            }
+        )
+
 
 module.exports = cookbook_content

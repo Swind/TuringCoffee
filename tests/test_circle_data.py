@@ -15,6 +15,10 @@ Test
 
 每個吐水的點間距 0.01 mm
 
+``` operations
+Command: Refill
+```
+
 ``` circle
 Radius: 2 cm
 Total Water: 60 ml

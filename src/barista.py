@@ -226,7 +226,6 @@ class Barista(object):
 
             if type(point) is Point:
                 gcode = self.__convert_to_gcode(point)
-                logger.debug("send command {}".format(gcode))
                 gcodes.append(gcode)
 
             elif type(point) is Command:
