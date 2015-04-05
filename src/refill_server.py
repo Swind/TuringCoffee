@@ -31,6 +31,11 @@ class RefillServer(object):
         self.publish_worker = Thread(target=self.publish_water_level_status)
         self.publish_worker.daemon = True
 
+        self.refill_worker = Thread(target=self.refill_water)
+        self.refill_worker.daemon = True
+
+        self.pause = False
+
     def start(self):
         """
         Receive command:
@@ -40,6 +45,7 @@ class RefillServer(object):
         }
         """
         self.publish_worker.start()
+        self.refill_worker.start()
 
         try:
             # The main thread will handle the command socket
@@ -50,11 +56,23 @@ class RefillServer(object):
 
                 if "Refill" in cmd:
                     if cmd["Refill"] == "START":
-                        self.refill.refill_water()
+                        self.pause = False
                     elif cmd["Refill"] == "STOP":
-                        self.refill.stop = True
+                        self.pause = True
         finally:
             self.refill.cleanup()
+
+    def refill_water(self):
+        try:
+            # The main thread will handle the command socket
+            while(True):
+                if not self.pause and not self.refill.is_water_full():
+                    self.refill.refill_water()
+
+                time.sleep(5)
+        finally:
+            self.refill.cleanup()
+
 
     def publish_water_level_status(self):
         while True:

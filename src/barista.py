@@ -157,10 +157,13 @@ class Barista(object):
             cookbook_name = self.brew_queue.get()
 
             logger.info("Start to cook {}".format(cookbook_name))
+
+            self.refill_cmd.send({"Refill": "STOP"})
             self.__change_state(self.BREWING)
             self.now_cookbook_name = cookbook_name
             self.__brew(cookbook_name)
             self.__change_state(self.IDLE)
+            self.refill_cmd.send({"Refill": "START"})
 
     def __brew(self, cookbook_name):
         cmgr = CookbookManager()
