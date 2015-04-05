@@ -24,7 +24,7 @@ class Refill(object):
         GPIO.setup(self.water_level_pin[0], GPIO.OUT)
         GPIO.output(self.water_level_pin[0], True)
 
-        GPIO.setup(self.water_level_pin[1], GPIO.IN)
+        GPIO.setup(self.water_level_pin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         logger.info("Set water level GPIO {} to OUT and {} to IN".format(self.water_level_pin[0], self.water_level_pin[1]))
 
         self.motor_pin = refill_config["motor_pin"]
@@ -32,17 +32,15 @@ class Refill(object):
         GPIO.setup(self.motor_pin[1], GPIO.OUT)
         logger.info("Set motor GPIO {} and {} to OUT".format(self.motor_pin[0], self.motor_pin[1]))
 
-        self.valve_pin = refill_config["valve_pin"]
-        GPIO.setup(self.valve_pin, GPIO.OUT)
-        logger.info("Set valve GPIO {} to OUT".format(self.valve_pin))
-
         self.motor_direct = refill_config["motor_direct"]
 
     def is_water_full(self):
-        return GPIO.input(self.water_level_pin[1])
+	if GPIO.input(self.water_level_pin[1]):
+	   return True	
+	else:
+	   return False
 
     def refill_water(self):
-        GPIO.output(self.valve_pin, True)
         GPIO.output(self.motor_pin[1], self.motor_direct)
 
         try:
@@ -55,7 +53,6 @@ class Refill(object):
                     GPIO.output(self.motor_pin[0], False)
                     time.sleep(0.001)
         finally:
-            GPIO.output(self.valve_pin, False)
             GPIO.output(self.water_level_pin[0], False)
             GPIO.output(self.motor_pin[1], False)
             self.stop = False
