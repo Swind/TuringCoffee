@@ -66,8 +66,3 @@ class HeaterServer(object):
             cmd = self.cmd_channel.recv()
 
             self.pid_controller.set_params(cmd["cycle_time"], cmd["k"], cmd["i"], cmd["d"], cmd["set_point"])
-
-
-if __name__ == "__main__":
-    server = Server()
-    server.start()

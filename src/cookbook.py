@@ -9,6 +9,7 @@ from process import operations
 from process import spiral
 from process import fixed_point
 from process import heat
+from process import wait
 
 
 class Cookbook(object):
@@ -140,7 +141,8 @@ class CodeBlock(object):
         "spiral": spiral.Spiral,
         "fixed_point": fixed_point.FixedPoint,
         "operations": operations.Operations,
-        "heat": heat.Heat
+        "heat": heat.Heat,
+        "wait": wait.Wait
     }
 
     def __init__(self, lang, params):

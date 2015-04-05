@@ -38,6 +38,10 @@ class Barista(object):
 
     def __init__(self):
         self.heater_temperature = 0
+        self.heater_duty_cycle = 0
+        self.heater_set_point = 0
+        self.heater_update_time = 0
+
         self.is_water_full = False
         self.total_cmd = 0
         self.state = self.IDLE
@@ -67,6 +71,11 @@ class Barista(object):
 
         # Read config
         self.config = json_config.parse_json("config.json")
+        cfg = self.config["PID"]
+        self.pid_cycle_time = cfg["cycle_time"]
+        self.pid_k = cfg["k"]
+        self.pid_i = cfg["i"]
+        self.pid_d = cfg["d"]
 
         # Create nanomsg socket to publish status and receive command
         logger.info("Connect to printer server ...")
@@ -98,10 +107,22 @@ class Barista(object):
         return worker
 
     def __temperature_monitor(self):
+        """
+        Receive the heater server published information
+        {
+            "cycle_time": 5,
+            "duty_cycle": 70,
+            "set_point": 80,
+            "temperature": 26.53
+        }
+        """
         while True:
             resp = self.heater_pub.recv()
-            temperature = resp.get("temperature", None)
-            self.heater_temperature = temperature
+
+            self.heater_temperature = round(resp.get("temperature", 0), 3)
+            self.heater_set_point = round(resp.get("set_point", 0), 3)
+            self.heater_duty_cycle = round(resp.get("duty_cycle", 0), 3)
+            self.heater_update_time = time.time()
 
             logger.debug("Receive new temperature {}".format(resp))
 
@@ -215,15 +236,19 @@ class Barista(object):
                 value = point.value
 
                 if cmd == "Home":
-                    self.printer.cmd.send({"C": "G28"})
+                    self.printer_cmd.send({"C": "G28"})
 
                 elif cmd == "Refill":
-                    self.refill.cmd.send({"Refill": True})
+                    self.refill_cmd.send({"Refill": "START"})
                     self.wait_refill()
 
                 elif cmd == "Heat":
                     # Wait temperature to target temperature
                     self.wait_temperature(value)
+
+                elif cmd == "Wait":
+                    logger.debug("Sleep {} seconds".format(value))
+                    time.sleep(value)
 
         if gcodes:
             self.wait_printer_operational()
@@ -231,7 +256,7 @@ class Barista(object):
             self.printer_cmd.send({"START": True})
             self.wait_printer(cmd_count)
 
-    def printer_jog(self, x, y, z, e1, e2, f):
+    def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)
         self.printer_cmd.send({"C": self.__convert_to_gcode(point)})
         return
@@ -240,6 +265,7 @@ class Barista(object):
     # Waitting
     #
     # ===============================================================================
+
     def wait_printer_operational(self):
         while self.printer_state_string != "Operational":
             logger.debug("Wait printer state from {} to Operational".format(self.printer_state_string))
@@ -247,18 +273,18 @@ class Barista(object):
 
     def wait_temperature(self, value):
         payload = {
-            "cycle_time": 1,
-            "k": 44,
-            "i": 165,
-            "d": 4,
+            "cycle_time": self.pid_cycle_time,
+            "k": self.pid_k,
+            "i": self.pid_i,
+            "d": self.pid_d,
             "set_point": value
         }
 
         self.heater_cmd.send(payload)
 
         # Wait the tempature
-        while not ((value - 0.5) < self.temperature < (value + 0.5)):
-            logger.debug("Waiting temperature to {}".format(self.temperature, value))
+        while not ((value - 0.5) < self.heater_temperature < (value + 0.5)):
+            logger.debug("Waiting temperature to {}".format(value))
             time.sleep(2)
 
     def wait_refill(self):

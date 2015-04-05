@@ -7,7 +7,7 @@ class Operations(Process):
 
         ''' operations
             Command: Home
-            Command: Refill
+            Command: Refill START
             Command: Wait 30s
         '''
     """

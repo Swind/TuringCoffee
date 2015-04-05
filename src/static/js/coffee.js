@@ -1,20 +1,22 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var temperature, barista, submodule;
-temperature = require('components/temperature.js');
+var heater, printer, barista, submodule;
+heater = require('components/heater.js');
+printer = require('components/printer.js');
 barista = {};
 barista.view = function(ctrl){
-  return [m("div.column", [ctrl.temperature_chart()])];
+  return [m("div.column", [ctrl.heater_chart()]), m("div.column", [ctrl.printer()])];
 };
 submodule = function(module, args){
   return module.view.bind(this, new module.controller(args));
 };
 barista.controller = function(){
-  this.temperature_chart = submodule(temperature, {});
+  this.heater_chart = submodule(heater, {});
+  this.printer = submodule(printer, {});
 };
 module.exports = barista;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/barista.js","/components")
-},{"1YiZ5S":9,"buffer":6,"components/temperature.js":4}],2:[function(require,module,exports){
+},{"1YiZ5S":10,"buffer":7,"components/heater.js":4,"components/printer.js":5}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook, CookbookItem;
 cookbook = {};
@@ -78,7 +80,7 @@ cookbook.controller = function(){
 };
 module.exports = cookbook;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
-},{"1YiZ5S":9,"buffer":6}],3:[function(require,module,exports){
+},{"1YiZ5S":10,"buffer":7}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_content;
 cookbook_content = {};
@@ -127,19 +129,58 @@ cookbook_content.controller = function(){
 };
 module.exports = cookbook_content;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/editor.js","/components")
-},{"1YiZ5S":9,"buffer":6}],4:[function(require,module,exports){
+},{"1YiZ5S":10,"buffer":7}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var temperature;
-temperature = {};
-temperature.view = function(ctrl){
-  return m('#plot[style=height:400px]', {
-    config: ctrl.config_chart
-  });
+var heater;
+heater = {};
+heater.vm = function(){
+  var vm;
+  vm = {};
+  vm.init = function(){
+    vm.heater_status = m.prop({});
+    vm.refill_status = m.prop({
+      "full": false
+    });
+  };
+  vm.get_heater_status = function(handler){
+    return m.request({
+      method: "GET",
+      url: "/heater"
+    }).then(vm.heater_status).then(handler);
+  };
+  return vm;
+}();
+heater.view = function(ctrl){
+  var generate_heater_statistic;
+  generate_heater_statistic = function(key, label_name){
+    return m('div.ui.statistic', [m('div.text.value', heater.vm.heater_status()[key]), m('div.label', label_name)]);
+  };
+  return m("div.ui.two.column.grid", [
+    m('div.ui.column#plot', {
+      config: ctrl.config_chart
+    }), m('div.ui.column.large.horizontal.statistics', [generate_heater_statistic("temperature", "Temperature"), generate_heater_statistic("set_point", "Set Point"), generate_heater_statistic("duty_cycle", "Duty Cycle"), generate_heater_statistic("is_water_full", "Water Level")])
+  ]);
 };
-temperature.controller = function(){
+heater.controller = function(){
+  heater.vm.init();
   this.config_chart = function(elem, isInitialized, ctx){
-    var chart;
+    var chart, update_heater_status;
     chart = ctx.Chart;
+    update_heater_status = function(temperature_series, set_point_series, duty_cycle_series){
+      var handler;
+      handler = function(){
+        var latest, temperature, set_point, duty_cycle, update_time;
+        latest = heater.vm.heater_status();
+        temperature = latest["temperature"];
+        set_point = latest["set_point"];
+        duty_cycle = latest["duty_cycle"];
+        update_time = latest["update_time"];
+        temperature_series.addPoint([update_time, temperature], true, false);
+        set_point_series.addPoint([update_time, set_point], true, false);
+        duty_cycle_series.addPoint([update_time, duty_cycle], true, false);
+      };
+      return heater.vm.get_heater_status(handler);
+    };
     if (!isInitialized) {
       ctx.chart = new Highcharts.Chart({
         chart: {
@@ -149,13 +190,12 @@ temperature.controller = function(){
           marginRight: 10,
           events: {
             load: function(){
-              var series;
-              series = this.series[0];
+              var temperature_series, set_point_series, duty_cycle_series;
+              temperature_series = this.series[0];
+              set_point_series = this.series[1];
+              duty_cycle_series = this.series[2];
               setInterval(function(){
-                var x, y;
-                x = new Date().getTime();
-                y = Math.random();
-                series.addPoint([x, y], true, true);
+                update_heater_status(temperature_series, set_point_series, duty_cycle_series);
               }, 1000);
             }
           }
@@ -169,7 +209,7 @@ temperature.controller = function(){
         },
         yAxis: {
           title: {
-            text: "Value"
+            text: "Temperature (C)"
           },
           plotLines: [{
             value: 0,
@@ -178,34 +218,82 @@ temperature.controller = function(){
           }]
         },
         legend: {
-          enabled: false
+          layout: 'vertical',
+          align: 'right',
+          verticalAlign: 'middle',
+          borderWidth: 0
         },
         exporting: {
           enabled: false
         },
-        series: [{
-          name: "Random data",
-          data: function(){
-            var data, time, i$, i;
-            data = [];
-            time = new Date().getTime();
-            for (i$ = -19; i$ <= 0; ++i$) {
-              i = i$;
-              data.push({
-                x: time + i * 1000,
-                y: Math.random()
-              });
-            }
-            return data;
-          }()
-        }]
+        series: [
+          {
+            name: "Temperature",
+            data: []
+          }, {
+            type: "area",
+            name: "Set Points",
+            data: []
+          }, {
+            name: "Duty Cycle",
+            data: []
+          }
+        ]
       });
     }
   };
 };
-module.exports = temperature;
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/temperature.js","/components")
-},{"1YiZ5S":9,"buffer":6}],5:[function(require,module,exports){
+module.exports = heater;
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/heater.js","/components")
+},{"1YiZ5S":10,"buffer":7}],5:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var printer;
+printer = {};
+printer.vm = function(){
+  var vm;
+  vm = {};
+  vm.jog = function(x, y, z, e1, e2, f){
+    var data;
+    x == null && (x = null);
+    y == null && (y = null);
+    z == null && (z = null);
+    e1 == null && (e1 = null);
+    e2 == null && (e2 = null);
+    f == null && (f = null);
+    data = {
+      "X": x,
+      "Y": y,
+      "Z": z,
+      "E1": e1,
+      "E2": e2,
+      "F": f
+    };
+    return m.request({
+      method: "PUT",
+      url: "/printer/jog",
+      data: data
+    });
+  };
+  return vm;
+}();
+printer.view = function(ctrl){
+  var panel_button, generate_control_panel;
+  panel_button = function(button_name, onclick){
+    return m("div.column", m("div.ui.icon.button", {
+      onclick: onclick
+    }, m("i." + button_name + ".icon")));
+  };
+  generate_control_panel = function(){
+    return m("div.ui.three.column.grid.middle.padded.aligned.internally.celled", [m("div.row", [panel_button("home"), panel_button("arrow.up"), panel_button("home")]), m("div.row", [panel_button("arrow.left"), panel_button("home"), panel_button("arrow.right")]), m("div.row", [panel_button("home"), panel_button("arrow.down"), panel_button("home")])]);
+  };
+  return m("div.ui.four.column.grid", [m("div.ui.column", [generate_control_panel()])]);
+};
+printer.controller = function(){
+  return;
+};
+module.exports = printer;
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/printer.js","/components")
+},{"1YiZ5S":10,"buffer":7}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook, barista, editor;
 cookbook = require('components/cookbook.js');
@@ -216,8 +304,8 @@ m.route(document.getElementById("wrapper"), "/", {
   "/editor/:name": editor,
   "/brew": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bbfcd157.js","/")
-},{"1YiZ5S":9,"buffer":6,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],6:[function(require,module,exports){
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b2219e4f.js","/")
+},{"1YiZ5S":10,"buffer":7,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1330,7 +1418,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":9,"base64-js":7,"buffer":6,"ieee754":8}],7:[function(require,module,exports){
+},{"1YiZ5S":10,"base64-js":8,"buffer":7,"ieee754":9}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -1458,7 +1546,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":9,"buffer":6}],8:[function(require,module,exports){
+},{"1YiZ5S":10,"buffer":7}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -1546,7 +1634,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":9,"buffer":6}],9:[function(require,module,exports){
+},{"1YiZ5S":10,"buffer":7}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -1613,4 +1701,4 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process/browser.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/process")
-},{"1YiZ5S":9,"buffer":6}]},{},[5])
+},{"1YiZ5S":10,"buffer":7}]},{},[6])

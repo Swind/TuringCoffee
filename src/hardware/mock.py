@@ -95,5 +95,5 @@ class MockRefill(object):
 
     def refill_water(self):
         self.full_flag = False
-        time.sleep(10)
+        time.sleep(5)
         self.full_flag = True

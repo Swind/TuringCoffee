@@ -215,12 +215,12 @@ def control_printer():
     }
     """
     params = json.loads(request.data)
-    barista.printer_jog(params["X"],
-                        params["Y"],
-                        params["Z"],
-                        params["E1"],
-                        params["E2"],
-                        params["F"])
+    barista.printer_jog(params.get("X", None),
+                        params.get("Y", None),
+                        params.get("Z", None),
+                        params.get("E1", None),
+                        params.get("E2", None),
+                        params.get("F", None))
 
     resp = make_response()
     resp.status_code = httplib.CREATED
@@ -233,7 +233,24 @@ def control_printer():
 # ===============================================================================
 @app.route("/heater", methods=["GET"])
 def get_heater_status():
-    pass
+    """
+    {
+        "duty_cycle": 100 ,
+        "set_point": 80,
+        "temperature": 24.32,
+        "update_time": 147998232.38,
+        "is_water_full": true
+    }
+    """
+    status = {
+        "duty_cycle": barista.heater_duty_cycle,
+        "set_point": barista.heater_set_point,
+        "temperature": barista.heater_temperature,
+        "update_time": barista.heater_update_time,
+        "is_water_full": barista.is_water_full
+    }
+
+    return jsonify(status)
 
 @app.route("/heater", methods=["PUT"])
 def control_heater():

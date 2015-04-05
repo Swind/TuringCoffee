@@ -57,8 +57,9 @@ class RefillServer(object):
             self.refill.cleanup()
 
     def publish_water_level_status(self):
-        self.pub_channel.send({"full": self.refill.is_water_full()})
-        time.sleep(1)
+        while True:
+            self.pub_channel.send({"full": self.refill.is_water_full()})
+            time.sleep(1)
 
 if __name__ == '__main__':
     server = RefillServer()

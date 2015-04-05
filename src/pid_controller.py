@@ -67,6 +67,7 @@ class PIDController(object):
             temperature = self.get_temperature()
 
             duty_cycle = self.pid.calcPID_reg4(temperature, self.set_point, True)
+
             self.__heater.add_job(self.cycle_time, duty_cycle)
 
             # notify to all observers

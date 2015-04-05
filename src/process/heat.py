@@ -17,4 +17,4 @@ class Heat(Process):
     }
 
     def points(self):
-        return [Command("heat", self.water_tank)]
+        return [Command("Heat", self.water_tank)]

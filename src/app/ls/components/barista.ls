@@ -1,5 +1,6 @@
 require! {
-    "components/temperature.js": temperature 
+    "components/heater.js": heater 
+    "components/printer.js": printer 
 }
 
 barista = {}
@@ -17,7 +18,8 @@ barista = {}
 # ================================================================================
 barista.view = (ctrl) ->
     [
-        (m "div.column", [ctrl.temperature_chart!])
+        (m "div.column", [ctrl.heater_chart!])
+        (m "div.column", [ctrl.printer!])
     ]
 # ================================================================================
 #
@@ -28,6 +30,7 @@ submodule = (module, args) ->
     return module.view.bind(this, new module.controller(args))
 
 barista.controller = ! ->
-    @temperature_chart = submodule(temperature, {})
+    @heater_chart = submodule(heater, {})
+    @printer = submodule(printer, {})
 
-module.exports = barista 
+module.exports = barista
