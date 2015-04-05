@@ -48,4 +48,37 @@ class Spiral(Process):
 
             point_list.append(Point(x=x, y=y))
 
+        point_list = self.__point_e(point_list)
+        point_list = self.__point_z(point_list)
+        point_list = self.__point_f(point_list)
+
         return point_list
+
+    def __point_e(self, points):
+        extrudate_per_point = self.extrudate * self.point_interval
+
+        for point in points:
+            point.e1 = extrudate_per_point
+
+        return points
+
+    def __point_z(self, points):
+        z_start = self.high[0]
+        z_end = self.high[1]
+
+        z_per_point = (z_end - z_start) / len(points)
+
+        for index, point in enumerate(points):
+            point.z = z_start + (z_per_point * index)
+
+        # Quick move to the z start point
+        quick_move = Point(z=z_start, f=1000)
+        points.insert(0, quick_move)
+
+        return points
+
+    def __point_f(self, points):
+        f = self.feedrate
+	for point in points:
+	    point.f = f
+        return points

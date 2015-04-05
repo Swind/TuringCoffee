@@ -56,6 +56,8 @@ class MockHeater(object):
                 self.pin_status = OFF
                 time.sleep(off_time)
 
+            self.pin_status = OFF 
+
     #Get time heating element is on and off during a set cycle time
     def __getonofftime(self, cycle_time, duty_cycle):
         duty = duty_cycle/100.0
@@ -69,7 +71,6 @@ class MockHeater(object):
 
         while(True):
             # every 0.1 second will check the pin status and change the total cal
-
             if self.pin_status:
                 add_temperature = (self.power / 4.184) * self.emulator_interval
                 self.__total_cal = self.__total_cal + add_temperature
@@ -77,7 +78,7 @@ class MockHeater(object):
                 desc_temperature = self.heat_dissipation * self.emulator_interval
                 self.__total_cal = self.__total_cal - desc_temperature
 
-            time.sleep(0.1)
+            time.sleep(self.emulator_interval)
 
 class MockSensor(object):
     def __init__(self, heater):

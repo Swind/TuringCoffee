@@ -22,9 +22,9 @@
     },
 
     "HeaterEmulator":{
-        "power": 6000,
+        "power": 1000,
         "capacity": 1500,
-        "start_temperature": 20,
+        "start_temperature": 60,
         "heat_dissipation_per_c": 600
     },
 

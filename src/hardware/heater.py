@@ -2,11 +2,17 @@ from threading import Thread
 import atexit
 import Queue
 import time
+import atexit
 
 import RPi.GPIO as GPIO
 
+
 ON = 1
 OFF = 0
+
+def close_heater(pin_number):
+    GPIO.output(pin_number, OFF)
+
 
 class Heater(object):
     def __init__(self, pin_number):
@@ -20,15 +26,12 @@ class Heater(object):
 	GPIO.setmode(GPIO.BOARD)
         if self.pin_number > 0:
             GPIO.setup(self.pin_number, GPIO.OUT)
+            atexit.register(close_heater, self.pin_number)
 
         self.worker.start()
 
     def add_job(self, cycle_time, duty_cycle):
         self.__queue.put((cycle_time, duty_cycle))
-
-    @atexit.register
-    def __close_heater(self):
-        GPIO.output(self.pin_number, OFF)
 
     def __manage_heat(self):
         while (True):

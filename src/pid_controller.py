@@ -6,6 +6,8 @@ from threading import Thread
 import hardware
 from utils import json_config
 
+import logging
+logger = logging.getLogger(__name__)
 
 class PIDController(object):
     def __init__(self, config):
@@ -66,6 +68,7 @@ class PIDController(object):
             # Get the average of all sensors
             temperature = self.get_temperature()
 
+            logger.debug("calcPID_reg4 -> temperature: {}, set_point: {}".format(temperature,self.set_point))
             duty_cycle = self.pid.calcPID_reg4(temperature, self.set_point, True)
 
             self.__heater.add_job(self.cycle_time, duty_cycle)
