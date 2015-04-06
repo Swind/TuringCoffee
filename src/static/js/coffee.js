@@ -165,6 +165,7 @@ heater.vm = function(){
     vm.refill_status = m.prop({
       "full": false
     });
+    vm.input_temperature = m.prop(0);
   };
   vm.get_heater_status = function(handler){
     return m.request({
@@ -182,11 +183,29 @@ heater.view = function(ctrl){
   return m("div.ui.two.column.grid", [
     m('div.ui.column#plot', {
       config: ctrl.config_chart
-    }), m('div.ui.column.large.horizontal.statistics', [generate_heater_statistic("temperature", "Temperature"), generate_heater_statistic("set_point", "Set Point"), generate_heater_statistic("duty_cycle", "Duty Cycle"), generate_heater_statistic("is_water_full", "Water Level")])
+    }), m('div.ui.column.large.horizontal.statistics', [
+      generate_heater_statistic("temperature", "Temperature"), generate_heater_statistic("set_point", "Set Point"), generate_heater_statistic("duty_cycle", "Duty Cycle"), generate_heater_statistic("is_water_full", "Water Level"), m("div.ui.action.input", [
+        m("input", {
+          type: "text",
+          onchange: m.withAttr("value", heater.vm.input_temperature)
+        }), m("button.ui.button", {
+          onclick: ctrl.set_temperature
+        }, "Set Temperature")
+      ])
+    ])
   ]);
 };
 heater.controller = function(){
   heater.vm.init();
+  this.set_temperature = function(){
+    return m.request({
+      method: "PUT",
+      url: "/heater",
+      data: {
+        "Set Point": heater.vm.input_temperature()
+      }
+    });
+  };
   this.config_chart = function(elem, isInitialized, ctx){
     var chart, update_heater_status;
     chart = ctx.Chart;
@@ -255,10 +274,10 @@ heater.controller = function(){
             name: "Temperature",
             data: []
           }, {
-            type: "area",
             name: "Set Points",
             data: []
           }, {
+            type: "area",
             name: "Duty Cycle",
             data: []
           }
@@ -276,6 +295,9 @@ printer = {};
 printer.vm = function(){
   var vm;
   vm = {};
+  vm.init = function(){
+    vm.barista_status = m.prop({});
+  };
   vm.jog = function(x, y, z, e1, e2, f){
     var data;
     x == null && (x = null);
@@ -298,22 +320,72 @@ printer.vm = function(){
       data: data
     });
   };
+  vm.get_barista_status = function(handler){
+    return m.request({
+      method: "GET",
+      url: "/barista"
+    }).then(vm.barista_status).then(handler);
+  };
+  vm.brew = function(cookbook_name, action){
+    return m.request({
+      method: "PUT",
+      url: "/barista",
+      data: {
+        "Name": cookbook_name,
+        "Command": action
+      }
+    });
+  };
   return vm;
 }();
 printer.view = function(ctrl){
-  var panel_button, generate_control_panel;
+  var panel_button, generate_move_panel, control_button, generate_control_panel, barista_status_panel, progress_panel;
   panel_button = function(button_name, onclick){
-    return m("div.column", m("div.ui.icon.button", {
+    return m("div.ui.icon.button", {
       onclick: onclick
-    }, m("i." + button_name + ".icon")));
+    }, m("i." + button_name + ".icon"));
+  };
+  generate_move_panel = function(){
+    return m("table.ui.table.collapsing", [m("tbody", [m("tr", [m("td", panel_button("home")), m("td", panel_button("arrow.up")), m("td", panel_button("home"))]), m("tr", [m("td", panel_button("arrow.left")), m("td", panel_button("home")), m("td", panel_button("arrow.right"))]), m("tr", [m("td", panel_button("home")), m("td", panel_button("arrow.down")), m("td", panel_button("home"))])])]);
+  };
+  control_button = function(button_name, label, onclick){
+    return m("div.ui.labeled.icon.button", {
+      onclick: onclick
+    }, [m("i." + button_name + ".icon"), label]);
   };
   generate_control_panel = function(){
-    return m("div.ui.three.column.grid.middle.padded.aligned.internally.celled", [m("div.row", [panel_button("home"), panel_button("arrow.up"), panel_button("home")]), m("div.row", [panel_button("arrow.left"), panel_button("home"), panel_button("arrow.right")]), m("div.row", [panel_button("home"), panel_button("arrow.down"), panel_button("home")])]);
+    return m("div.ui.vertical.buttons", [control_button("play", "Start", ctrl.start_onclick), control_button("pause", "Pause"), control_button("stop", "Stop", ctrl.stop_onclick)]);
   };
-  return m("div.ui.four.column.grid", [m("div.ui.column", [generate_control_panel()])]);
+  "{\n    \"State\": \"Brewing\",\n    \"Now steps\": \"Step title\",\n    \"Now steps index\": 3,\n    \"Now process\": \"Process title\",\n    \"Now process index\": 1,\n    \"Now cookbook name\": \"Test\",\n    \"Temperature\": 90,\n    \"Is water full\": true,\n    \"Total commands\": 1000,\n    \"Progress\": 834\n}";
+  barista_status_panel = function(){
+    return m("div", [m("h5.ui.top.attached.header", "Barista Status"), m("div.ui.attached.segment", m("p", printer.vm.barista_status()["State"])), m("h5.ui.attached.header", "Brewing"), m("div.ui.attached.segment", m("p", printer.vm.barista_status()["Now cookbook name"])), m("h5.ui.attached.header", "Now step"), m("div.ui.attached.segment", m("p", printer.vm.barista_status()["Now steps"])), m("h5.ui.attached.header", "Now process"), m("div.ui.attached.segment", m("p", printer.vm.barista_status()["Now process"]))]);
+  };
+  progress_panel = function(){
+    return m('div.ui.indicating.progress#process_progress', [m("div.bar"), m("div.label", "Process progress")]);
+  };
+  return m("div.ui.four.column.grid", [m("div.ui.column", [generate_move_panel()]), m("div.ui.column", [generate_control_panel()]), m("div.ui.column", [barista_status_panel()]), m("div.ui.column", [progress_panel()])]);
 };
 printer.controller = function(){
-  return;
+  var cookbook_name, update_progress;
+  printer.vm.init();
+  cookbook_name = m.route.param("name");
+  update_progress = function(status){
+    var total_cmd, progress;
+    total_cmd = status["Total commands"];
+    progress = status["Progress"];
+    return $('#process_progress').progress({
+      percent: (progress / total_cmd) * 100
+    });
+  };
+  setInterval(function(){
+    printer.vm.get_barista_status(update_progress);
+  }, 1000);
+  this.start_onclick = function(){
+    printer.vm.brew(cookbook_name, "Start");
+  };
+  this.stop_onclick = function(){
+    printer.vm.brew(cookbook_name, "Stop");
+  };
 };
 module.exports = printer;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/printer.js","/components")
@@ -328,7 +400,7 @@ m.route(document.getElementById("wrapper"), "/", {
   "/editor/:name": editor,
   "/brew/:name": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_12574dfa.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_551ff212.js","/")
 },{"1YiZ5S":10,"buffer":7,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!

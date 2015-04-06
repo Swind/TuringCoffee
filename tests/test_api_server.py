@@ -7,13 +7,14 @@ os.chdir("../src")
 import time
 import api_server
 
-from data import test_cookbook_manager_data 
-from data import test_circle_data 
-from data import test_fixed_point_data 
-from data import test_spiral_data 
-from data import test_refill_data 
-from data import test_heat_data 
-from data import test_wait_data 
+from data import test_cookbook_manager_data
+from data import test_circle_data
+from data import test_fixed_point_data
+from data import test_spiral_data
+from data import test_refill_data
+from data import test_heat_data
+from data import test_wait_data
+from data import test_move_data
 
 import unittest
 import json
@@ -62,6 +63,9 @@ class TestAPIServer(unittest.TestCase):
     def test_brew_wait(self):
         self.__test_brew(test_wait_data.data)
 
+    def test_brew_move(self):
+        self.__test_brew(test_move_data.data)
+
     def __test_brew(self, test_data):
         # Create a new cookbook
         self.app.put("/cookbooks/test_cookbook_manager")
@@ -95,12 +99,13 @@ class TestAPIServer(unittest.TestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestAPIServer("test_cookbook_manager"))
+    #suite.addTest(TestAPIServer("test_cookbook_manager"))
     #suite.addTest(TestAPIServer("test_brew_circle"))
     #suite.addTest(TestAPIServer("test_brew_spiral"))
     #suite.addTest(TestAPIServer("test_brew_fixed_point"))
     #suite.addTest(TestAPIServer("test_brew_refill"))
     #suite.addTest(TestAPIServer("test_brew_heat"))
     #suite.addTest(TestAPIServer("test_brew_wait"))
+    suite.addTest(TestAPIServer("test_brew_move"))
 
     unittest.TextTestRunner().run(suite)

@@ -11,6 +11,7 @@ heater.vm = do ->
     vm.init = ! ->
         vm.heater_status = m.prop {}
         vm.refill_status = m.prop {"full": false} 
+        vm.input_temperature = m.prop 0
 
     vm.get_heater_status = (handler) ->
         return m.request(
@@ -43,6 +44,10 @@ heater.view = (ctrl) ->
             generate_heater_statistic("set_point", "Set Point")
             generate_heater_statistic("duty_cycle", "Duty Cycle")
             generate_heater_statistic("is_water_full", "Water Level")
+            (m "div.ui.action.input", [
+                (m "input" {type: "text", onchange: m.withAttr("value", heater.vm.input_temperature)})
+                (m "button.ui.button" {onclick: ctrl.set_temperature},"Set Temperature")
+            ])
         ])
     ])
 
@@ -53,6 +58,15 @@ heater.view = (ctrl) ->
 # ================================================================================
 heater.controller = ! ->
     heater.vm.init!
+
+    @set_temperature = ! ->
+        return m.request({
+            method: "PUT"
+            url: "/heater"
+            data: {
+                "Set Point": heater.vm.input_temperature!
+            }
+        })
 
     @config_chart = (elem, isInitialized, ctx) ->
         chart = ctx.Chart
@@ -124,11 +138,11 @@ heater.controller = ! ->
                     data: []
                 },
                 {
-                    type: "area"
                     name: "Set Points"
                     data: []
                 },
                 {
+                    type: "area"
                     name: "Duty Cycle"
                     data: []
                 }

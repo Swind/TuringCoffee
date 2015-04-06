@@ -57,6 +57,8 @@ class Barista(object):
 
         self.brew_queue = Queue.Queue()
 
+        self.stop = False
+
         logger.info("Start printer server ...")
         printer_server = PrinterServer()
         printer_server_thread = self.__start_worker(target=printer_server.start)
@@ -160,9 +162,20 @@ class Barista(object):
 
             self.refill_cmd.send({"Refill": "STOP"})
             self.__change_state(self.BREWING)
+
             self.now_cookbook_name = cookbook_name
             self.__brew(cookbook_name)
+
+            # Clean status
+            self.now_cookbook_name = ""
+            self.now_step = ""
+            self.now_step_index = 0
+
+            self.now_process = ""
+            self.now_process_index = 0
+            self.stop = False
             self.__change_state(self.IDLE)
+
             self.refill_cmd.send({"Refill": "START"})
 
     def __brew(self, cookbook_name):
@@ -173,25 +186,26 @@ class Barista(object):
         self.wait_printer_operational()
 
         self.__init_printer()
+
         for step_index, step in enumerate(cookbook.steps):
+
             logger.debug("# Start step {}".format(step.title))
             self.now_step = step.title
             self.now_step_index = step_index
 
             for process_index, process in enumerate(step.processes):
+
                 logger.debug("## Start process {}".format(process.title))
                 self.now_process = process.title
                 self.now_process_index = process_index
 
                 for block in process.blocks:
+
+                    if self.stop:
+                        return
+
                     logger.debug("### Start block {}".format(block.lang))
                     self.handle_block(block)
-
-        self.now_step = ""
-        self.now_step_index = 0
-
-        self.now_process = ""
-        self.now_process_index = 0
 
     def __init_printer(self):
         self.printer_cmd.send({"C": "G21"})
@@ -220,6 +234,10 @@ class Barista(object):
 
     def brew(self, name):
         self.brew_queue.put(name)
+
+    def stop_brew(self):
+        self.stop = True
+        self.printer_cmd.send({"STOP": True})
 
     def handle_block(self, block):
         points = block.points()
@@ -261,6 +279,18 @@ class Barista(object):
         point = Point(x, y, z, e1, e2, f)
         self.printer_cmd.send({"C": self.__convert_to_gcode(point)})
         return
+
+    def set_temperature(self, value):
+        payload = {
+            "cycle_time": self.pid_cycle_time,
+            "k": self.pid_k,
+            "i": self.pid_i,
+            "d": self.pid_d,
+            "set_point": value
+        }
+
+        self.heater_cmd.send(payload)
+
     # ===============================================================================
     #
     # Waitting
@@ -273,15 +303,7 @@ class Barista(object):
             time.sleep(2)
 
     def wait_temperature(self, value):
-        payload = {
-            "cycle_time": self.pid_cycle_time,
-            "k": self.pid_k,
-            "i": self.pid_i,
-            "d": self.pid_d,
-            "set_point": value
-        }
-
-        self.heater_cmd.send(payload)
+        self.set_temperature(value)
 
         # Wait the tempature
         while not ((value - 0.5) < self.heater_temperature < (value + 0.5)):

@@ -174,6 +174,8 @@ def brew():
 
     if cmd == "Start":
         barista.brew(name)
+    elif cmd == "Stop":
+        barista.stop_brew()
 
     resp = make_response()
     resp.status_code = httplib.OK
@@ -259,7 +261,20 @@ def control_heater():
         "Set Point": 80
     }
     """
-    pass
+    if request.data:
+        params = json.loads(request.data)
+    else:
+        params = {}
+
+    set_point = params.get("Set Point", None)
+
+    if set_point is not None:
+        barista.set_temperature(float(set_point))
+
+    resp = make_response()
+    resp.status_code = httplib.OK
+
+    return resp
 
 # ===============================================================================
 #

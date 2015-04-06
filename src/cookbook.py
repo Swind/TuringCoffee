@@ -10,6 +10,7 @@ from process import spiral
 from process import fixed_point
 from process import heat
 from process import wait
+from process import move
 
 
 class Cookbook(object):
@@ -142,7 +143,8 @@ class CodeBlock(object):
         "fixed_point": fixed_point.FixedPoint,
         "operations": operations.Operations,
         "heat": heat.Heat,
-        "wait": wait.Wait
+        "wait": wait.Wait,
+        "move": move.Move
     }
 
     def __init__(self, lang, params):
@@ -169,7 +171,6 @@ def split_block(compare_func, items):
     blocks.append(items[block_start:])
 
     return blocks
-
 
 def split_heading(tokens, level):
     return split_block(lambda token: token["type"] == "heading" and token["level"] == level, tokens)

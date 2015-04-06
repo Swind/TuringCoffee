@@ -14,6 +14,7 @@ class Heat(Process):
 
     params_rules = {
         "Water Tank": ["temperature", False, None],
+        "Wait": ["temperature", False, None],
     }
 
     def points(self):
