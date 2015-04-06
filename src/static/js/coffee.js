@@ -277,7 +277,6 @@ heater.controller = function(){
             name: "Set Points",
             data: []
           }, {
-            type: "area",
             name: "Duty Cycle",
             data: []
           }

@@ -138,7 +138,7 @@ class Barista(object):
     def __printer_monitor(self):
         while True:
             data = self.printer_pub.recv()
-            logging.debug("Receive message from printer: {}".format(data))
+            #logging.info("Receive message from printer: {}".format(data))
 
             if "total" in data:
                 self.total_cmd = data["total"]
@@ -186,6 +186,7 @@ class Barista(object):
         self.wait_printer_operational()
 
         self.__init_printer()
+	time.sleep(3)
 
         for step_index, step in enumerate(cookbook.steps):
 
@@ -201,17 +202,15 @@ class Barista(object):
 
                 for block in process.blocks:
 
-                    if self.stop:
-                        return
-
                     logger.debug("### Start block {}".format(block.lang))
                     self.handle_block(block)
 
     def __init_printer(self):
-        self.printer_cmd.send({"C": "G21"})
-        self.printer_cmd.send({"C": "G28"})
-        self.printer_cmd.send({"C": "G90"})
-        self.printer_cmd.send({"C": "M83"})
+        self.wait_printer_operational()
+    	self.printer_cmd.send({"C": "G21"})
+    	self.printer_cmd.send({"C": "G28"})
+    	self.printer_cmd.send({"C": "G90"})
+    	self.printer_cmd.send({"C": "M83"})
 
     def __convert_to_gcode(self, point):
         gcode = "G1"

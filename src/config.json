@@ -1,11 +1,11 @@
 {
     "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
-    "Emulator": true,
+    "Emulator": false,
     "Unit": "C",
 
     "Heater": {
-        "pin": 16
+        "pin": 7 
     },
     "Sensors": [
         {
@@ -22,22 +22,21 @@
     },
 
     "HeaterEmulator":{
-        "power": 1000,
+        "power": 6000,
         "capacity": 1500,
-        "start_temperature": 60,
+        "start_temperature": 20,
         "heat_dissipation_per_c": 600
     },
 
     "Printer":{
-        "PortName": "VIRTUAL",
+        "PortName": "/dev/ttyACM0",
         "Baudrate": 115200
     },
 
     "Refill":{
-        "water_level_pin": [13, 15],
-        "motor_pin": [11, 12],
-        "motor_direct": false,
-	"valve_pin": 22
+        "water_level_pin": [11, 12],
+        "motor_pin": [13, 15],
+        "motor_direct": false
     },
 
     "HeaterServer":

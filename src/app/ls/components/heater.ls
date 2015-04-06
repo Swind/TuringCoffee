@@ -142,7 +142,6 @@ heater.controller = ! ->
                     data: []
                 },
                 {
-                    type: "area"
                     name: "Duty Cycle"
                     data: []
                 }

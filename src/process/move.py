@@ -22,11 +22,12 @@ class Move(Process):
         "Y":        ["length",   False,         None],
         "Z":        ["length",   False,         None],
         "E":        ["length",   False,         None],
-        "Feedrate": ["feedrate",   False,       3000]
+        "Feedrate": ["feedrate",   False,       500]
     }
 
     def points(self):
-        point = Point(x=self.x, y=self.y, z=self.z, e1=self.e, f=self.feedrate)
+	set_f = Point(f=self.feedrate)
+        point = Point(x=self.x, y=self.y, z=self.z, e1=self.e)
 
-        return [point]
+        return [set_f, point]
 
