@@ -240,7 +240,6 @@ class Barista(object):
 
     def handle_block(self, block):
         points = block.points()
-
         gcodes = []
         for point in points:
 
@@ -272,7 +271,9 @@ class Barista(object):
             self.wait_printer_operational()
             self.printer_cmd.send({"G": gcodes})
             self.printer_cmd.send({"START": True})
+	    time.sleep(1)
             self.wait_printer(len(gcodes))
+    	    self.printer_cmd.send({"C": "M110 N0"})
 
     def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)
@@ -321,4 +322,7 @@ class Barista(object):
         while not (self.printer_progress == cmd_count and self.total_cmd == cmd_count):
             logger.debug("Now printer total cmd {}, progress {}, wait it to {}".format(self.total_cmd, self.printer_progress, cmd_count))
             time.sleep(1)
+
+        logger.debug("Done printer total cmd {}, progress {}, wait it to {}".format(self.total_cmd, self.printer_progress, cmd_count))
+	self.printer_progress = 0
 

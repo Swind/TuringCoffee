@@ -295,8 +295,6 @@ class MachineCom(object):
 
 	def _log(self, message):
             self._callback.mcLog(message)
-            #print message
-            logger.debug(message)
 
 	def _readline(self):
 		if self._serial is None:
@@ -400,17 +398,14 @@ class MachineCom(object):
 			self._sendCommand(cmd)
 
 	def printGCode(self, gcodeList):
-		if not self.isOperational() or self.isPrinting():
-		    self._log("The printer state is {} can't print".format(self.getStateString()))
-                    return
-
+	    if self.isOperational() and not self.isPrinting():
 		self._gcodeList = gcodeList
 		self._gcodePos = 0
 		self._printStartTime100 = None
 		self._printSection = 'CUSTOM'
 		self._changeState(self.STATE_PRINTING)
 		self._printStartTime = time.time()
-		for i in xrange(0, 12):
+		for i in xrange(0, 4):
 			self._sendNext()
 
 	def cancelPrint(self):
