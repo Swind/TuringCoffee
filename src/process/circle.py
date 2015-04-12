@@ -1,4 +1,3 @@
-import re
 import math
 from process import Process
 from process import Point
