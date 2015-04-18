@@ -8,17 +8,20 @@ OFF = 0
 import logging
 logger = logging.Logger(__name__)
 
+
 class MockHeater(object):
+
     def __init__(self, heater_conf):
         """
         power unit: w
         capacity:   ml
         """
         self.__queue = Queue.Queue()
-        self.power = float(heater_conf["power"])
-        self.capacity = float(heater_conf["capacity"])
-        self.start_temperature = float(heater_conf["start_temperature"])
-        self.heat_dissipation = float(self.capacity) / heater_conf["heat_dissipation_per_c"]
+        self.power = float(heater_conf['power'])
+        self.capacity = float(heater_conf['capacity'])
+        self.start_temperature = float(heater_conf['start_temperature'])
+        self.heat_dissipation = float(
+            self.capacity) / heater_conf['heat_dissipation_per_c']
 
         self.worker = Thread(target=self.__manage_heat)
         self.worker.daemon = True
@@ -56,36 +59,41 @@ class MockHeater(object):
                 self.pin_status = OFF
                 time.sleep(off_time)
 
-            self.pin_status = OFF 
+            self.pin_status = OFF
 
-    #Get time heating element is on and off during a set cycle time
+    # Get time heating element is on and off during a set cycle time
     def __getonofftime(self, cycle_time, duty_cycle):
-        duty = duty_cycle/100.0
+        duty = duty_cycle / 100.0
 
-        on_time = cycle_time*(duty)
-        off_time = cycle_time*(1.0-duty)
+        on_time = cycle_time * (duty)
+        off_time = cycle_time * (1.0 - duty)
 
         return on_time, off_time
 
     def __emulator(self):
 
         while(True):
-            # every 0.1 second will check the pin status and change the total cal
+            # every 0.1 second will check the pin status and change the total
+            # cal
             if self.pin_status:
                 add_temperature = (self.power / 4.184) * self.emulator_interval
                 self.__total_cal = self.__total_cal + add_temperature
             else:
-                desc_temperature = self.heat_dissipation * self.emulator_interval
+                desc_temperature = self.heat_dissipation * \
+                    self.emulator_interval
                 self.__total_cal = self.__total_cal - desc_temperature
 
             time.sleep(self.emulator_interval)
 
+
 class MockSensor(object):
+
     def __init__(self, heater):
         self.__heater = heater
 
     def read(self):
         return self.__heater.get_temperature()
+
 
 class MockRefill(object):
 

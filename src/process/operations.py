@@ -1,7 +1,9 @@
 from process import Command
 from process import Process
 
+
 class Operations(Process):
+
     """
     Example:
 
@@ -14,10 +16,9 @@ class Operations(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "Command":  [None,       True,          None]
+        'Command':  [None,       True,          None]
     }
 
     def points(self):
         result = map(lambda item: Command(item, None), self.command)
         return result
-

@@ -17,16 +17,16 @@ class RefillServer(object):
 
     def __init__(self):
         # Read config
-        self.config = json_config.parse_json("config.json")
+        self.config = json_config.parse_json('config.json')
 
         self.refill = hardware.get_refill(self.config)
 
         # Create a socket to receive refill command
-        cmd_address = self.config["RefillServer"]["Command_Socket_Address"]
-        self.cmd_channel = channel.Channel(cmd_address, "Pair", True)
+        cmd_address = self.config['RefillServer']['Command_Socket_Address']
+        self.cmd_channel = channel.Channel(cmd_address, 'Pair', True)
 
-        pub_address = self.config["RefillServer"]["Publish_Socket_Address"]
-        self.pub_channel = channel.Channel(pub_address, "Pub", True)
+        pub_address = self.config['RefillServer']['Publish_Socket_Address']
+        self.pub_channel = channel.Channel(pub_address, 'Pub', True)
 
         self.publish_worker = Thread(target=self.publish_water_level_status)
         self.publish_worker.daemon = True
@@ -52,12 +52,12 @@ class RefillServer(object):
             while(True):
                 cmd = self.cmd_channel.recv()
 
-                logger.info("Receive command {}".format(cmd))
+                logger.info('Receive command {}'.format(cmd))
 
-                if "Refill" in cmd:
-                    if cmd["Refill"] == "START":
+                if 'Refill' in cmd:
+                    if cmd['Refill'] == 'START':
                         self.pause = False
-                    elif cmd["Refill"] == "STOP":
+                    elif cmd['Refill'] == 'STOP':
                         self.pause = True
         finally:
             self.refill.cleanup()
@@ -73,10 +73,9 @@ class RefillServer(object):
         finally:
             self.refill.cleanup()
 
-
     def publish_water_level_status(self):
         while True:
-            self.pub_channel.send({"full": self.refill.is_water_full()})
+            self.pub_channel.send({'full': self.refill.is_water_full()})
             time.sleep(1)
 
 if __name__ == '__main__':

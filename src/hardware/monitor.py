@@ -5,7 +5,7 @@ import time
 
 
 class TemperatureMonitor(object):
-    MAX_RECORD_NUMBER = 64 
+    MAX_RECORD_NUMBER = 64
 
     def __init__(self, sensor, interval=0.5):
         self.__sensor = sensor

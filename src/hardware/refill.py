@@ -14,33 +14,36 @@ class Refill(object):
 
     def __init__(self):
         # Read Config
-        self.config = json_config.parse_json("config.json")
-        refill_config = self.config["Refill"]
+        self.config = json_config.parse_json('config.json')
+        refill_config = self.config['Refill']
 
         # Setup Raspberry Pi GPIO
         GPIO.setmode(GPIO.BOARD)
 
-        self.water_level_pin = refill_config["water_level_pin"]
+        self.water_level_pin = refill_config['water_level_pin']
         GPIO.setup(self.water_level_pin[0], GPIO.OUT)
         GPIO.output(self.water_level_pin[0], True)
 
-        GPIO.setup(self.water_level_pin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        logger.info("Set water level GPIO {} to OUT and {} to IN".format(self.water_level_pin[0], self.water_level_pin[1]))
+        GPIO.setup(
+            self.water_level_pin[1], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        logger.info('Set water level GPIO {} to OUT and {} to IN'.format(
+            self.water_level_pin[0], self.water_level_pin[1]))
 
-        self.motor_pin = refill_config["motor_pin"]
+        self.motor_pin = refill_config['motor_pin']
         GPIO.setup(self.motor_pin[0], GPIO.OUT)
         GPIO.setup(self.motor_pin[1], GPIO.OUT)
-        logger.info("Set motor GPIO {} and {} to OUT".format(self.motor_pin[0], self.motor_pin[1]))
+        logger.info('Set motor GPIO {} and {} to OUT'.format(
+            self.motor_pin[0], self.motor_pin[1]))
 
-        self.motor_direct = refill_config["motor_direct"]
+        self.motor_direct = refill_config['motor_direct']
 
     def is_water_full(self):
         result = self.water_level_pin[1]
-        logger.debug("Read water level pin value: {}".format(result))
-	if GPIO.input(result):
-	   return True
-	else:
-	   return False
+        logger.debug('Read water level pin value: {}'.format(result))
+        if GPIO.input(result):
+            return True
+        else:
+            return False
 
     def refill_water(self):
         GPIO.output(self.motor_pin[1], self.motor_direct)

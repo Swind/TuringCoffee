@@ -1,7 +1,9 @@
 from process import Process
 from process import Command
 
+
 class Wait(Process):
+
     """
     Example:
 
@@ -12,8 +14,8 @@ class Wait(Process):
     """
 
     params_rules = {
-        "Time": ["time", False, None],
+        'Time': ['time', False, None],
     }
 
     def points(self):
-        return [Command("Wait", self.time)]
+        return [Command('Wait', self.time)]

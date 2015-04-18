@@ -4,6 +4,7 @@ import json
 
 import spidev
 
+
 class PT100(object):
 
     def __init__(self, number, average_number=5):
@@ -33,7 +34,7 @@ class PT100(object):
         self.spi.xfer([0x03, 0xff])
         self.spi.xfer([0x04, 0xff])
 
-        with open("max31865_table.json", "r") as table:
+        with open('max31865_table.json', 'r') as table:
             self.table = json.loads(table.read())
 
         # The first read after start is 0 0
@@ -41,16 +42,16 @@ class PT100(object):
 
     def _interpolation(self, rtdRaw):
         for index, item in enumerate(self.table):
-            if rtdRaw <= int(item["code_dec"]):
+            if rtdRaw <= int(item['code_dec']):
                 break
 
-        a1 = self.table[index-1]
-        a1_code_dec = float(a1["code_dec"])
-        a1_temperature = float(a1["temperature"])
+        a1 = self.table[index - 1]
+        a1_code_dec = float(a1['code_dec'])
+        a1_temperature = float(a1['temperature'])
 
         a2 = self.table[index]
-        a2_code_dec = float(a2["code_dec"])
-        a2_temperature = float(a2["temperature"])
+        a2_code_dec = float(a2['code_dec'])
+        a2_temperature = float(a2['temperature'])
 
         return ((rtdRaw - a1_code_dec) / (a2_code_dec - a1_code_dec) * (a2_temperature - a1_temperature)) + a1_temperature
 
@@ -75,4 +76,4 @@ class PT100(object):
 
             temp = temp + self._RawToTemp(MSB, LSB)
 
-        return (temp/self.__average_number)
+        return (temp / self.__average_number)

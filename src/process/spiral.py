@@ -5,6 +5,7 @@ from process import Point
 
 
 class Spiral(Process):
+
     """
     Example:
 
@@ -21,12 +22,12 @@ class Spiral(Process):
     """
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "Radius":         ["length_from_to",    True, None],
-        "High":           ["length_from_to",      True, None],
-        "Cylinder":       [None,  True, None],
-        "Point interval": ["length",    False, 0.01],
-        "Feedrate":       ["feedrate",  False, 80],
-        "Extrudate":      ["extrudate", True, None],
+        'Radius':         ['length_from_to',    True, None],
+        'High':           ['length_from_to',      True, None],
+        'Cylinder':       [None,  True, None],
+        'Point interval': ['length',    False, 0.01],
+        'Feedrate':       ['feedrate',  False, 80],
+        'Extrudate':      ['extrudate', True, None],
     }
 
     def points(self):
@@ -39,7 +40,8 @@ class Spiral(Process):
         while (total_theta <= max_theta):
             # point interval / (2 * pi * r) = theta
             now_radius = a * total_theta + self.radius[0]
-            now_theta = math.radians((self.point_interval / (2*math.pi*now_radius))*360)
+            now_theta = math.radians(
+                (self.point_interval / (2 * math.pi * now_radius)) * 360)
 
             total_theta = total_theta + now_theta
 
@@ -79,6 +81,6 @@ class Spiral(Process):
 
     def __point_f(self, points):
         f = self.feedrate
-	for point in points:
-	    point.f = f
+        for point in points:
+            point.f = f
         return points

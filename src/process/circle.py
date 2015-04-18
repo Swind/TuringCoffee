@@ -5,6 +5,7 @@ from process import Point
 
 
 class Circle(Process):
+
     """
     Example:
 
@@ -21,17 +22,18 @@ class Circle(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "Total Water":          ["capacity",  True, None],
-        "Radius":         ["length",    True, None],
-        "Extrudate":      ["extrudate", True, None],
-        "High":           ["length_from_to",      True, None],
-        "Feedrate":       ["feedrate",  False, 80],
-        "Point interval": ["length",    False, 0.01]
+        'Total Water':          ['capacity',  True, None],
+        'Radius':         ['length',    True, None],
+        'Extrudate':      ['extrudate', True, None],
+        'High':           ['length_from_to',      True, None],
+        'Feedrate':       ['feedrate',  False, 80],
+        'Point interval': ['length',    False, 0.01]
     }
 
     def points(self, previous_end_point=None):
         if previous_end_point:
-            start_angle = math.atan2(previous_end_point.y, previous_end_point.x)
+            start_angle = math.atan2(
+                previous_end_point.y, previous_end_point.x)
         else:
             start_angle = 0
 
@@ -44,7 +46,7 @@ class Circle(Process):
         points = self.__point_xy(points, start_angle)
         points = self.__point_e(points)
         points = self.__point_z(points)
-	points = self.__point_f(points)
+        points = self.__point_f(points)
 
         return points
 
@@ -94,9 +96,9 @@ class Circle(Process):
 
     def __point_f(self, points):
         f = self.feedrate
-	for point in points:
-	    point.f = f
+        for point in points:
+            point.f = f
         return points
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass

@@ -21,20 +21,23 @@ from utils import json_config
 
 app = Flask(__name__)
 cmgr = CookbookManager()
-config = json_config.parse_json("config.json")
+config = json_config.parse_json('config.json')
 
 barista = Barista()
 
-@app.route("/")
+
+@app.route('/')
 def index():
-    return render_template("index.jinja2")
+    return render_template('index.jinja2')
 
 # ===============================================================================
 #
 # Cookbook Manager API
 #
 # ===============================================================================
-@app.route("/cookbooks", methods=["GET"])
+
+
+@app.route('/cookbooks', methods=['GET'])
 def list_cookbooks():
     """
     {
@@ -49,12 +52,13 @@ def list_cookbooks():
     resp = {}
     for cookbook in cookbooks:
         resp[cookbook.name] = {
-            "name": cookbook.name,
-            "description": cookbook.description
+            'name': cookbook.name,
+            'description': cookbook.description
         }
     return jsonify(resp)
 
-@app.route("/cookbooks/<string:name>", methods=["GET"])
+
+@app.route('/cookbooks/<string:name>', methods=['GET'])
 def read_cookbook(name):
     """
     {
@@ -66,13 +70,14 @@ def read_cookbook(name):
     cookbook = cmgr.get(name)
 
     data = {
-        "name": name,
-        "description": cookbook.description
+        'name': name,
+        'description': cookbook.description
     }
 
     return jsonify(data)
 
-@app.route("/cookbooks/<string:name>", methods=["PUT"])
+
+@app.route('/cookbooks/<string:name>', methods=['PUT'])
 def update_cookbook(name):
     """
     {
@@ -84,8 +89,8 @@ def update_cookbook(name):
     else:
         params = {}
 
-    if "name" in params:
-        new_name = params["name"]
+    if 'name' in params:
+        new_name = params['name']
         cmgr.rename(name, new_name)
     else:
         # If no name params in the params, create a new cookbook
@@ -96,12 +101,14 @@ def update_cookbook(name):
 
     return resp
 
-@app.route("/cookbooks/<string:name>/content", methods=["GET"])
+
+@app.route('/cookbooks/<string:name>/content', methods=['GET'])
 def read_cookbook_content(name):
     cookbook = cmgr.get(name)
     return cookbook.content
 
-@app.route("/cookbooks/<string:name>/content", methods=["PUT"])
+
+@app.route('/cookbooks/<string:name>/content', methods=['PUT'])
 def update_cookbook_content(name):
     new_content = request.data
     cmgr.update(name, new_content)
@@ -111,7 +118,8 @@ def update_cookbook_content(name):
 
     return resp
 
-@app.route("/cookbooks/<string:name>", methods=["DELETE"])
+
+@app.route('/cookbooks/<string:name>', methods=['DELETE'])
 def delete_cookbook(name):
     cmgr.delete(name)
 
@@ -125,7 +133,9 @@ def delete_cookbook(name):
 # Barista API
 #
 # ===============================================================================
-@app.route("/barista", methods=["GET"])
+
+
+@app.route('/barista', methods=['GET'])
 def get_barista_status():
     """
     {
@@ -143,21 +153,22 @@ def get_barista_status():
     """
 
     status = {
-        "State": barista.state,
-        "Now steps": barista.now_step,
-        "Now steps index": barista.now_step_index,
-        "Now process": barista.now_process,
-        "Now process index": barista.now_process_index,
-        "Now cookbook name": barista.now_cookbook_name,
-        "Temperature": barista.heater_temperature,
-        "Is water full": barista.is_water_full,
-        "Total commands": barista.total_cmd,
-        "Progress": barista.printer_progress
+        'State': barista.state,
+        'Now steps': barista.now_step,
+        'Now steps index': barista.now_step_index,
+        'Now process': barista.now_process,
+        'Now process index': barista.now_process_index,
+        'Now cookbook name': barista.now_cookbook_name,
+        'Temperature': barista.heater_temperature,
+        'Is water full': barista.is_water_full,
+        'Total commands': barista.total_cmd,
+        'Progress': barista.printer_progress
     }
 
     return jsonify(status)
 
-@app.route("/barista", methods=["PUT"])
+
+@app.route('/barista', methods=['PUT'])
 def brew():
     """
     {
@@ -167,14 +178,14 @@ def brew():
     """
     params = json.loads(request.data)
 
-    cmd = params["Command"]
-    name = params["Name"]
+    cmd = params['Command']
+    name = params['Name']
 
-    app.logger.debug("{} {} ...".format(cmd, name))
+    app.logger.debug('{} {} ...'.format(cmd, name))
 
-    if cmd == "Start":
+    if cmd == 'Start':
         barista.brew(name)
-    elif cmd == "Stop":
+    elif cmd == 'Stop':
         barista.stop_brew()
 
     resp = make_response()
@@ -187,7 +198,9 @@ def brew():
 # Printer API
 #
 # ===============================================================================
-@app.route("/printer", methods=["GET"])
+
+
+@app.route('/printer', methods=['GET'])
 def get_printer_status():
     """
     {
@@ -197,14 +210,15 @@ def get_printer_status():
     }
     """
     status = {
-        "state": barista.printer_state_string,
-        "progress": barista.printer_progress,
-        "total": barista.total_cmd
+        'state': barista.printer_state_string,
+        'progress': barista.printer_progress,
+        'total': barista.total_cmd
     }
 
     return jsonify(status)
 
-@app.route("/printer/jog", methods=["PUT"])
+
+@app.route('/printer/jog', methods=['PUT'])
 def control_printer():
     """
     {
@@ -217,12 +231,12 @@ def control_printer():
     }
     """
     params = json.loads(request.data)
-    barista.printer_jog(params.get("X", None),
-                        params.get("Y", None),
-                        params.get("Z", None),
-                        params.get("E1", None),
-                        params.get("E2", None),
-                        params.get("F", None))
+    barista.printer_jog(params.get('X', None),
+                        params.get('Y', None),
+                        params.get('Z', None),
+                        params.get('E1', None),
+                        params.get('E2', None),
+                        params.get('F', None))
 
     resp = make_response()
     resp.status_code = httplib.CREATED
@@ -233,7 +247,9 @@ def control_printer():
 # Heater API
 #
 # ===============================================================================
-@app.route("/heater", methods=["GET"])
+
+
+@app.route('/heater', methods=['GET'])
 def get_heater_status():
     """
     {
@@ -245,16 +261,17 @@ def get_heater_status():
     }
     """
     status = {
-        "duty_cycle": barista.heater_duty_cycle,
-        "set_point": barista.heater_set_point,
-        "temperature": barista.heater_temperature,
-        "update_time": barista.heater_update_time,
-        "is_water_full": barista.is_water_full
+        'duty_cycle': barista.heater_duty_cycle,
+        'set_point': barista.heater_set_point,
+        'temperature': barista.heater_temperature,
+        'update_time': barista.heater_update_time,
+        'is_water_full': barista.is_water_full
     }
 
     return jsonify(status)
 
-@app.route("/heater", methods=["PUT"])
+
+@app.route('/heater', methods=['PUT'])
 def control_heater():
     """
     {
@@ -266,7 +283,7 @@ def control_heater():
     else:
         params = {}
 
-    set_point = params.get("Set Point", None)
+    set_point = params.get('Set Point', None)
 
     if set_point is not None:
         barista.set_temperature(float(set_point))
@@ -281,11 +298,14 @@ def control_heater():
 # Refill API
 #
 # ===============================================================================
-@app.route("/refill", methods=["GET"])
-def get_refill_status():
-    return jsonify({"full": barista.is_water_full})
 
-@app.route("/refill", methods=["PUT"])
+
+@app.route('/refill', methods=['GET'])
+def get_refill_status():
+    return jsonify({'full': barista.is_water_full})
+
+
+@app.route('/refill', methods=['PUT'])
 def control_refill():
     """
     {
@@ -294,5 +314,5 @@ def control_refill():
     """
     pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(host='0.0.0.0')

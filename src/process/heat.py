@@ -1,7 +1,9 @@
 from process import Process
 from process import Command
 
+
 class Heat(Process):
+
     """
     Example:
 
@@ -13,9 +15,9 @@ class Heat(Process):
     """
 
     params_rules = {
-        "Water Tank": ["temperature", False, None],
-        "Wait": ["temperature", False, None],
+        'Water Tank': ['temperature', False, None],
+        'Wait': ['temperature', False, None],
     }
 
     def points(self):
-        return [Command("Heat", self.water_tank)]
+        return [Command('Heat', self.water_tank)]

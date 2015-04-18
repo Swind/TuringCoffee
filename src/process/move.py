@@ -3,7 +3,9 @@ import math
 from process import Process
 from process import Point
 
+
 class Move(Process):
+
     """
     Example:
 
@@ -18,16 +20,15 @@ class Move(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "X":        ["length",   False,         None],
-        "Y":        ["length",   False,         None],
-        "Z":        ["length",   False,         None],
-        "E":        ["length",   False,         None],
-        "Feedrate": ["feedrate",   False,       500]
+        'X':        ['length',   False,         None],
+        'Y':        ['length',   False,         None],
+        'Z':        ['length',   False,         None],
+        'E':        ['length',   False,         None],
+        'Feedrate': ['feedrate',   False,       500]
     }
 
     def points(self):
-	set_f = Point(f=self.feedrate)
+        set_f = Point(f=self.feedrate)
         point = Point(x=self.x, y=self.y, z=self.z, e1=self.e)
 
         return [set_f, point]
-

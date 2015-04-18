@@ -5,16 +5,16 @@ import shutil
 
 from cookbook import Cookbook
 
+
 class CookbookManager(object):
 
     def __init__(self):
         # Read Config
-        self.config = json_config.parse_json("config.json")
-        self.folder = self.config["Cookbook Folder"]
+        self.config = json_config.parse_json('config.json')
+        self.folder = self.config['Cookbook Folder']
 
     def __folder_path(self, cookbook_name):
         return os.path.join(self.folder, cookbook_name)
-
 
     def __create_cookbook_folder(self, cookbook_name):
         path = self.__folder_path(cookbook_name)
@@ -42,7 +42,7 @@ class CookbookManager(object):
         old_path = self.__folder_path(old_name)
         new_path = self.__folder_path(new_name)
 
-        return os.rename(old_path , new_path)
+        return os.rename(old_path, new_path)
 
     def get(self, cookbook_name):
         folder_path = self.__folder_path(cookbook_name)
@@ -52,4 +52,3 @@ class CookbookManager(object):
     def delete(self, cookbook_name):
         folder_path = self.__folder_path(cookbook_name)
         return shutil.rmtree(folder_path)
-

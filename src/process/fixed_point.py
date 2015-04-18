@@ -5,6 +5,7 @@ from process import Point
 
 
 class FixedPoint(Process):
+
     """
     Example:
 
@@ -20,12 +21,13 @@ class FixedPoint(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        "Coordinates": ["x_y_coordinates", True, None],
-        "Total Water": ["capacity",        True, None],
-        "High":        ["length_from_to",  True, None],
-        "Feedrate":    ["feedrate",        False, 80],
-        "Extrudate":   ["extrudate",       True, None]
+        'Coordinates': ['x_y_coordinates', True, None],
+        'Total Water': ['capacity',        True, None],
+        'High':        ['length_from_to',  True, None],
+        'Feedrate':    ['feedrate',        False, 80],
+        'Extrudate':   ['extrudate',       True, None]
     }
+
     def points(self):
         point_number = self.total_water / self.extrudate
         points = map(lambda index: Point(), range(0, int(point_number)))
@@ -33,7 +35,7 @@ class FixedPoint(Process):
         points = self.__point_x_y(points)
         points = self.__point_z(points)
         points = self.__point_e1(points)
-	points = self.__point_f(points)
+        points = self.__point_f(points)
 
         return points
 
@@ -66,6 +68,6 @@ class FixedPoint(Process):
 
     def __point_f(self, points):
         f = self.feedrate
-	for point in points:
+        for point in points:
             point.f = f
         return points

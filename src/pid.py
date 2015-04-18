@@ -5,10 +5,10 @@ class pid(object):
     xk_2 = 0.0  # PV[k-2] = Thlt[k-1]
     yk_1 = 0.0  # y[k-1] = Gamma[k-1]
     yk_2 = 0.0  # y[k-2] = Gamma[k-1]
-    lpf_1 = 0.0 # lpf[k-1] = LPF output[k-1]
-    lpf_2 = 0.0 # lpf[k-2] = LPF output[k-2]
+    lpf_1 = 0.0  # lpf[k-1] = LPF output[k-1]
+    lpf_2 = 0.0  # lpf[k-2] = LPF output[k-2]
 
-    yk = 0.0 # output
+    yk = 0.0  # output
 
     GMA_HLIM = 100.0
     GMA_LLIM = 0.0
@@ -44,11 +44,11 @@ class pid(object):
     def calcPID_reg3(self, xk, tset, enable):
         ek = 0.0
         lpf = 0.0
-        ek = tset - xk # calculate e[k] = SP[k] - PV[k]
+        ek = tset - xk  # calculate e[k] = SP[k] - PV[k]
         #--------------------------------------
         # Calculate Lowpass Filter for D-term
         #--------------------------------------
-        lpf = self.lpf1 * pid.lpf_1 + self.lpf2 * (ek + pid.ek_1);
+        lpf = self.lpf1 * pid.lpf_1 + self.lpf2 * (ek + pid.ek_1)
 
         if (enable):
             #-----------------------------------------------------------
@@ -57,7 +57,8 @@ class pid(object):
             # Ts*e[k]/Ti +
             # Td/Ts*(lpf[k] - 2*lpf[k-1] + lpf[k-2]))
             #-----------------------------------------------------------
-            self.pp = self.kc * (ek - pid.ek_1) # y[k] = y[k-1] + Kc*(PV[k-1] - PV[k])
+            # y[k] = y[k-1] + Kc*(PV[k-1] - PV[k])
+            self.pp = self.kc * (ek - pid.ek_1)
             self.pi = self.k0 * ek  # + Kc*Ts/Ti * e[k]
             self.pd = self.k1 * (lpf - 2.0 * pid.lpf_1 + pid.lpf_2)
             pid.yk += self.pp + self.pi + self.pd
@@ -67,8 +68,8 @@ class pid(object):
             self.pi = 0.0
             self.pd = 0.0
 
-        pid.ek_1 = ek # e[k-1] = e[k]
-        pid.lpf_2 = pid.lpf_1 # update stores for LPF
+        pid.ek_1 = ek  # e[k-1] = e[k]
+        pid.lpf_2 = pid.lpf_1  # update stores for LPF
         pid.lpf_1 = lpf
 
         # limit y[k] to GMA_HLIM and GMA_LLIM
@@ -81,7 +82,7 @@ class pid(object):
 
     def calcPID_reg4(self, xk, tset, enable):
         ek = 0.0
-        ek = tset - xk # calculate e[k] = SP[k] - PV[k]
+        ek = tset - xk  # calculate e[k] = SP[k] - PV[k]
 
         if (enable):
             #-----------------------------------------------------------
@@ -90,7 +91,8 @@ class pid(object):
             # Ts*e[k]/Ti +
             # Td/Ts*(2*PV[k-1] - PV[k] - PV[k-2]))
             #-----------------------------------------------------------
-            self.pp = self.kc * (pid.xk_1 - xk) # y[k] = y[k-1] + Kc*(PV[k-1] - PV[k])
+            # y[k] = y[k-1] + Kc*(PV[k-1] - PV[k])
+            self.pp = self.kc * (pid.xk_1 - xk)
             self.pi = self.k0 * ek  # + Kc*Ts/Ti * e[k]
             self.pd = self.k1 * (2.0 * pid.xk_1 - xk - pid.xk_2)
             pid.yk += self.pp + self.pi + self.pd

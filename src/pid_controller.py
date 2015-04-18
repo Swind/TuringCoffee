@@ -9,20 +9,23 @@ from utils import json_config
 import logging
 logger = logging.getLogger(__name__)
 
+
 class PIDController(object):
+
     def __init__(self, config):
         # Heat
         self.__heater = hardware.get_heater(config)
         self.__sensors = hardware.get_sensors(config)
 
         # PID configuration
-        pid_config = config["PID"]
+        pid_config = config['PID']
 
-        self.cycle_time = pid_config["cycle_time"]
+        self.cycle_time = pid_config['cycle_time']
         self.set_point = 0
 
         # Init PID module
-        self.pid = pid(self.cycle_time, pid_config["k"], pid_config["i"], pid_config["d"])
+        self.pid = pid(
+            self.cycle_time, pid_config['k'], pid_config['i'], pid_config['d'])
 
         # Worker thread
         self.worker = Thread(target=self.__control_temperature)
@@ -68,14 +71,17 @@ class PIDController(object):
             # Get the average of all sensors
             temperature = self.get_temperature()
 
-            logger.debug("calcPID_reg4 -> temperature: {}, set_point: {}".format(temperature,self.set_point))
-            duty_cycle = self.pid.calcPID_reg4(temperature, self.set_point, True)
+            logger.debug(
+                'calcPID_reg4 -> temperature: {}, set_point: {}'.format(temperature, self.set_point))
+            duty_cycle = self.pid.calcPID_reg4(
+                temperature, self.set_point, True)
 
             self.__heater.add_job(self.cycle_time, duty_cycle)
 
             # notify to all observers
             for observer in self.__observers:
-                observer(self.cycle_time, duty_cycle, self.set_point, temperature)
+                observer(
+                    self.cycle_time, duty_cycle, self.set_point, temperature)
 
             # Wait heat job done
             time.sleep(self.cycle_time)

@@ -2,19 +2,23 @@ import pid_controller
 from utils import json_config
 from utils import channel
 
+
 class HeaterServer(object):
+
     def __init__(self):
         # Read Config
-        self.config = json_config.parse_json("config.json")
+        self.config = json_config.parse_json('config.json')
 
         # Create PID controller
         self.pid_controller = pid_controller.PIDController(self.config)
 
         # That other process can subscribe the pid controller status
-        self.pub_channel = channel.Channel(self.config["HeaterServer"]["Publish_Socket_Address"], "Pub", True)
+        self.pub_channel = channel.Channel(
+            self.config['HeaterServer']['Publish_Socket_Address'], 'Pub', True)
 
         # Receive the pid controller command
-        self.cmd_channel = channel.Channel(self.config["HeaterServer"]["Command_Socket_Address"], "Pair", True)
+        self.cmd_channel = channel.Channel(
+            self.config['HeaterServer']['Command_Socket_Address'], 'Pair', True)
 
     def __pid_controller_observer(self, *pid_status):
         self.publish_pid_status(*pid_status)
@@ -46,8 +50,10 @@ class HeaterServer(object):
             "temperature": 26.53
         }
         """
-        #print "Publish cycle_time:{}, duty_cycle:{}, set_point:{}".format(cycle_time, duty_cycle, set_point, temperature)
-        self.pub_channel.send({"cycle_time": cycle_time, "duty_cycle": duty_cycle, "set_point": set_point, "temperature": temperature})
+        # print "Publish cycle_time:{}, duty_cycle:{},
+        # set_point:{}".format(cycle_time, duty_cycle, set_point, temperature)
+        self.pub_channel.send({'cycle_time': cycle_time, 'duty_cycle':
+                               duty_cycle, 'set_point': set_point, 'temperature': temperature})
 
     def receive_pid_parameters(self):
         """
@@ -65,4 +71,5 @@ class HeaterServer(object):
         while(True):
             cmd = self.cmd_channel.recv()
 
-            self.pid_controller.set_params(cmd["cycle_time"], cmd["k"], cmd["i"], cmd["d"], cmd["set_point"])
+            self.pid_controller.set_params(
+                cmd['cycle_time'], cmd['k'], cmd['i'], cmd['d'], cmd['set_point'])

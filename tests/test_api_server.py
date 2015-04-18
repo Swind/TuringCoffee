@@ -1,8 +1,8 @@
 import os
 import sys
-sys.path.insert(0, "../src")
+sys.path.insert(0, '../src')
 
-os.chdir("../src")
+os.chdir('../src')
 
 import time
 import api_server
@@ -19,7 +19,9 @@ from data import test_move_data
 import unittest
 import json
 
+
 class TestAPIServer(unittest.TestCase):
+
     def setUp(self):
         api_server.app.debug = True
         self.app = api_server.app.test_client()
@@ -28,22 +30,24 @@ class TestAPIServer(unittest.TestCase):
         test_data = test_cookbook_manager_data.data
 
         # Create a new cookbook
-        self.app.put("/cookbooks/test_cookbook_manager")
+        self.app.put('/cookbooks/test_cookbook_manager')
 
         # List all cookbooks
-        resp = self.app.get("/cookbooks")
+        resp = self.app.get('/cookbooks')
 
         # Update the cookbook content
-        self.app.put("/cookbooks/test_cookbook_manager/content", data=test_data)
+        self.app.put(
+            '/cookbooks/test_cookbook_manager/content', data=test_data)
 
         # Rename the cookbook
         payload = {
-            "name": "new_test_cookbook_manager"
+            'name': 'new_test_cookbook_manager'
         }
-        self.app.put("/cookbooks/test_cookbook_manager", data=json.dumps(payload))
+        self.app.put(
+            '/cookbooks/test_cookbook_manager', data=json.dumps(payload))
 
         # Delete the cookbook
-        self.app.delete("/cookbooks/new_test_cookbook_manager")
+        self.app.delete('/cookbooks/new_test_cookbook_manager')
 
     def test_brew_circle(self):
         self.__test_brew(test_circle_data.data)
@@ -68,44 +72,45 @@ class TestAPIServer(unittest.TestCase):
 
     def __test_brew(self, test_data):
         # Create a new cookbook
-        self.app.put("/cookbooks/test_cookbook_manager")
+        self.app.put('/cookbooks/test_cookbook_manager')
 
         # Update the cookbook content
-        self.app.put("/cookbooks/test_cookbook_manager/content", data=test_data)
+        self.app.put(
+            '/cookbooks/test_cookbook_manager/content', data=test_data)
 
         # Brew
         payload = {
-            "Command": "Start",
-            "Name": "test_cookbook_manager"
+            'Command': 'Start',
+            'Name': 'test_cookbook_manager'
         }
-        self.app.put("/barista", data=json.dumps(payload))
+        self.app.put('/barista', data=json.dumps(payload))
 
         # Wait
         while True:
-            resp = json.loads(self.app.get("/barista").data)
-            state = resp["State"]
-            now_name = resp["Now cookbook name"]
+            resp = json.loads(self.app.get('/barista').data)
+            state = resp['State']
+            now_name = resp['Now cookbook name']
 
-            if state == "Idle" and now_name == "test_cookbook_manager":
+            if state == 'Idle' and now_name == 'test_cookbook_manager':
                 break
 
             time.sleep(0.1)
 
         # Delete the cookbook
-        self.app.delete("/cookbooks/test_cookbook_manager")
+        self.app.delete('/cookbooks/test_cookbook_manager')
 
     def tearDown(self):
         pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     suite = unittest.TestSuite()
-    #suite.addTest(TestAPIServer("test_cookbook_manager"))
-    #suite.addTest(TestAPIServer("test_brew_circle"))
-    #suite.addTest(TestAPIServer("test_brew_spiral"))
-    #suite.addTest(TestAPIServer("test_brew_fixed_point"))
-    #suite.addTest(TestAPIServer("test_brew_refill"))
-    #suite.addTest(TestAPIServer("test_brew_heat"))
-    #suite.addTest(TestAPIServer("test_brew_wait"))
-    suite.addTest(TestAPIServer("test_brew_move"))
+    # suite.addTest(TestAPIServer("test_cookbook_manager"))
+    # suite.addTest(TestAPIServer("test_brew_circle"))
+    # suite.addTest(TestAPIServer("test_brew_spiral"))
+    # suite.addTest(TestAPIServer("test_brew_fixed_point"))
+    # suite.addTest(TestAPIServer("test_brew_refill"))
+    # suite.addTest(TestAPIServer("test_brew_heat"))
+    # suite.addTest(TestAPIServer("test_brew_wait"))
+    suite.addTest(TestAPIServer('test_brew_move'))
 
     unittest.TextTestRunner().run(suite)

@@ -10,11 +10,13 @@ import RPi.GPIO as GPIO
 ON = 1
 OFF = 0
 
+
 def close_heater(pin_number):
     GPIO.output(pin_number, OFF)
 
 
 class Heater(object):
+
     def __init__(self, pin_number):
         self.__queue = Queue.Queue()
 
@@ -23,7 +25,7 @@ class Heater(object):
         self.worker.daemon = True
 
     def start(self):
-	GPIO.setmode(GPIO.BOARD)
+        GPIO.setmode(GPIO.BOARD)
         if self.pin_number > 0:
             GPIO.setup(self.pin_number, GPIO.OUT)
             atexit.register(close_heater, self.pin_number)
@@ -46,11 +48,11 @@ class Heater(object):
                 GPIO.output(self.pin_number, OFF)
                 time.sleep(off_time)
 
-    #Get time heating element is on and off during a set cycle time
+    # Get time heating element is on and off during a set cycle time
     def __getonofftime(self, cycle_time, duty_cycle):
-        duty = duty_cycle/100.0
+        duty = duty_cycle / 100.0
 
-        on_time = cycle_time*(duty)
-        off_time = cycle_time*(1.0-duty)
+        on_time = cycle_time * (duty)
+        off_time = cycle_time * (1.0 - duty)
 
         return on_time, off_time

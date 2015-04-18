@@ -26,14 +26,14 @@ class Cookbook(object):
     @property
     def content(self):
         if self.__content is None:
-            with open(self.__content_path(), "r") as f:
+            with open(self.__content_path(), 'r') as f:
                 self.__content = f.read()
 
         return self.__content
 
     @content.setter
     def content(self, value):
-        with open(self.__content_path(), "w") as f:
+        with open(self.__content_path(), 'w') as f:
             f.write(value)
 
         self.__clean()
@@ -68,9 +68,10 @@ class Cookbook(object):
         # If there are paragraphs before the first head
         # Save this paragraphs as description
         for index, token in enumerate(tokens):
-            if token["type"] == "heading":
+            if token['type'] == 'heading':
                 break
-        self.__description = "\n".join(map(lambda item: item["text"], tokens[:index]))
+        self.__description = '\n'.join(
+            map(lambda item: item['text'], tokens[:index]))
 
         # Parse all lv 1 heading as step and lv 2 heading as process
         tree = Heading.heading_tree(tokens)
@@ -78,7 +79,8 @@ class Cookbook(object):
         self.__steps = steps
 
     def __content_path(self):
-        return os.path.join(self.folder_path, "content.md")
+        return os.path.join(self.folder_path, 'content.md')
+
 
 class Heading(object):
 
@@ -87,7 +89,7 @@ class Heading(object):
         return map(lambda block: Heading(block, 1), split_heading(tokens, 1))
 
     def __init__(self, tokens, level=1):
-        self.title = ""
+        self.title = ''
         self.content = None
         self.sub_headings = []
         self.level = level
@@ -95,56 +97,62 @@ class Heading(object):
         # Find self heading content
         end = 0
         for index, token in enumerate(tokens):
-            if token["type"] == "heading" and token["level"] > self.level:
+            if token['type'] == 'heading' and token['level'] > self.level:
                 end = index
                 break
 
-        self.title = tokens[0]["text"]
+        self.title = tokens[0]['text']
         if end:
             self.content = tokens[1:end]
-            self.sub_headings = map(lambda block: Heading(block, self.level + 1), split_heading(tokens[end:], self.level + 1))
+            self.sub_headings = map(lambda block: Heading(
+                block, self.level + 1), split_heading(tokens[end:], self.level + 1))
         else:
             self.content = tokens[1:]
 
 
 class Step(object):
+
     def __init__(self, heading):
         self.__heading = heading
         self.title = heading.title
 
-        self.processes = map(lambda item: Process(item), self.__heading.sub_headings)
+        self.processes = map(
+            lambda item: Process(item), self.__heading.sub_headings)
+
 
 class Process(object):
+
     def __init__(self, heading):
         self.__heading = heading
         self.title = heading.title
 
         self.blocks = []
         for block in heading.content:
-            if block["type"] == "code":
+            if block['type'] == 'code':
                 self.blocks.append(self.__parse_code(block))
 
     def __parse_code(self, code_block):
         params = []
 
-        for line in code_block["text"].split("\n"):
-            if ":" in line:
-                key, value = line.split(":")
+        for line in code_block['text'].split('\n'):
+            if ':' in line:
+                key, value = line.split(':')
                 params.append((key.strip(), value.strip()))
             else:
                 params.append((line.strip(), None))
 
-        return CodeBlock(code_block["lang"], params)
+        return CodeBlock(code_block['lang'], params)
+
 
 class CodeBlock(object):
     lang_map = {
-        "circle": circle.Circle,
-        "spiral": spiral.Spiral,
-        "fixed_point": fixed_point.FixedPoint,
-        "operations": operations.Operations,
-        "heat": heat.Heat,
-        "wait": wait.Wait,
-        "move": move.Move
+        'circle': circle.Circle,
+        'spiral': spiral.Spiral,
+        'fixed_point': fixed_point.FixedPoint,
+        'operations': operations.Operations,
+        'heat': heat.Heat,
+        'wait': wait.Wait,
+        'move': move.Move
     }
 
     def __init__(self, lang, params):
@@ -155,7 +163,8 @@ class CodeBlock(object):
         return self.lang_map[self.lang](self.params).points()
 
     def __str__(self):
-        return "{} => {}".format(self.lang, self.params)
+        return '{} => {}'.format(self.lang, self.params)
+
 
 def split_block(compare_func, items):
     block_start = 0
@@ -172,11 +181,12 @@ def split_block(compare_func, items):
 
     return blocks
 
-def split_heading(tokens, level):
-    return split_block(lambda token: token["type"] == "heading" and token["level"] == level, tokens)
 
-if __name__ == "__main__":
-    with open("test.md", "r") as data:
+def split_heading(tokens, level):
+    return split_block(lambda token: token['type'] == 'heading' and token['level'] == level, tokens)
+
+if __name__ == '__main__':
+    with open('test.md', 'r') as data:
         content = data.read()
 
-    cookbook = Cookbook("test", content)
+    cookbook = Cookbook('test', content)

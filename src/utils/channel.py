@@ -11,12 +11,13 @@ from nanomsg import (
     EAGAIN
 )
 
+
 class Channel(object):
 
     type_map = {
-        "Sub": SUB,
-        "Pub": PUB,
-        "Pair": PAIR
+        'Sub': SUB,
+        'Pub': PUB,
+        'Pair': PAIR
     }
 
     def __init__(self, address, channel_type, is_server):
@@ -27,7 +28,7 @@ class Channel(object):
         else:
             self.__socket.connect(address)
 
-            if channel_type == "Sub":
+            if channel_type == 'Sub':
                 self.__socket.set_string_option(SUB, SUB_SUBSCRIBE, '')
 
     def recv(self, blocking=True):
@@ -39,7 +40,7 @@ class Channel(object):
                 result = self.__socket.recv(flags=DONTWAIT)
             except NanoMsgAPIError as error:
                 if error.errno == EAGAIN:
-                   return None
+                    return None
 
         return msgpack.unpackb(result)
 

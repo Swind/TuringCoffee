@@ -1,6 +1,7 @@
 import json
 import re
 
+
 def parse_json(path):
     """ Parse a JSON file
         First remove comments and then use the json module package

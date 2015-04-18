@@ -32,9 +32,10 @@ import logging.config
 logging.config.fileConfig('logging.conf')
 logger = logging.getLogger(__name__)
 
+
 class Barista(object):
-    IDLE = "Idle"
-    BREWING = "Brewing"
+    IDLE = 'Idle'
+    BREWING = 'Brewing'
 
     def __init__(self):
         self.heater_temperature = 0
@@ -47,57 +48,66 @@ class Barista(object):
         self.state = self.IDLE
         self.printer_progress = 0
         self.printer_state = 0
-        self.printer_state_string = ""
+        self.printer_state_string = ''
 
-        self.now_cookbook_name = ""
-        self.now_step = ""
+        self.now_cookbook_name = ''
+        self.now_step = ''
         self.now_step_index = 0
-        self.now_process = ""
+        self.now_process = ''
         self.now_process_index = 0
 
         self.brew_queue = Queue.Queue()
 
         self.stop = False
 
-        logger.info("Start printer server ...")
+        logger.info('Start printer server ...')
         printer_server = PrinterServer()
-        printer_server_thread = self.__start_worker(target=printer_server.start)
+        printer_server_thread = self.__start_worker(
+            target=printer_server.start)
 
-        logger.info("Start heater server ...")
+        logger.info('Start heater server ...')
         heater_server = HeaterServer()
         heater_server_thread = self.__start_worker(target=heater_server.start)
 
-        logger.info("Start refill server ...")
+        logger.info('Start refill server ...')
         refill_server = RefillServer()
         refill_server_thread = self.__start_worker(target=refill_server.start)
 
         # Read config
-        self.config = json_config.parse_json("config.json")
-        cfg = self.config["PID"]
-        self.pid_cycle_time = cfg["cycle_time"]
-        self.pid_k = cfg["k"]
-        self.pid_i = cfg["i"]
-        self.pid_d = cfg["d"]
+        self.config = json_config.parse_json('config.json')
+        cfg = self.config['PID']
+        self.pid_cycle_time = cfg['cycle_time']
+        self.pid_k = cfg['k']
+        self.pid_i = cfg['i']
+        self.pid_d = cfg['d']
 
         # Create nanomsg socket to publish status and receive command
-        logger.info("Connect to printer server ...")
-        cfg = self.config["PrinterServer"]
-        self.printer_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
-        self.printer_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
+        logger.info('Connect to printer server ...')
+        cfg = self.config['PrinterServer']
+        self.printer_cmd = channel.Channel(
+            cfg['Command_Socket_Address'], 'Pair', False)
+        self.printer_pub = channel.Channel(
+            cfg['Publish_Socket_Address'], 'Sub', False)
 
-        logger.info("Connect to heater server ...")
-        cfg = self.config["HeaterServer"]
-        self.heater_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
-        self.heater_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
+        logger.info('Connect to heater server ...')
+        cfg = self.config['HeaterServer']
+        self.heater_cmd = channel.Channel(
+            cfg['Command_Socket_Address'], 'Pair', False)
+        self.heater_pub = channel.Channel(
+            cfg['Publish_Socket_Address'], 'Sub', False)
 
-        logger.info("Connect to refill server ...")
-        cfg = self.config["RefillServer"]
-        self.refill_cmd = channel.Channel(cfg["Command_Socket_Address"], "Pair", False)
-        self.refill_pub = channel.Channel(cfg["Publish_Socket_Address"], "Sub", False)
+        logger.info('Connect to refill server ...')
+        cfg = self.config['RefillServer']
+        self.refill_cmd = channel.Channel(
+            cfg['Command_Socket_Address'], 'Pair', False)
+        self.refill_pub = channel.Channel(
+            cfg['Publish_Socket_Address'], 'Sub', False)
 
-        logger.info("Start monitor workers ...")
-        self.temperature_worker = self.__start_worker(self.__temperature_monitor)
-        self.water_level_worker = self.__start_worker(self.__water_level_monitor)
+        logger.info('Start monitor workers ...')
+        self.temperature_worker = self.__start_worker(
+            self.__temperature_monitor)
+        self.water_level_worker = self.__start_worker(
+            self.__water_level_monitor)
         self.printer_worker = self.__start_worker(self.__printer_monitor)
         self.brew_worker = self.__start_worker(self.__brew_worker)
 
@@ -121,113 +131,115 @@ class Barista(object):
         while True:
             resp = self.heater_pub.recv()
 
-            self.heater_temperature = round(resp.get("temperature", 0), 3)
-            self.heater_set_point = round(resp.get("set_point", 0), 3)
-            self.heater_duty_cycle = round(resp.get("duty_cycle", 0), 3)
+            self.heater_temperature = round(resp.get('temperature', 0), 3)
+            self.heater_set_point = round(resp.get('set_point', 0), 3)
+            self.heater_duty_cycle = round(resp.get('duty_cycle', 0), 3)
             self.heater_update_time = time.time()
 
-            logger.debug("Receive new temperature {}".format(resp))
+            logger.debug('Receive new temperature {}'.format(resp))
 
     def __water_level_monitor(self):
         while True:
             resp = self.refill_pub.recv()
-            self.is_water_full = resp.get("full", None)
+            self.is_water_full = resp.get('full', None)
 
-            logger.debug("Receive new water level {}".format(self.is_water_full))
+            logger.debug(
+                'Receive new water level {}'.format(self.is_water_full))
 
     def __printer_monitor(self):
         while True:
             data = self.printer_pub.recv()
             #logging.info("Receive message from printer: {}".format(data))
 
-            if "total" in data:
-                self.total_cmd = data["total"]
+            if 'total' in data:
+                self.total_cmd = data['total']
 
-            if "progress" in data:
-                self.printer_progress = data["progress"]
+            if 'progress' in data:
+                self.printer_progress = data['progress']
 
-            if "state" in data:
-                self.printer_state = data["state"]
-                self.printer_state_string = data["state_string"]
+            if 'state' in data:
+                self.printer_state = data['state']
+                self.printer_state_string = data['state_string']
 
     def __change_state(self, state):
-        logger.info("Barista change state from {} to {}".format(self.state, state))
+        logger.info(
+            'Barista change state from {} to {}'.format(self.state, state))
         self.state = state
 
     def __brew_worker(self):
         while True:
             cookbook_name = self.brew_queue.get()
 
-            logger.info("Start to cook {}".format(cookbook_name))
+            logger.info('Start to cook {}'.format(cookbook_name))
 
-            self.refill_cmd.send({"Refill": "STOP"})
+            self.refill_cmd.send({'Refill': 'STOP'})
             self.__change_state(self.BREWING)
 
             self.now_cookbook_name = cookbook_name
             self.__brew(cookbook_name)
 
             # Clean status
-            self.now_cookbook_name = ""
-            self.now_step = ""
+            self.now_cookbook_name = ''
+            self.now_step = ''
             self.now_step_index = 0
 
-            self.now_process = ""
+            self.now_process = ''
             self.now_process_index = 0
             self.stop = False
             self.__change_state(self.IDLE)
 
-            self.refill_cmd.send({"Refill": "START"})
+            self.refill_cmd.send({'Refill': 'START'})
 
     def __brew(self, cookbook_name):
         cmgr = CookbookManager()
         cookbook = cmgr.get(cookbook_name)
 
-        logger.debug("Barista look the cookbook")
+        logger.debug('Barista look the cookbook')
         self.wait_printer_operational()
 
         self.__init_printer()
-	time.sleep(3)
+        time.sleep(3)
 
         for step_index, step in enumerate(cookbook.steps):
 
-            logger.debug("# Start step {}".format(step.title))
+            logger.debug('# Start step {}'.format(step.title))
             self.now_step = step.title
             self.now_step_index = step_index
 
             for process_index, process in enumerate(step.processes):
 
-                logger.debug("## Start process {}".format(process.title))
+                logger.debug('## Start process {}'.format(process.title))
                 self.now_process = process.title
                 self.now_process_index = process_index
 
                 for block in process.blocks:
 
-                    logger.debug("### Start block {}".format(block.lang))
+                    logger.debug('### Start block {}'.format(block.lang))
                     self.handle_block(block)
 
     def __init_printer(self):
         self.wait_printer_operational()
-    	self.printer_cmd.send({"C": "G21"})
-    	self.printer_cmd.send({"C": "G28"})
-    	self.printer_cmd.send({"C": "G90"})
-    	self.printer_cmd.send({"C": "M83"})
+        self.printer_cmd.send({'C': 'G21'})
+        self.printer_cmd.send({'C': 'G28'})
+        self.printer_cmd.send({'C': 'G90'})
+        self.printer_cmd.send({'C': 'M83'})
 
     def __convert_to_gcode(self, point):
-        gcode = "G1"
+        gcode = 'G1'
         if point.x is not None:
-            gcode = gcode + " X{}".format(point.x)
+            gcode = gcode + ' X{}'.format(point.x)
 
         if point.y is not None:
-            gcode = gcode + " Y{}".format(point.y)
+            gcode = gcode + ' Y{}'.format(point.y)
 
         if point.z is not None:
-            gcode = gcode + " Z{}".format(point.z)
+            gcode = gcode + ' Z{}'.format(point.z)
 
         if point.e1 is not None:
-            gcode = gcode + " E{}".format(point.e1)
+            gcode = gcode + ' E{}'.format(point.e1)
 
         if point.f is not None:
-            gcode = gcode + " F{}".format(point.f)
+            gcode = gcode + ' F{}'.format(point.f)
 
         return gcode
 
@@ -236,7 +248,7 @@ class Barista(object):
 
     def stop_brew(self):
         self.stop = True
-        self.printer_cmd.send({"STOP": True})
+        self.printer_cmd.send({'STOP': True})
 
     def handle_block(self, block):
         points = block.points()
@@ -252,41 +264,41 @@ class Barista(object):
                 cmd = point.command
                 value = point.value
 
-                if cmd == "Home":
-                    self.printer_cmd.send({"C": "G28"})
+                if cmd == 'Home':
+                    self.printer_cmd.send({'C': 'G28'})
 
-                elif cmd == "Refill":
-                    self.refill_cmd.send({"Refill": "START"})
+                elif cmd == 'Refill':
+                    self.refill_cmd.send({'Refill': 'START'})
                     self.wait_refill()
 
-                elif cmd == "Heat":
+                elif cmd == 'Heat':
                     # Wait temperature to target temperature
                     self.wait_temperature(value)
 
-                elif cmd == "Wait":
-                    logger.debug("Sleep {} seconds".format(value))
+                elif cmd == 'Wait':
+                    logger.debug('Sleep {} seconds'.format(value))
                     time.sleep(value)
 
         if gcodes:
             self.wait_printer_operational()
-            self.printer_cmd.send({"G": gcodes})
-            self.printer_cmd.send({"START": True})
-	    time.sleep(1)
+            self.printer_cmd.send({'G': gcodes})
+            self.printer_cmd.send({'START': True})
+            time.sleep(1)
             self.wait_printer(len(gcodes))
-    	    self.printer_cmd.send({"C": "M110 N0"})
+            self.printer_cmd.send({'C': 'M110 N0'})
 
     def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)
-        self.printer_cmd.send({"C": self.__convert_to_gcode(point)})
+        self.printer_cmd.send({'C': self.__convert_to_gcode(point)})
         return
 
     def set_temperature(self, value):
         payload = {
-            "cycle_time": self.pid_cycle_time,
-            "k": self.pid_k,
-            "i": self.pid_i,
-            "d": self.pid_d,
-            "set_point": value
+            'cycle_time': self.pid_cycle_time,
+            'k': self.pid_k,
+            'i': self.pid_i,
+            'd': self.pid_d,
+            'set_point': value
         }
 
         self.heater_cmd.send(payload)
@@ -298,8 +310,9 @@ class Barista(object):
     # ===============================================================================
 
     def wait_printer_operational(self):
-        while self.printer_state_string != "Operational":
-            logger.debug("Wait printer state from {} to Operational".format(self.printer_state_string))
+        while self.printer_state_string != 'Operational':
+            logger.debug(
+                'Wait printer state from {} to Operational'.format(self.printer_state_string))
             time.sleep(2)
 
     def wait_temperature(self, value):
@@ -307,22 +320,24 @@ class Barista(object):
 
         # Wait the tempature
         while not ((value - 0.5) < self.heater_temperature < (value + 0.5)):
-            logger.debug("Waiting temperature to {}".format(value))
+            logger.debug('Waiting temperature to {}'.format(value))
             time.sleep(2)
 
     def wait_refill(self):
-        self.refill_cmd.send({"Refill": True})
+        self.refill_cmd.send({'Refill': True})
 
         # Wait refill finished
         while not self.is_water_full:
-            logger.debug("Now water level is {}, waiting to full".format(self.is_water_full))
+            logger.debug(
+                'Now water level is {}, waiting to full'.format(self.is_water_full))
             time.sleep(2)
 
     def wait_printer(self, cmd_count):
         while not (self.printer_progress == cmd_count and self.total_cmd == cmd_count):
-            logger.debug("Now printer total cmd {}, progress {}, wait it to {}".format(self.total_cmd, self.printer_progress, cmd_count))
+            logger.debug('Now printer total cmd {}, progress {}, wait it to {}'.format(
+                self.total_cmd, self.printer_progress, cmd_count))
             time.sleep(1)
 
-        logger.debug("Done printer total cmd {}, progress {}, wait it to {}".format(self.total_cmd, self.printer_progress, cmd_count))
-	self.printer_progress = 0
-
+        logger.debug('Done printer total cmd {}, progress {}, wait it to {}'.format(
+            self.total_cmd, self.printer_progress, cmd_count))
+        self.printer_progress = 0
