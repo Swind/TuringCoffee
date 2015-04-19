@@ -15,7 +15,15 @@ class Point(object):
         self.f = f
 
     def __str__(self):
-        return 'x:{} y:{} z:{} e1:{} e2:{}'.format(self.x, self.y, self.z, self.e1, self.e2)
+        fields = ['x', 'y', 'z', 'e1', 'e2', 'f']
+
+        string = ''
+        for field in fields:
+            if hasattr(self, field):
+                if getattr(self, field) is not None:
+                    string += (field + ' : ' + str(getattr(self, field)) + ' ')
+
+        return string
 
 
 class Command(object):
