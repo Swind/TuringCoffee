@@ -24,11 +24,6 @@ Z: 175 mm
 Feedrate: 500 mm/min
 ```
 
-``` move
-Z: 175 mm
-Feedrate: 200 mm/min
-```
-
 ## 先行吐水維持溫度
 
 ``` fixed_point
@@ -81,13 +76,14 @@ Extrudate: 0.1 ml/step
 
 繞圓 15 ml
 
-``` circle
-Radius: 1 cm
-Total Water: 15 ml
-High: 175 mm to 175 mm
-Feedrate： 120 mm/min
-Extrudate: 0.1 ml/mm
+``` spiral
+Radius: 0.1 cm to 1.2 cm
+High: 170 mm to 170 mm
+Cylinder: 6
 Point interval: 0.1 mm
+Feedrate: 120 mm/min
+Total Water: 7.5 ml
+Extrudate: 0.1 ml/mm
 ```
 
 ## 等待 40s
@@ -102,54 +98,30 @@ Feedrate: 120 mm/min
 
 # Step 2: 沖煮
 
-## 繞半徑 1 cm 的圓
-
-``` circle
-Radius: 1 cm
-Total Water: 45 ml
-High: 175 mm to 175 mm
-Feedrate： 120 mm/min
-Extrudate: 0.1 ml/mm
-Point interval: 0.1 mm
-```
-
 ## 螺旋注水
 
-從離中心 1 cm 的地方開始使用螺旋注水
-繞行 5 圈
+從離中心 0.1 cm -> 2 cm 的地方開始使用螺旋注水
 
 ``` spiral
-Radius: 1 cm to 2 cm
+Radius: 0.1 cm to 2 cm
 High: 175 mm to 175 mm
-Cylinder: 6
+Cylinder: 8
 Point interval: 0.1 mm
 Feedrate: 120 mm/min
-Extrudate: 0.1 ml/mm
+Extrudate: 0.15 ml/mm
 ```
 
 ## 螺旋注水 - 繞回中心
 
-從離中心 2 cm 的地方使用螺旋注水往回繞
-繞行 5 圈
+從離中心 2 cm -> 0.1 cm 的地方使用螺旋注水往回繞
 
 ``` spiral
-Radius: 2 cm to 1 cm
+Radius: 2 cm to 0.1 cm
 High: 175 mm to 175 mm
-Cylinder: 6
+Cylinder: 8
 Point interval: 0.1 mm
 Feedrate: 120 mm/min
-Extrudate: 0.1 ml/mm
-```
-
-## 繞半徑 1 cm 的圓
-
-``` circle
-Radius: 1 cm
-Total Water: 45 ml
-High: 175 mm to 175 mm
-Feedrate： 120 mm/min
-Extrudate: 0.1 ml/mm
-Point interval: 0.1 mm
+Extrudate: 0.15 ml/mm
 ```
 
 ## HOME
