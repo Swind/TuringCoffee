@@ -7,6 +7,7 @@ import mistune
 from process import circle
 from process import operations
 from process import spiral
+from process import spiral_total_water
 from process import fixed_point
 from process import heat
 from process import wait
@@ -148,6 +149,7 @@ class CodeBlock(object):
     lang_map = {
         'circle': circle.Circle,
         'spiral': spiral.Spiral,
+        'spiral_total_water': spiral_total_water.SpiralTotalWater,
         'fixed_point': fixed_point.FixedPoint,
         'operations': operations.Operations,
         'heat': heat.Heat,
