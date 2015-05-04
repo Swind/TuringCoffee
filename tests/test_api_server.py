@@ -85,13 +85,16 @@ class TestAPIServer(unittest.TestCase):
         }
         self.app.put('/barista', data=json.dumps(payload))
 
+        # Wait the state change to start
+        time.sleep(1)
+
         # Wait
         while True:
             resp = json.loads(self.app.get('/barista').data)
             state = resp['State']
             now_name = resp['Now cookbook name']
 
-            if state == 'Idle' and now_name == 'test_cookbook_manager':
+            if state == "Idle":
                 break
 
             time.sleep(0.1)
@@ -104,13 +107,12 @@ class TestAPIServer(unittest.TestCase):
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
-    # suite.addTest(TestAPIServer("test_cookbook_manager"))
-    # suite.addTest(TestAPIServer("test_brew_circle"))
-    # suite.addTest(TestAPIServer("test_brew_spiral"))
-    # suite.addTest(TestAPIServer("test_brew_fixed_point"))
-    # suite.addTest(TestAPIServer("test_brew_refill"))
-    # suite.addTest(TestAPIServer("test_brew_heat"))
-    # suite.addTest(TestAPIServer("test_brew_wait"))
-    suite.addTest(TestAPIServer('test_brew_move'))
+    suite.addTest(TestAPIServer("test_brew_circle"))
+    suite.addTest(TestAPIServer("test_brew_spiral"))
+    suite.addTest(TestAPIServer("test_brew_fixed_point"))
+    suite.addTest(TestAPIServer("test_brew_refill"))
+    suite.addTest(TestAPIServer("test_brew_heat"))
+    suite.addTest(TestAPIServer("test_brew_wait"))
+    suite.addTest(TestAPIServer("test_brew_move"))
 
     unittest.TextTestRunner().run(suite)

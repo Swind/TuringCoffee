@@ -8,10 +8,6 @@ process.
 """
 
 __copyright__ = 'Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License'
-import sys
-import time
-import os
-import json
 
 from utils import machineCom
 
@@ -50,8 +46,12 @@ class PrinterServer(object):
         self._gcodeList = []
         self._printing_gcodeList = []
 
-        port_name = self.config['Printer']['PortName']
-        baudrate = int(self.config['Printer']['Baudrate'])
+        if self.config["Emulator"]:
+            port_name = "VIRTUAL"
+        else:
+            port_name = self.config["Printer"]["PortName"]
+
+        baudrate = int(self.config["Printer"]["Baudrate"])
 
         self._comm = machineCom.MachineCom(
             port_name, baudrate, callbackObject=self)
