@@ -10,7 +10,6 @@ class Operations(Process):
         ''' operations
             Command: Home
             Command: Refill START
-            Command: Wait 30s
         '''
     """
 
@@ -20,5 +19,5 @@ class Operations(Process):
     }
 
     def points(self):
-        result = map(lambda item: Command(item, None), self.command)
+        result = [Command(self.command, None)]
         return result
