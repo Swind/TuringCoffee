@@ -299,7 +299,7 @@ class MachineCom(object):
                         'Communication timeout during printing, forcing a line')
                     line = 'ok'
 
-                if 'ok' in line:
+                if 'ok' in line or 'wait' in line:
                     timeout = time.time() + 5
                     if not self._commandQueue.empty():
                         self._sendCommand(self._commandQueue.get())
@@ -437,8 +437,6 @@ class MachineCom(object):
             self._printSection = 'CUSTOM'
             self._changeState(self.STATE_PRINTING)
             self._printStartTime = time.time()
-            for i in xrange(0, 4):
-                self._sendNext()
 
     def cancelPrint(self):
         if self.isOperational():
