@@ -111,7 +111,6 @@ class PrinterServer(object):
             elif 'START' in cmd:
                 self._printing_gcodeList = self._gcodeList
                 self._gcodeList = []
-                print len('Start gcodes size is {}'.format(len(self._printing_gcodeList)))
                 self._comm.printGCode(self._printing_gcodeList)
 
             elif 'INFORMATION' in cmd:
