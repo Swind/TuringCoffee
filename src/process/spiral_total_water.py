@@ -28,7 +28,8 @@ class SpiralTotalWater(Process):
         'Point interval': [ 'length'         , False    , 0.01          ] ,
         'Feedrate':       [ 'feedrate'       , False    , 120           ] ,
         'Extrudate':      [ 'extrudate'      , False    , 0.01          ] ,
-        'Total Water':    [ 'capacity'       , True     , None          ]
+        'Total Water':    [ 'capacity'       , True     , None          ] ,
+        'Total Time':     [ 'time'           , True     , None          ]
     }
 
     def points(self):
@@ -52,9 +53,9 @@ class SpiralTotalWater(Process):
 
             point_list.append(Point(x=x, y=y))
 
+        point_list = self.__point_f(point_list)
         point_list = self.__point_e(point_list)
         point_list = self.__point_z(point_list)
-        point_list = self.__point_f(point_list)
 
         return point_list
 
@@ -82,7 +83,15 @@ class SpiralTotalWater(Process):
         return points
 
     def __point_f(self, points):
-        f = self.feedrate
+
+        total_len = 0.0
+        for i in xrange(1, len(points)):
+            point1 = points[i - 1]
+            point2 = points[i]
+            path_len = ((((point2.x - point1.x) ** 2) + (point2.y - point1.y) ** 2) ** 0.5)
+            total_len += path_len
+
+        f = (total_len * 60)/(self.total_time)
         for point in points:
             point.f = f
         return points
