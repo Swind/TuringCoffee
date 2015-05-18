@@ -75,7 +75,8 @@ class PIDController(object):
                 'calcPID_reg4 -> temperature: {}, set_point: {}'.format(temperature, self.set_point))
 
             if (self.set_point - 2) < temperature < self.set_point:
-                duty_cycle = self.pid.calcPID_reg4(temperature, self.set_point, True)
+                duty_cycle = self.pid.calcPID_reg4(
+                    temperature, self.set_point, True)
             elif temperature >= self.set_point:
                 duty_cycle = 0
             else:

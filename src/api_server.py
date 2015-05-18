@@ -315,4 +315,9 @@ def control_refill():
     pass
 
 if __name__ == '__main__':
+    # Close the werkzeug logger
+    import logging
+    logger = logging.getLogger('werkzeug')
+    logger.setLevel(logging.ERROR)
+
     app.run(host='0.0.0.0')

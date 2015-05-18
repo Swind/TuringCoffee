@@ -46,12 +46,12 @@ class PrinterServer(object):
         self._gcodeList = []
         self._printing_gcodeList = []
 
-        if self.config["Emulator"]:
-            port_name = "VIRTUAL"
+        if self.config['Emulator']:
+            port_name = 'VIRTUAL'
         else:
-            port_name = self.config["Printer"]["PortName"]
+            port_name = self.config['Printer']['PortName']
 
-        baudrate = int(self.config["Printer"]["Baudrate"])
+        baudrate = int(self.config['Printer']['Baudrate'])
 
         self._comm = machineCom.MachineCom(
             port_name, baudrate, callbackObject=self)

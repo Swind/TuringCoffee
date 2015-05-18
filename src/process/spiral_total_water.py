@@ -22,14 +22,14 @@ class SpiralTotalWater(Process):
     """
     params_rules = {
         # Key:            [ Unit             , Required , Default Value ]
-        'Radius':         [ 'length_from_to' , True     , None          ] ,
-        'High':           [ 'length_from_to' , True     , None          ] ,
-        'Cylinder':       [ None             , True     , None          ] ,
-        'Point interval': [ 'length'         , False    , 0.01          ] ,
-        'Feedrate':       [ 'feedrate'       , False    , 120           ] ,
-        'Extrudate':      [ 'extrudate'      , False    , 0.01          ] ,
-        'Total Water':    [ 'capacity'       , True     , None          ] ,
-        'Total Time':     [ 'time'           , True     , None          ]
+        'Radius':         ['length_from_to', True, None],
+        'High':           ['length_from_to', True, None],
+        'Cylinder':       [None, True, None],
+        'Point interval': ['length', False, 0.01],
+        'Feedrate':       ['feedrate', False, 120],
+        'Extrudate':      ['extrudate', False, 0.01],
+        'Total Water':    ['capacity', True, None],
+        'Total Time':     ['time', True, None]
     }
 
     def points(self):
@@ -88,10 +88,11 @@ class SpiralTotalWater(Process):
         for i in xrange(1, len(points)):
             point1 = points[i - 1]
             point2 = points[i]
-            path_len = ((((point2.x - point1.x) ** 2) + (point2.y - point1.y) ** 2) ** 0.5)
+            path_len = (
+                (((point2.x - point1.x) ** 2) + (point2.y - point1.y) ** 2) ** 0.5)
             total_len += path_len
 
-        f = (total_len * 60)/(self.total_time)
+        f = (total_len * 60) / (self.total_time)
         for point in points:
             point.f = f
         return points
