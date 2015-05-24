@@ -84,13 +84,7 @@ class SpiralTotalWater(Process):
 
     def __point_f(self, points):
 
-        total_len = 0.0
-        for i in xrange(1, len(points)):
-            point1 = points[i - 1]
-            point2 = points[i]
-            path_len = (
-                (((point2.x - point1.x) ** 2) + (point2.y - point1.y) ** 2) ** 0.5)
-            total_len += path_len
+        total_len = (len(points) - 1) * self.point_interval
 
         f = (total_len * 60) / (self.total_time)
         for point in points:
