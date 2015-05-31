@@ -9,7 +9,26 @@
 
 ``` move
 Z: 175 mm
-Feedrate: 2000 mm/min
+```
+
+``` move
+Z: 185 mm
+```
+
+``` move
+Z: 195 mm
+```
+
+``` move
+Z: 205 mm
+```
+
+``` move
+Z: 215 mm
+```
+
+``` move
+Z: 165 mm
 ```
 
 ## HOME

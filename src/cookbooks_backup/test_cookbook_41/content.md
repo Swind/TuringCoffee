@@ -1,5 +1,5 @@
 
-三杯量的咖啡
+三杯量的咖啡水位校正
 
 # Step 1: 預浸
 
@@ -11,11 +11,11 @@
 Command: Home
 ```
 
-## 加熱溫度到 75 degree c
+## 加熱溫度到80
 
-``` heat
-Water Tank: 75 degress C
-```
+## ``` heat
+## water Tank: 80 degress C
+## ```
 
 ## 往下移動
 
@@ -37,10 +37,6 @@ Feedrate: 500 mm/min
 Z: 190 mm
 ```
 
-``` wait
-Time: 20s
-```
-
 ``` move
 Feedrate: 300 mm/min
 ```
@@ -60,19 +56,8 @@ Radius: 0.1 cm to 3.5 cm
 High: 175 mm to 175 mm
 Cylinder: 12
 Total Water: 250 ml
-Point interval: 0.2 mm
-```
-
-## 螺旋注水 - 繞回中心
-
-從離中心 3.5 cm -> 0.1 cm 的地方使用螺旋注水往回繞
-
-``` spiral_total_water
-Radius: 3.5 cm to 0.1 cm
-High: 175 mm to 175 mm
-Cylinder: 12
-Total Water: 250 ml
-Point interval: 0.2 mm
+Point interval: 0.1 mm
+Feedrate: 160 mm/min
 ```
 
 ## HOME
