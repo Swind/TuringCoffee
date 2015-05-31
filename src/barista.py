@@ -313,6 +313,11 @@ class Barista(object):
         while self.printer_state_string != 'Operational':
             logger.debug(
                 'Wait printer state from {} to Operational'.format(self.printer_state_string))
+            if self.printer_state_string == '':
+                self.printer_cmd.send({'INFORMATION': ''})
+                resp = self.printer_cmd.recv()
+                if resp['state_string'] == 'Operational':
+                    return
             time.sleep(2)
 
     def wait_temperature(self, value):
