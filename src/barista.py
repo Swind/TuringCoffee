@@ -151,9 +151,6 @@ class Barista(object):
             data = self.printer_pub.recv()
             #logging.info("Receive message from printer: {}".format(data))
 
-            if 'total' in data:
-                self.total_cmd = data['total']
-
             if 'progress' in data:
                 self.printer_progress = data['progress']
 
@@ -196,8 +193,8 @@ class Barista(object):
 
         logger.debug('Barista look the cookbook')
 
+        self.reset_gcode_counter()
         self.__init_printer()
-        time.sleep(3)
 
         for step_index, step in enumerate(cookbook.steps):
 
@@ -216,11 +213,25 @@ class Barista(object):
                     logger.debug('### Start block {}'.format(block.lang))
                     self.handle_block(block)
 
+        self.wait_printer_finish()
+
+    def __send_to_printer(self, cmd):
+        if 'C' in cmd:
+            self.total_cmd = self.total_cmd + 1
+        elif 'G' in cmd:
+            self.total_cmd = self.total_cmd + len(cmd['G'])
+        self.printer_cmd.send(cmd)
+
+    def reset_gcode_counter(self):
+        self.total_cmd = 0
+        self.printer_cmd.send({'RESET_COUNT': 0})
+
     def __init_printer(self):
-        self.printer_cmd.send({'C': 'G21'})
-        self.printer_cmd.send({'C': 'G28'})
-        self.printer_cmd.send({'C': 'G90'})
-        self.printer_cmd.send({'C': 'M83'})
+        self.__send_to_printer({'C': 'G21'})
+        self.__send_to_printer({'C': 'G28'})
+        self.__send_to_printer({'C': 'G90'})
+        self.__send_to_printer({'C': 'M83'})
+        self.wait_printer_finish()
 
     def __convert_to_gcode(self, point):
         gcode = 'G1'
@@ -246,7 +257,7 @@ class Barista(object):
 
     def stop_brew(self):
         self.stop = True
-        self.printer_cmd.send({'STOP': True})
+        self.__send_to_printer({'STOP': True})
 
     def handle_block(self, block):
         points = block.points()
@@ -263,7 +274,7 @@ class Barista(object):
                 value = point.value
 
                 if cmd == 'Home':
-                    self.printer_cmd.send({'C': 'G28'})
+                    self.__send_to_printer({'C': 'G28'})
 
                 elif cmd == 'Refill':
                     self.refill_cmd.send({'Refill': 'START'})
@@ -274,16 +285,16 @@ class Barista(object):
                     self.wait_temperature(value)
 
                 elif cmd == 'Wait':
+                    self.wait_printer_finish()
                     logger.debug('Sleep {} seconds'.format(value))
                     time.sleep(value)
 
         if gcodes:
-            self.printer_cmd.send({'G': gcodes})
-            self.wait_printer(len(gcodes))
+            self.__send_to_printer({'G': gcodes})
 
     def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)
-        self.printer_cmd.send({'C': self.__convert_to_gcode(point)})
+        self.__send_to_printer({'C': self.__convert_to_gcode(point)})
         return
 
     def set_temperature(self, value):
@@ -315,11 +326,22 @@ class Barista(object):
             time.sleep(2)
 
     def wait_printer(self, cmd_count):
-        while not (self.printer_progress == cmd_count and self.total_cmd == cmd_count):
-            logger.debug('Now printer total cmd {}, progress {}, wait it to {}'.format(
-                self.total_cmd, self.printer_progress, cmd_count))
+        while not (self.printer_progress == cmd_count):
+            logger.debug('Now printer progress {}, wait it to {}'.format(
+                self.printer_progress, cmd_count))
             time.sleep(1)
 
-        logger.debug('Done printer total cmd {}, progress {}, wait it to {}'.format(
-            self.total_cmd, self.printer_progress, cmd_count))
+        logger.debug('Done printer progress {}, wait it to {}'.format(
+            self.printer_progress, cmd_count))
         self.printer_progress = 0
+
+    def wait_printer_finish(self):
+        self.wait_printer(self.total_cmd)
+
+    def wait_printer_operational(self):
+        while self.printer_state_string is not None and self.printer_state_string != 'Operational':
+            time.sleep(1)
+
+    def wait_printer_printing(self):
+        while self.printer_state_string is not None and self.printer_state_string != 'Printing':
+            time.sleep(1)

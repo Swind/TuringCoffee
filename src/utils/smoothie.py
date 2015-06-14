@@ -20,7 +20,7 @@ class MachineComPrintCallback(object):
     def mcLog(self, message):
         pass
 
-    def mcStateChange(self, state):
+    def mcStateChange(self, state, state_string):
         pass
 
     def mcMessage(self, message):
@@ -98,6 +98,7 @@ class Smoothie(object):
         self._state_lock = threading.Lock()
         self._pause_flag = False
         self._stop_flag = False
+        self.reset_count()
 
         self._thread = threading.Thread(target=self._start)
         self._thread.daemon = True
@@ -171,7 +172,8 @@ class Smoothie(object):
                     self._change_state(State.OPERATIONAL)
                     break;
 
-            for i in xrange(0, len(cmd)):
+            i = 0
+            while i < len(cmd):
                 gcode = cmd[i]
                 if self._pause_flag is True:
                     self._change_state(State.PAUSED)
@@ -187,6 +189,14 @@ class Smoothie(object):
                     self._flush_command()
                     self._change_state(State.CLOSED_WITH_ERROR)
                     return
+
+                line = self._readline()
+                if 'ok' not in line:
+                    continue
+
+                self._cmd_counter = self._cmd_counter + 1
+                self._callback.mcProgress(self._cmd_counter)
+                i = i + 1
 
     def _pause(self):
         if self._pause_flag is False:
@@ -246,6 +256,8 @@ class Smoothie(object):
         self._state = new_state
         self._state_lock.release()
 
+        self._callback.mcStateChange(new_state, new_state_str)
+
         logger.info('Changing state from {} to {}'.format(old_state_str, new_state_str))
 
     def _get_state(self):
@@ -273,6 +285,9 @@ class Smoothie(object):
     def close(self):
         self.stop()
         self._wait_stop()
+
+    def reset_count(self):
+        self._cmd_counter = 0
 
     def is_closed(self):
         state = self._get_state()
