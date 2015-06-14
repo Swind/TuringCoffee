@@ -345,3 +345,7 @@ class Barista(object):
     def wait_printer_printing(self):
         while self.printer_state_string is not None and self.printer_state_string != 'Printing':
             time.sleep(1)
+
+    def go_home(self):
+        if self.state == self.IDLE:
+            self.__send_to_printer({'C': 'G28'})
