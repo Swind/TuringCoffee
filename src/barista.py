@@ -195,7 +195,6 @@ class Barista(object):
         cookbook = cmgr.get(cookbook_name)
 
         logger.debug('Barista look the cookbook')
-        self.wait_printer_operational()
 
         self.__init_printer()
         time.sleep(3)
@@ -218,7 +217,6 @@ class Barista(object):
                     self.handle_block(block)
 
     def __init_printer(self):
-        self.wait_printer_operational()
         self.printer_cmd.send({'C': 'G21'})
         self.printer_cmd.send({'C': 'G28'})
         self.printer_cmd.send({'C': 'G90'})
@@ -280,12 +278,8 @@ class Barista(object):
                     time.sleep(value)
 
         if gcodes:
-            self.wait_printer_operational()
             self.printer_cmd.send({'G': gcodes})
-            self.printer_cmd.send({'START': True})
-            time.sleep(1)
             self.wait_printer(len(gcodes))
-            self.printer_cmd.send({'C': 'M110 N0'})
 
     def printer_jog(self, x=None, y=None, z=None, e1=None, e2=None, f=None):
         point = Point(x, y, z, e1, e2, f)
@@ -302,23 +296,6 @@ class Barista(object):
         }
 
         self.heater_cmd.send(payload)
-
-    # ===============================================================================
-    #
-    # Waitting
-    #
-    # ===============================================================================
-
-    def wait_printer_operational(self):
-        while self.printer_state_string != 'Operational':
-            logger.debug(
-                'Wait printer state from {} to Operational'.format(self.printer_state_string))
-            if self.printer_state_string == '':
-                self.printer_cmd.send({'INFORMATION': ''})
-                resp = self.printer_cmd.recv()
-                if resp['state_string'] == 'Operational':
-                    return
-            time.sleep(2)
 
     def wait_temperature(self, value):
         self.set_temperature(value)

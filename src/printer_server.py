@@ -99,22 +99,13 @@ class PrinterServer(object):
             cmd = self.cmd_channel.recv()
 
             if 'STOP' in cmd:
-                self._comm.cancelPrint()
-                self._gcodeList = ['M110']
+                self._comm.stop()
 
             elif 'G' in cmd:
-                self._gcodeList.extend(cmd['G'])
+                self._comm.send_command(cmd['G'])
 
             elif 'C' in cmd:
-                self._comm.sendCommand(cmd['C'])
-
-            elif 'START' in cmd:
-                self._printing_gcodeList = self._gcodeList
-                self._gcodeList = []
-                for cmd in self._printing_gcodeList:
-                    self._comm.sendCommand(cmd)
-
-                self.mcProgress(len(self._printing_gcodeList))
+                self._comm.send_command(cmd['C'])
 
             elif 'INFORMATION' in cmd:
                 self.cmd_channel.send(
@@ -123,6 +114,12 @@ class PrinterServer(object):
             elif 'SHUTDOWN' in cmd:
                 self.mcMessage('Shoutdown printer server')
                 break
+
+            elif 'PAUSE' in cmd:
+                self._comm.pause()
+
+            elif 'CONTINUE' in cmd:
+                self._comm.continue()
 
 if __name__ == '__main__':
     server = PrinterServer()
