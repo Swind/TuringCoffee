@@ -327,6 +327,8 @@ class Barista(object):
 
     def wait_printer(self, cmd_count):
         while not (self.printer_progress == cmd_count):
+            if self.stop:
+                break
             logger.debug('Now printer progress {}, wait it to {}'.format(
                 self.printer_progress, cmd_count))
             time.sleep(1)

@@ -157,9 +157,11 @@ class Smoothie(object):
         self._change_state(State.PRINTING)
 
     def _flush_command(self):
-        self._cmd_queue.clear()
+        for i in xrange(0, self._cmd_queue.qsize()):
+            self._cmd_queue.get_nowait()
 
     def _exec_command(self):
+        self._stop_flag = False
         while True:
             cmd = None
             if self._paused_cmd is not None:
