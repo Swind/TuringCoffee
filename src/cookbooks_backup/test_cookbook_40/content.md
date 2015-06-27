@@ -1,9 +1,9 @@
 
-一杯量的咖啡
+三杯量的咖啡
 
 # Step 1: 預浸
 
-預浸需要 80 度 60ml 的水，注水結束之後等待 20 秒
+預浸需要 75 度 60ml 的水，注水結束之後等待 20 秒
 
 ## 事前準備 
 
@@ -11,7 +11,7 @@
 Command: Home
 ```
 
-## 加熱溫度到 75 degree
+## 加熱溫度到80
 
 ``` heat
 Water Tank: 75 degress C
@@ -21,17 +21,17 @@ Water Tank: 75 degress C
 
 ``` move
 Feedrate: 800 mm/min
-Z: 175 mm
+Z: 225 mm
 ```
 
 ``` move
 Feedrate: 300 mm/min
-Z: 180 mm
+Z: 225 mm
 ```
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 175 mm to 175 mm
+High: 225 mm to 225 mm
 Total Water: 150 ml
 Extrudate: 1 ml/step
 Feedrate: 200 mm/min
@@ -42,7 +42,7 @@ Feedrate: 500 mm/min
 ```
 
 ``` move
-Z: 190 mm
+Z: 225 mm
 ```
 
 ``` wait
@@ -54,7 +54,7 @@ Feedrate: 300 mm/min
 ```
 
 ``` move
-Z: 175 mm
+Z: 225 mm
 ```
 
 ## 開始預浸
@@ -65,7 +65,7 @@ Feedrate: 120 mm/min
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 170 mm to 170 mm
+High: 225 mm to 225 mm
 Total Water: 15 ml
 Extrudate: 1 ml/step
 Feedrate: 120 mm/min
@@ -73,9 +73,9 @@ Feedrate: 120 mm/min
 
 ``` spiral_total_water
 Radius: 0.1 cm to 1.2 cm
-High: 170 mm to 170 mm
+High: 225 mm to 225 mm
 Cylinder: 6
-Total Water: 45 ml
+Total Water: 35 ml
 Point interval: 0.1 mm
 ```
 
@@ -97,9 +97,9 @@ Feedrate: 120 mm/min
 
 ``` spiral_total_water
 Radius: 0.1 cm to 3.5 cm
-High: 175 mm to 175 mm
+High: 225 mm to 225 mm
 Cylinder: 8
-Total Water: 250 ml
+Total Water: 225 ml
 Point interval: 0.1 mm
 ```
 
@@ -109,9 +109,9 @@ Point interval: 0.1 mm
 
 ``` spiral_total_water
 Radius: 3.5 cm to 0.1 cm
-High: 175 mm to 175 mm
+High: 225 mm to 225 mm
 Cylinder: 8
-Total Water: 250 ml
+Total Water: 225 ml
 Point interval: 0.1 mm
 ```
 

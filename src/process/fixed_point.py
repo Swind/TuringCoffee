@@ -30,10 +30,19 @@ class FixedPoint(Process):
         point_number = self.total_water / self.extrudate
         points = map(lambda index: Point(), range(0, int(point_number)))
 
-        points = self.__point_x_y(points)
-        points = self.__point_z(points)
+        #points = self.__point_x_y(points)
+        #points = self.__point_z(points)
         points = self.__point_e1(points)
         points = self.__point_f(points)
+
+        x = self.coordinates[0]
+        y = self.coordinates[1]
+        points.insert(0, Point(x=x, y=y, f=2000))
+        if self.high[0] != self.high[1]:
+            points = self.__point_z(points)
+        else:
+            z = self.high[0]
+            points.insert(0, Point(z=z, f=2000))
 
         return points
 

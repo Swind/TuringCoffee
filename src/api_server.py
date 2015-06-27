@@ -217,6 +217,14 @@ def get_printer_status():
 
     return jsonify(status)
 
+@app.route('/printer/home', methods=['PUT'])
+def go_home():
+
+    barista.go_home()
+    resp = make_response()
+    resp.status_code = httplib.CREATED
+
+    return resp
 
 @app.route('/printer/jog', methods=['PUT'])
 def control_printer():

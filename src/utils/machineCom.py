@@ -417,8 +417,8 @@ class MachineCom(object):
         except:
             self._log('Unexpected error: %s' % (getExceptionString()))
         checksum = reduce(
-            lambda x, y: x ^ y, map(ord, 'N%d%s' % (self._gcodePos, line)))
-        self._sendCommand('N%d%s*%d' % (self._gcodePos, line, checksum))
+            lambda x, y: x ^ y, map(ord, '%s' % (line)))
+        self._sendCommand('%s*%d' % (line, checksum))
         self._gcodePos += 1
         self._callback.mcProgress(self._gcodePos)
 

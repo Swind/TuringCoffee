@@ -9,7 +9,7 @@ process.
 
 __copyright__ = 'Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License'
 
-from utils import machineCom
+from utils import smoothie
 
 from utils import json_config
 from utils import channel
@@ -53,8 +53,8 @@ class PrinterServer(object):
 
         baudrate = int(self.config['Printer']['Baudrate'])
 
-        self._comm = machineCom.MachineCom(
-            port_name, baudrate, callbackObject=self)
+        self._comm = smoothie.Smoothie(
+            port_name, baudrate, callback_object=self)
 
     # ================================================================================
     #
@@ -70,20 +70,19 @@ class PrinterServer(object):
         #self.pub_channel.send({"temperature": temp})
         pass
 
-    def mcStateChange(self, state):
+    def mcStateChange(self, state, state_string):
         if self._comm is None:
             return
 
         self.pub_channel.send(
-            {'state': self._comm.getState(), 'state_string': self._comm.getStateString()})
+            {'state': state, 'state_string': state_string})
 
     def mcMessage(self, message):
         #self.pub_channel.send({"message": message})
         pass
 
     def mcProgress(self, lineNr):
-        self.pub_channel.send(
-            {'total': len(self._printing_gcodeList), 'progress': lineNr})
+        self.pub_channel.send({'progress': lineNr})
 
     def mcZChange(self, newZ):
         #self.pub_channel.send({"changeZ": newZ})
@@ -99,19 +98,13 @@ class PrinterServer(object):
             cmd = self.cmd_channel.recv()
 
             if 'STOP' in cmd:
-                self._comm.cancelPrint()
-                self._gcodeList = ['M110']
+                self._comm.stop()
 
             elif 'G' in cmd:
-                self._gcodeList.extend(cmd['G'])
+                self._comm.send_command(cmd['G'])
 
             elif 'C' in cmd:
-                self._comm.sendCommand(cmd['C'])
-
-            elif 'START' in cmd:
-                self._printing_gcodeList = self._gcodeList
-                self._gcodeList = []
-                self._comm.printGCode(self._printing_gcodeList)
+                self._comm.send_command(cmd['C'])
 
             elif 'INFORMATION' in cmd:
                 self.cmd_channel.send(
@@ -120,6 +113,13 @@ class PrinterServer(object):
             elif 'SHUTDOWN' in cmd:
                 self.mcMessage('Shoutdown printer server')
                 break
+
+            elif 'PAUSE' in cmd:
+                self._comm.pause()
+
+            elif 'RESET_COUNT' in cmd:
+                self._comm.reset_count()
+
 
 if __name__ == '__main__':
     server = PrinterServer()
