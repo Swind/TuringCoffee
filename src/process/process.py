@@ -25,6 +25,14 @@ class Point(object):
 
         return string
 
+    def to_dict(self):
+        return {"x": self.x,
+                "y": self.y,
+                "z": self.z,
+                "e1": self.e1,
+                "e2": self.e2,
+                "f": self.f}
+
 
 class Command(object):
 

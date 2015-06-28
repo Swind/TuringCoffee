@@ -51,6 +51,17 @@ class Cookbook(object):
 
         return self.__steps
 
+    def points(self):
+
+        points = []
+
+        for step in self.steps:
+            for process in step.processes:
+                for block in process.blocks:
+                    points.extend(block.points())
+
+        return points
+
     @property
     def description(self):
         if self.__description is None:
