@@ -9,6 +9,10 @@ process.
 
 __copyright__ = 'Copyright (C) 2013 David Braam - Released under terms of the AGPLv3 License'
 
+import threading
+import Queue
+import time
+
 from utils import smoothie
 
 from utils import json_config
@@ -16,6 +20,39 @@ from utils import channel
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+class State:
+    INITIAL = 0
+    CONNECTING = 1
+    OPERATIONAL = 2
+    PRINTING = 3
+    PAUSED = 4
+    CLOSED = 5
+    ERROR = 6
+    CLOSED_WITH_ERROR = 7
+    STOPPING = 8
+
+    @staticmethod
+    def get_state_string(state):
+        if state is State.INITIAL:
+            return 'Offline'
+        elif state is State.CONNECTING:
+            return 'Connecting'
+        elif state is State.OPERATIONAL:
+            return 'Operational'
+        elif state is State.PRINTING:
+            return 'Printing'
+        elif state is State.PAUSED:
+            return 'Paused'
+        elif state is State.CLOSED:
+            return 'Closed'
+        elif state is State.ERROR:
+            return 'Error'
+        elif state is State.CLOSED_WITH_ERROR:
+            return 'Closed with error'
+        elif state is State.STOPPING:
+            return 'STOPPING'
 
 
 class PrinterServer(object):
@@ -43,8 +80,6 @@ class PrinterServer(object):
         logger.info('Create the command channel at {}'.format(cmd_address))
 
         self._comm = None
-        self._gcodeList = []
-        self._printing_gcodeList = []
 
         if self.config['Emulator']:
             port_name = 'VIRTUAL'
@@ -53,8 +88,34 @@ class PrinterServer(object):
 
         baudrate = int(self.config['Printer']['Baudrate'])
 
-        self._comm = smoothie.Smoothie(
-            port_name, baudrate, callback_object=self)
+        self._comm = smoothie.Smoothie(port_name, baudrate)
+
+        self._callback = self
+
+        self._state = State.INITIAL
+        self._cmd_queue = Queue.Queue()
+        self._reset_count()
+
+        self._state_table = {
+                State.INITIAL: self._open,
+                State.CONNECTING: self._connect,
+                State.OPERATIONAL: self._check_cmd_queue,
+                State.PRINTING: self._exec_command,
+                State.PAUSED: self._pause,
+                State.CLOSED: self._close
+        }
+
+        self._paused_cmd = None
+        self._stop_flag = False
+        self._pause_flag = False
+
+        self._state_lock = threading.Lock()
+        self._thread = threading.Thread(target=self._start)
+        self._thread.daemon = True
+        self._thread.start()
+
+    def __del__(self):
+        self.close()
 
     # ================================================================================
     #
@@ -93,6 +154,150 @@ class PrinterServer(object):
     #   Printer Server API
     #
     # ================================================================================
+
+    def stop(self):
+        self._stop_flag = True
+
+    def pause(self):
+        self._pause_flag = True
+
+    def close(self):
+        self.stop()
+
+    def _start(self):
+        while True:
+            state = self._get_state()
+            if state in self._state_table:
+                self._state_table[state]()
+            else:
+                logger.error('This should not happen')
+
+    def _change_state(self, new_state):
+        if self._state is new_state:
+            return
+
+        old_state_str = State.get_state_string(self._state)
+        new_state_str = State.get_state_string(new_state)
+
+        self._state_lock.acquire()
+        self._state = new_state
+        self._state_lock.release()
+
+        self._callback.mcStateChange(new_state, new_state_str)
+
+        logger.info('Changing state from {} to {}'.format(old_state_str, new_state_str))
+
+    def _get_state(self):
+        self._state_lock.acquire()
+        state = self._state
+        self._state_lock.release()
+        return state
+
+    def _open(self):
+        if self._comm.open() == True:
+            self._change_state(State.CONNECTING)
+            return True
+        else:
+            self._change_state(State.CLOSED_WITH_ERROR)
+            return False
+
+    def _close(self):
+        self._change_state(State.NONE)
+
+    def _connect(self):
+        line = self._comm.readline()
+
+        if line is None:
+            return False
+
+        if line == '' or 'wait' in line:
+
+            if self._comm.write('M105') is False:
+                return False
+
+            line = self._comm.readline()
+            if line is None:
+                return False
+
+        if 'ok' not in line:
+            return False
+
+        self._change_state(State.OPERATIONAL)
+        return True
+
+    def _exec_command(self):
+        while True:
+            cmd = None
+            if self._paused_cmd is not None:
+                cmd = self._paused_cmd
+                self._paused_cmd = None
+            else:
+                try:
+                    cmd = self._cmd_queue.get(False)
+                except Queue.Empty:
+                    self._change_state(State.OPERATIONAL)
+                    break;
+
+            i = 0
+            while i < len(cmd):
+                gcode = cmd[i]
+                if self._pause_flag is True:
+                    self._change_state(State.PAUSED)
+                    self._paused_cmd = cmd[i:]
+                    return
+
+                if self._stop_flag is True:
+                    self._change_state(State.STOPPING)
+                    return
+
+                if self._comm.write(gcode) is False:
+                    self._flush_command()
+                    self._change_state(State.CLOSED_WITH_ERROR)
+                    return
+
+                line = self._comm.readline()
+                if 'ok' not in line:
+                    continue
+
+                self._cmd_counter = self._cmd_counter + 1
+                self._callback.mcProgress(self._cmd_counter)
+                i = i + 1
+
+    def _pause(self):
+        if self._pause_flag is False:
+            self._change_state(State.PRINTING)
+        if self._stop_flag is True:
+            self._change_state(State.STOPPING)
+        time.sleep(1)
+
+    def _stop(self):
+        self._flush_command()
+        self._change_state(State.OPERATIONAL)
+
+    def _close(self):
+        self._change_state(State.NONE)
+
+    def _check_cmd_queue(self):
+        while self._cmd_queue.empty():
+            time.sleep(1)
+        self._change_state(State.PRINTING)
+
+    def _flush_command(self):
+        self._cmd_queue.clear()
+
+    def _send_command(self, cmd):
+        type_cmd = type(cmd)
+        if type_cmd is str:
+            self._cmd_queue.put([cmd])
+        elif type_cmd is list:
+            self._cmd_queue.put(cmd)
+        else:
+            return False
+        return True
+
+    def _reset_count(self):
+        self._cmd_counter = 0
+
     def start(self):
         while True:
             cmd = self.cmd_channel.recv()
@@ -101,10 +306,10 @@ class PrinterServer(object):
                 self._comm.stop()
 
             elif 'G' in cmd:
-                self._comm.send_command(cmd['G'])
+                self._send_command(cmd['G'])
 
             elif 'C' in cmd:
-                self._comm.send_command(cmd['C'])
+                self._send_command(cmd['C'])
 
             elif 'INFORMATION' in cmd:
                 self.cmd_channel.send(
@@ -118,7 +323,41 @@ class PrinterServer(object):
                 self._comm.pause()
 
             elif 'RESET_COUNT' in cmd:
-                self._comm.reset_count()
+                self._reset_count()
+
+    def is_closed(self):
+        state = self._get_state()
+        if state is State.CLOSED:
+            return True
+        return False
+
+    def is_operational(self):
+        state = self._get_state()
+        if state is State.OPERATIONAL:
+            return True
+        return False
+
+    def is_printing(self):
+        state = self._get_state()
+        if state is State.PRINTING:
+            return True
+        return False
+
+    def is_pausing(self):
+        state = self._get_state()
+        if state is State.PAUSED:
+            return True
+        return False
+
+    def _send_command(self, cmd):
+        type_cmd = type(cmd)
+        if type_cmd is str:
+            self._cmd_queue.put([cmd])
+        elif type_cmd is list:
+            self._cmd_queue.put(cmd)
+        else:
+            return False
+        return True
 
 
 if __name__ == '__main__':
