@@ -55,15 +55,24 @@ cookbook.vm = function(){
 cookbook.view = function(ctrl){
   var generate_card, cards;
   generate_card = function(cookbook){
-    return m("div.ui.card", [m("div.content", [
-      m("i.right.floated.delete.icon"), m("a.header[href='/editor/" + cookbook.name + "']", {
-        config: m.route
-      }, cookbook.name), m("div.description", cookbook.description)
+    return m("div.col-md-3", [m("div.thumbnail", [
+      m("img", {
+        "data-src": "holder.js/300x200"
+      }), m("div.caption", [
+        m("h4", cookbook.name), m("p", cookbook.description), m("p", [
+          m("a.btn.btn-info[href='/editor/" + cookbook.name + "']", {
+            role: "button",
+            config: m.route
+          }, "Edit"), m("a.btn.btn-default[href='#']", {
+            role: "button"
+          }, "Brew")
+        ])
+      ])
     ])]);
   };
   cards = function(cookbooks){
     var cookbook;
-    return m("div.ui.three.cards", (function(){
+    return m("div", (function(){
       var i$, ref$, len$, results$ = [];
       for (i$ = 0, len$ = (ref$ = cookbooks).length; i$ < len$; ++i$) {
         cookbook = ref$[i$];
@@ -72,7 +81,7 @@ cookbook.view = function(ctrl){
       return results$;
     }()));
   };
-  return [m("div.column", [cards(cookbook.vm.cookbooks())])];
+  return [m("div", [m("div.center-block", [cards(cookbook.vm.cookbooks())])])];
 };
 cookbook.controller = function(){
   cookbook.vm.init();
@@ -401,10 +410,8 @@ module.exports = printer;
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var sidebar;
 sidebar = {};
-console.log('load sidebar script...');
 sidebar.ready = function(){
   $('.setting.item').on('click', function(){
-    console.log('button be clicked');
     return $('.setting.sidebar').sidebar('toggle');
   });
 };
@@ -422,7 +429,7 @@ m.route(document.getElementById("wrapper"), "/", {
   "/editor/:name": editor,
   "/brew/:name": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_55a81cfc.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_57886460.js","/")
 },{"1YiZ5S":11,"buffer":8,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3,"components/sidebar.js":6}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!

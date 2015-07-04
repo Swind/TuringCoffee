@@ -39,20 +39,30 @@ cookbook.vm = do ->
 # ================================================================================
 cookbook.view = (ctrl) ->
     generate_card = (cookbook) ->
-        m "div.ui.card", [
-            (m "div.content", [
-                (m "i.right.floated.delete.icon")
-                (m "a.header[href='/editor/#{cookbook.name}']", {config: m.route}, cookbook.name)
-                (m "div.description" cookbook.description)
+        (m "div.col-md-3", [
+            (m "div.thumbnail", [
+                (m "img" {"data-src": "holder.js/300x200"})
+                (m "div.caption", [
+                    (m "h4", cookbook.name)
+                    (m "p", cookbook.description)
+                    (m "p", [
+                        (m "a.btn.btn-info[href='/editor/#{cookbook.name}']", {role: "button", config: m.route}, "Edit")
+                        (m "a.btn.btn-default[href='#']", {role: "button"}, "Brew")
+                    ])
+                ])
             ])
-        ]
+        ])
 
     cards = (cookbooks) ->
-        m "div.ui.three.cards", for cookbook in cookbooks
+        m "div", for cookbook in cookbooks
             generate_card(cookbook)
 
     [
-        (m "div.column", [cards(cookbook.vm.cookbooks!)])
+        (m "div", [
+            (m "div.center-block", [
+                cards(cookbook.vm.cookbooks!)
+            ])
+        ])
     ]
 
 # ================================================================================

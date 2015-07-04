@@ -2,13 +2,14 @@
 
 sidebar = {}
 
-console.log 'load sidebar script...'
-
 sidebar.ready = ! ->
 
+    # Set the header "menu" click action.
+    # When "menu" be clicked, the sidebar will be shown
     <- $ \.setting.item .on \click
-    console.log 'button be clicked'
     $ \.setting.sidebar .sidebar \toggle
+
+
 
 
 $ document .ready(sidebar.ready)
