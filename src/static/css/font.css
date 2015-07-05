@@ -1,0 +1,7 @@
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local("static/font/Roboto"), local("static/font/Roboto-Regular");
+  unicode-range: U460-52F, U20B 4, U2DE -2DFF, UA640-A69F; }
