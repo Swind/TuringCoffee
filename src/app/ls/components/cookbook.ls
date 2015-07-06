@@ -43,7 +43,7 @@ cookbook.view = (ctrl) ->
     generate_buttons = (cookbook) ->
         m "div.buttons" {config: ctrl.button_config} [
             (m "div.button.button-edit" {
-                onclick: ctrl.brew_onclick.bind cookbook
+                onclick: ctrl.edit_onclick.bind cookbook
             } "Edit")
             (m "div.button.button-brew" {
                 onclick: ctrl.brew_onclick.bind cookbook
@@ -63,7 +63,7 @@ cookbook.view = (ctrl) ->
                 (m "div.description" cookbook.description)
                 (generate_buttons cookbook)
             ])
-        ])
+        ]
 
     cards = (cookbooks) ->
         m "div", for cookbook in cookbooks
