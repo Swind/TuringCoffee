@@ -16,7 +16,7 @@ barista.controller = function(){
 };
 module.exports = barista;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/barista.js","/components")
-},{"1YiZ5S":10,"buffer":7,"components/heater.js":4,"components/printer.js":5}],2:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8,"components/heater.js":4,"components/printer.js":5}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook, CookbookItem;
 cookbook = {};
@@ -118,7 +118,7 @@ cookbook.controller = function(){
 };
 module.exports = cookbook;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
-},{"1YiZ5S":10,"buffer":7}],3:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var cookbook_content;
 cookbook_content = {};
@@ -191,7 +191,7 @@ cookbook_content.controller = function(){
 };
 module.exports = cookbook_content;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/editor.js","/components")
-},{"1YiZ5S":10,"buffer":7}],4:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],4:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var heater;
 heater = {};
@@ -325,7 +325,7 @@ heater.controller = function(){
 };
 module.exports = heater;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/heater.js","/components")
-},{"1YiZ5S":10,"buffer":7}],5:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var printer;
 printer = {};
@@ -435,12 +435,24 @@ printer.controller = function(){
 };
 module.exports = printer;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/printer.js","/components")
-},{"1YiZ5S":10,"buffer":7}],6:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
-var cookbook, barista, editor;
+var sidebar;
+sidebar = {};
+sidebar.ready = function(){
+  $('.setting.item').on('click', function(){
+    return $('.setting.sidebar').sidebar('toggle');
+  });
+};
+$(document).ready(sidebar.ready);
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/sidebar.js","/components")
+},{"1YiZ5S":11,"buffer":8}],7:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+var cookbook, barista, editor, sidebar;
 cookbook = require('components/cookbook.js');
 barista = require('components/barista.js');
 editor = require('components/editor.js');
+sidebar = require('components/sidebar.js');
 m.route(document.getElementById("wrapper"), "/", {
   "/": cookbook,
   "/editor/:name": editor,
@@ -1560,7 +1572,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer")
-},{"1YiZ5S":10,"base64-js":8,"buffer":7,"ieee754":9}],8:[function(require,module,exports){
+},{"1YiZ5S":11,"base64-js":9,"buffer":8,"ieee754":10}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -1688,7 +1700,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"1YiZ5S":10,"buffer":7}],9:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -1776,7 +1788,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 }
 
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../node_modules/gulp-browserify/node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"1YiZ5S":10,"buffer":7}],10:[function(require,module,exports){
+},{"1YiZ5S":11,"buffer":8}],11:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 

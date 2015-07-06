@@ -5,7 +5,8 @@
 body {
   height: 100%;
   font-family: 'Open Sans', sans-serif;
-  margin-bottom: 60px; }
+  margin-bottom: 60px;
+  padding-top: 70px; }
   body div.ui.grid {
     height: 100%; }
   body div.coffee_sidebar {
@@ -22,3 +23,5 @@ body {
   body div.editor {
     height: 100%;
     overflow: auto; }
+  body div.setting.sidebar.menu {
+    top: 35px; }

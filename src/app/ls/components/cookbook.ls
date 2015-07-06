@@ -63,7 +63,7 @@ cookbook.view = (ctrl) ->
                 (m "div.description" cookbook.description)
                 (generate_buttons cookbook)
             ])
-        ]
+        ])
 
     cards = (cookbooks) ->
         m "div", for cookbook in cookbooks

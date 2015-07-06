@@ -102,17 +102,32 @@ class TestAPIServer(unittest.TestCase):
         # Delete the cookbook
         self.app.delete('/cookbooks/test_cookbook_manager')
 
+    def test_read_points(self):
+        # Create a new cookbook
+        self.app.put('/cookbooks/test_cookbook_manager')
+
+        # Update the cookbook content
+        self.app.put(
+            '/cookbooks/test_cookbook_manager/content', data=test_spiral_data.data)
+
+        self.app.get('/cookbooks/test_cookbook_manager/points')
+
+        time.sleep(1)
+
+
     def tearDown(self):
         pass
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
-    suite.addTest(TestAPIServer('test_brew_circle'))
-    suite.addTest(TestAPIServer('test_brew_spiral'))
-    suite.addTest(TestAPIServer('test_brew_fixed_point'))
-    suite.addTest(TestAPIServer('test_brew_refill'))
-    suite.addTest(TestAPIServer('test_brew_heat'))
-    suite.addTest(TestAPIServer('test_brew_wait'))
-    suite.addTest(TestAPIServer('test_brew_move'))
+
+   # suite.addTest(TestAPIServer('test_brew_circle'))
+   # suite.addTest(TestAPIServer('test_brew_spiral'))
+   # suite.addTest(TestAPIServer('test_brew_fixed_point'))
+   # suite.addTest(TestAPIServer('test_brew_refill'))
+   # suite.addTest(TestAPIServer('test_brew_heat'))
+   # suite.addTest(TestAPIServer('test_brew_wait'))
+   # suite.addTest(TestAPIServer('test_brew_move'))
+    suite.addTest(TestAPIServer('test_read_points')) 
 
     unittest.TextTestRunner().run(suite)

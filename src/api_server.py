@@ -118,6 +118,16 @@ def update_cookbook_content(name):
 
     return resp
 
+@app.route('/cookbooks/<string:name>/points', methods=['GET'])
+def read_cookbook_points(name):
+    cookbook = cmgr.get(name)
+    points = cookbook.points()
+
+    data = []
+    for point in points:
+        data.append(point.to_dict())
+
+    return jsonify({"points": data})
 
 @app.route('/cookbooks/<string:name>', methods=['DELETE'])
 def delete_cookbook(name):
