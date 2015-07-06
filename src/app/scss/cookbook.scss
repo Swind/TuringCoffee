@@ -35,11 +35,13 @@
         display: flex;
         margin: 1em auto;
         justify-content:space-between;
+        z-index: 1001;
 
         .button {
             width: 100px;
             height: 100px;
             line-height: 100px;
+            z-index: 1002;
 
             border: 1px solid;
             border-radius: 50%;

@@ -57,7 +57,13 @@ cookbook.view = function(ctrl){
   generate_buttons = function(cookbook){
     return m("div.buttons", {
       config: ctrl.button_config
-    }, [m("div.button.button-edit", "Edit"), m("div.button.button-brew", "Brew")]);
+    }, [
+      m("div.button.button-edit", {
+        onclick: ctrl.brew_onclick.bind(cookbook)
+      }, "Edit"), m("div.button.button-brew", {
+        onclick: ctrl.brew_onclick.bind(cookbook)
+      }, "Brew")
+    ]);
   };
   generate_card = function(cookbook){
     return m("div.col-xs-12.col-sm-4.col-md-3.col-lg-2", [m("div.card[href='/editor/" + cookbook.name + "']", {
@@ -79,19 +85,36 @@ cookbook.view = function(ctrl){
   return [m("div.row.card-container", [cards(cookbook.vm.cookbooks())])];
 };
 cookbook.controller = function(){
+  var ctrl;
   cookbook.vm.init();
   cookbook.vm.list();
-  return {
-    card_onclick: function(e){
-      $('.buttons').hide();
-      $(e.toElement.children).show();
-    },
-    button_config: function(element, isInit){
-      if (isInit === false) {
-        element.style.display = 'none';
+  ctrl = {};
+  ctrl.card_onclick = function(e){
+    var btns, i$, len$, btn, ref$, child;
+    btns = document.getElementsByClassName('buttons');
+    for (i$ = 0, len$ = btns.length; i$ < len$; ++i$) {
+      btn = btns[i$];
+      btn.style.display = 'none';
+    }
+    for (i$ = 0, len$ = (ref$ = this.children).length; i$ < len$; ++i$) {
+      child = ref$[i$];
+      if (child.className === 'buttons') {
+        child.style.display = 'flex';
       }
     }
   };
+  ctrl.button_config = function(element, isInit){
+    if (isInit === false) {
+      element.style.display = 'none';
+    }
+  };
+  ctrl.brew_onclick = function(){
+    return m.route("/brew/" + this.name);
+  };
+  ctrl.edit_onclick = function(){
+    return m.route("/editor/" + this.name);
+  };
+  return ctrl;
 };
 module.exports = cookbook;
 }).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/components/cookbook.js","/components")
@@ -423,7 +446,7 @@ m.route(document.getElementById("wrapper"), "/", {
   "/editor/:name": editor,
   "/brew/:name": barista
 });
-}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_85e26.js","/")
+}).call(this,require("1YiZ5S"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_cdfec30.js","/")
 },{"1YiZ5S":10,"buffer":7,"components/barista.js":1,"components/cookbook.js":2,"components/editor.js":3}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!

@@ -42,8 +42,12 @@ cookbook.view = (ctrl) ->
 
     generate_buttons = (cookbook) ->
         m "div.buttons" {config: ctrl.button_config} [
-            m "div.button.button-edit" "Edit"
-            m "div.button.button-brew" "Brew"
+            (m "div.button.button-edit" {
+                onclick: ctrl.brew_onclick.bind cookbook
+            } "Edit")
+            (m "div.button.button-brew" {
+                onclick: ctrl.brew_onclick.bind cookbook
+            } "Brew")
         ]
 
     generate_card = (cookbook) ->
@@ -78,14 +82,27 @@ cookbook.controller = ->
     cookbook.vm.init!
     cookbook.vm.list!
 
-    {
-        card_onclick: (e) !->
-            $('.buttons').hide()
-            $(e.toElement.children).show()
+    ctrl = {}
+    ctrl.card_onclick = (e) !->
+        btns = document.getElementsByClassName 'buttons'
 
-        button_config: (element, isInit) !->
-            if isInit is false
-                element.style.display = 'none'
-    }
+        for btn in btns
+            btn.style.display = 'none'
+
+        for child in this.children
+            if child.className is 'buttons'
+                child.style.display = 'flex'
+
+    ctrl.button_config = (element, isInit) !->
+        if isInit is false
+            element.style.display = 'none'
+
+    ctrl.brew_onclick = ->
+        m.route "/brew/#{this.name}"
+
+    ctrl.edit_onclick = ->
+        m.route "/editor/#{this.name}"
+
+    ctrl
 
 module.exports = cookbook
