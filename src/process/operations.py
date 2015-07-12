@@ -15,7 +15,8 @@ class Operations(Process):
 
     params_rules = {
         # Key:      [Unit,       Required,      Default Value]
-        'Command':  [None,       True,          None]
+        'Command':  [None,       True,          None],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self):

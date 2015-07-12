@@ -1,8 +1,11 @@
 {
     "Cookbook Folder": "./cookbooks",
     "GPIO_pin_number_scheme": "BOARD",
-    "Emulator": false,
+    "Emulator": true,
     "Unit": "C",
+
+    "ColdWaterTemperature": 20,
+    "HotWaterTemperature": 90,
 
     "Heater": {
         "pin": 7 

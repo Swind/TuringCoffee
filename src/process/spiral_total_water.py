@@ -29,7 +29,8 @@ class SpiralTotalWater(Process):
         'Feedrate':       ['feedrate', False, 120],
         'Extrudate':      ['extrudate', False, 0.01],
         'Total Water':    ['capacity', True, None],
-        'Total Time':     ['time', True, None]
+        'Total Time':     ['time', True, None],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self):

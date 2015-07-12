@@ -23,7 +23,8 @@ class FixedPoint(Process):
         'Total Water': ['capacity',        True, None],
         'High':        ['length_from_to',  True, None],
         'Feedrate':    ['feedrate',        False, 80],
-        'Extrudate':   ['extrudate',       True, None]
+        'Extrudate':   ['extrudate',       True, None],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self):

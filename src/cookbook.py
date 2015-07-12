@@ -49,6 +49,21 @@ class Cookbook(object):
         if self.__steps is None:
             self.__parse()
 
+        current_temperature = '90 degress C'
+
+        for step in self.__steps:
+            for process in step.processes:
+                for block in process.blocks:
+                    has_temperature = False
+                    for param in block.params:
+                        if 'Temperature' in param:
+                            current_temperature = param[1]
+                            has_temperature = True
+                            break
+
+                    if not has_temperature:
+                        block.params.append(('Temperature', current_temperature))
+
         return self.__steps
 
     @property

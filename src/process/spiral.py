@@ -28,6 +28,7 @@ class Spiral(Process):
         'Point interval': ['length',    False, 0.01],
         'Feedrate':       ['feedrate',  False, 80],
         'Extrudate':      ['extrudate', True, None],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self):

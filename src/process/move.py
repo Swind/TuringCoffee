@@ -22,7 +22,8 @@ class Move(Process):
         'Y':        ['length',   False,         None],
         'Z':        ['length',   False,         None],
         'E':        ['length',   False,         None],
-        'Feedrate': ['feedrate',   False,       2000]
+        'Feedrate': ['feedrate',   False,       2000],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self):

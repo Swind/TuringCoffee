@@ -111,6 +111,9 @@ class Barista(object):
         self.printer_worker = self.__start_worker(self.__printer_monitor)
         self.brew_worker = self.__start_worker(self.__brew_worker)
 
+        self.cold_water_temperature = int(self.config['ColdWaterTemperature'])
+        self.hot_water_temperature = int(self.config['HotWaterTemperature'])
+
     def __start_worker(self, target):
         worker = Thread(target=target)
         worker.daemon = True
@@ -247,6 +250,9 @@ class Barista(object):
         if point.e1 is not None:
             gcode = gcode + ' E{}'.format(point.e1)
 
+        if point.e2 is not None:
+            gcode = gcode + ' E{}'.format(point.e2)
+
         if point.f is not None:
             gcode = gcode + ' F{}'.format(point.f)
 
@@ -262,9 +268,45 @@ class Barista(object):
     def handle_block(self, block):
         points = block.points()
         gcodes = []
-        for point in points:
+
+        target_temperature = block.lang_map[block.lang](block.params).temperature
+
+        hot_percentage = (target_temperature - self.cold_water_temperature)/(self.hot_water_temperature - self.cold_water_temperature)
+        cold_percentage = 1 - hot_percentage
+
+        new_points = []
+        for i in xrange(0, len(points) - 1):
+            if type(points[i]) is Point and type(points[i+1]) is Point and points[i].e1 != None and points[i+1].e1 != None:
+                middle_point = Point()
+                if points[i + 1].x != None and points[i].x != None:
+                    middle_point.x = points[i + 1].x - points[i].x
+                if points[i + 1].y != None and points[i].y != None:
+                    middle_point.y = points[i + 1].y - points[i].y
+                if points[i + 1].z != None and points[i].z != None:
+                    middle_point.z = points[i + 1].z - points[i].z
+                if points[i + 1].f != None and points[i].f != None:
+                    middle_point.f = points[i].f
+
+                middle_point.e2 = points[i].e1 * cold_percentage
+                points[i].e1 = points[i].e1 * hot_percentage
+
+                new_points.append(points[i])
+                new_points.append(middle_point)
+            else:
+                new_points.append(points[i])
+
+        current_extruder = 0
+        for point in new_points:
 
             if type(point) is Point:
+
+                if point.e1 != None and current_extruder != 0:
+                    gcodes.append('T0')
+                    current_extruder = 0
+                elif point.e2 != None and current_extruder != 1:
+                    gcodes.append('T1')
+                    current_extruder = 1
+
                 gcode = self.__convert_to_gcode(point)
                 gcodes.append(gcode)
 

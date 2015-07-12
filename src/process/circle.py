@@ -26,7 +26,8 @@ class Circle(Process):
         'Extrudate':      ['extrudate', True, None],
         'High':           ['length_from_to',      True, None],
         'Feedrate':       ['feedrate',  False, 80],
-        'Point interval': ['length',    False, 0.01]
+        'Point interval': ['length',    False, 0.01],
+        'Temperature':    ['temperature', False, None],
     }
 
     def points(self, previous_end_point=None):
