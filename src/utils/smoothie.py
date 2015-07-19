@@ -113,6 +113,7 @@ class Smoothie(object):
         if self._serial is None:
             return
         logger.info('Write \'{}\''.format(cmd))
+        print cmd
         try:
             self._serial.write(cmd + '\n')
         except serial.SerialTimeoutException:
