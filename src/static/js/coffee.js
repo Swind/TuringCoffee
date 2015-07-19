@@ -319,6 +319,12 @@ printer.vm = function(){
       data: data
     });
   };
+  vm.go_home = function(){
+    return m.request({
+      method: "PUT",
+      url: "/printer/home"
+    });
+  };
   vm.get_barista_status = function(handler){
     return m.request({
       method: "GET",

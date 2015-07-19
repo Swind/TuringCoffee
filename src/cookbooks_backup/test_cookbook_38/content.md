@@ -1,5 +1,4 @@
-
-一杯量的咖啡
+新三杯量的咖啡
 
 # Step 1: 預浸
 
@@ -40,23 +39,13 @@ Feedrate: 200 mm/min
 Feedrate: 1000 mm/min
 ```
 ``` move
-Z: 190 mm
+Z: 350 mm
 ```
 
 ## 等待20秒方便換杯
 
 ``` wait
 Time: 20s
-```
-
-## 快速移動到175 mm
-
-``` move
-Feedrate: 1000 mm/min
-```
-
-``` move
-Z: 175 mm
 ```
 
 ## 開始預浸
@@ -69,20 +58,19 @@ Feedrate: 120 mm/min
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 170 mm to 170 mm
-Total Water: 5 ml
+High: 290 mm to 290 mm
+Total Water: 15 ml
 Extrudate: 0.1 ml/step
 ```
 
 繞圓 15 ml
 
 ``` spiral
-Radius: 0.1 cm to 1.2 cm
-High: 170 mm to 170 mm
+Radius: 0.1 cm to 2 cm
+High: 290 mm to 290 mm
 Cylinder: 6
 Point interval: 0.1 mm
 Feedrate: 120 mm/min
-Total Water: 7.5 ml
 Extrudate: 0.1 ml/mm
 ```
 
@@ -100,12 +88,12 @@ Feedrate: 120 mm/min
 
 ## 螺旋注水
 
-從離中心 0.1 cm -> 2 cm 的地方開始使用螺旋注水
+從離中心 0.1 cm -> 3 cm 的地方開始使用螺旋注水
 
 ``` spiral
-Radius: 0.1 cm to 2 cm
-High: 175 mm to 175 mm
-Cylinder: 8
+Radius: 0.1 cm to 3 cm
+High: 295 mm to 295 mm
+Cylinder: 16
 Point interval: 0.1 mm
 Feedrate: 120 mm/min
 Extrudate: 0.15 ml/mm
@@ -113,12 +101,12 @@ Extrudate: 0.15 ml/mm
 
 ## 螺旋注水 - 繞回中心
 
-從離中心 2 cm -> 0.1 cm 的地方使用螺旋注水往回繞
+從離中心 3 cm -> 0.1 cm 的地方使用螺旋注水往回繞
 
 ``` spiral
-Radius: 2 cm to 0.1 cm
-High: 175 mm to 175 mm
-Cylinder: 8
+Radius: 3 cm to 0.1 cm
+High: 295 mm to 295 mm
+Cylinder: 16
 Point interval: 0.1 mm
 Feedrate: 120 mm/min
 Extrudate: 0.15 ml/mm

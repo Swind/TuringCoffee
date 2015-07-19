@@ -29,6 +29,12 @@ printer.vm = do ->
             }
         )
 
+    vm.go_home = ! ->
+        return m.request({
+            method: "PUT"
+            url: "/printer/home"
+        })
+
     vm.get_barista_status = (handler) ->
         return m.request(
             {
@@ -71,7 +77,7 @@ printer.view = (ctrl) ->
 
                 (m "tr", [
                     (m "td", panel_button("arrow.left"))
-                    (m "td", panel_button("home"))
+                    (m "td", panel_button("home", ctrl.home_onclick))
                     (m "td", panel_button("arrow.right"))
                 ])
 
@@ -163,5 +169,8 @@ printer.controller = ! ->
 
     @stop_onclick = ! ->
         printer.vm.brew(cookbook_name, "Stop")
+
+    @home_onclick = ! ->
+        printer.vm.go_home()
 
 module.exports = printer
