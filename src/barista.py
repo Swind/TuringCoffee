@@ -269,36 +269,41 @@ class Barista(object):
         points = block.points()
         gcodes = []
 
-        target_temperature = block.lang_map[block.lang](block.params).temperature
-        hot_temperature = self.heater_temperature - 10
-
-        if hot_temperature <= self.cold_water_temperature or hot_temperature <= target_temperature:
-            hot_percentage = 1.0
-            cold_percentage = 0.0
-        else:
-            hot_percentage = (target_temperature - self.cold_water_temperature)/(hot_temperature - self.cold_water_temperature)
-            cold_percentage = 1 - hot_percentage
-
         new_points = []
-        for i in xrange(0, len(points) - 1):
-            if type(points[i]) is Point and type(points[i+1]) is Point and points[i].e1 != None and points[i+1].e1 != None and hot_percentage < 1.0:
-                middle_point = Point()
-                if points[i + 1].x != None and points[i].x != None:
-                    middle_point.x = (points[i + 1].x + points[i].x)/2
-                if points[i + 1].y != None and points[i].y != None:
-                    middle_point.y = (points[i + 1].y + points[i].y)/2
-                if points[i + 1].z != None and points[i].z != None:
-                    middle_point.z = points[i].z
-                if points[i + 1].f != None and points[i].f != None:
-                    middle_point.f = points[i].f * 5
+        if hasattr(block.lang_map[block.lang](block.params), 'temperature'):
+            target_temperature = block.lang_map[block.lang](block.params).temperature
+            hot_temperature = self.heater_temperature - 10
 
-                middle_point.e2 = float(points[i].e1) * cold_percentage * 21.5
-                points[i].e1 = float(points[i].e1) * hot_percentage
-
-                new_points.append(points[i])
-                new_points.append(middle_point)
+            if hot_temperature <= self.cold_water_temperature or hot_temperature <= target_temperature:
+                hot_percentage = 1.0
+                cold_percentage = 0.0
             else:
-                new_points.append(points[i])
+                hot_percentage = (target_temperature - self.cold_water_temperature)/(hot_temperature - self.cold_water_temperature)
+                cold_percentage = 1 - hot_percentage
+
+            for i in xrange(0, len(points) - 1):
+
+                if type(points[i]) is Point and type(points[i+1]) is Point and points[i].e1 != None and points[i+1].e1 != None and hot_percentage < 1.0:
+                    middle_point = Point()
+                    if points[i + 1].x != None and points[i].x != None:
+                        middle_point.x = (points[i + 1].x + points[i].x)/2
+                    if points[i + 1].y != None and points[i].y != None:
+                        middle_point.y = (points[i + 1].y + points[i].y)/2
+                    if points[i + 1].z != None and points[i].z != None:
+                        middle_point.z = points[i].z
+                    if points[i + 1].f != None and points[i].f != None:
+                        middle_point.f = points[i].f * 5
+
+                    middle_point.e2 = float(points[i].e1) * cold_percentage * 21.5
+                    points[i].e1 = float(points[i].e1) * hot_percentage
+
+                    new_points.append(points[i])
+                    new_points.append(middle_point)
+                else:
+                    new_points.append(points[i])
+
+        if len(new_points) == 0:
+            new_points = points
 
         current_extruder = 2
         for point in new_points:

@@ -12,6 +12,8 @@ from process import fixed_point
 from process import heat
 from process import wait
 from process import move
+from process import waste_water
+from process import mix_temperature
 
 
 class Cookbook(object):
@@ -169,6 +171,8 @@ class CodeBlock(object):
         'operations': operations.Operations,
         'heat': heat.Heat,
         'wait': wait.Wait,
+        'waste_water': waste_water.WasteWater,
+        'mix_temperature': mix_temperature.MixTemperature,
         'move': move.Move
     }
 
