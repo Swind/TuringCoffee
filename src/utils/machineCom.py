@@ -422,6 +422,9 @@ class MachineCom(object):
         self._gcodePos += 1
         self._callback.mcProgress(self._gcodePos)
 
+    def write(self, cmd):
+        self.sendCommand(cmd)
+
     def sendCommand(self, cmd):
         cmd = cmd.encode('ascii', 'replace')
         if self.isPrinting():

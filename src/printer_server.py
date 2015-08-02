@@ -14,6 +14,7 @@ import Queue
 import time
 
 from utils import smoothie
+from utils import reprap
 
 from utils import json_config
 from utils import channel
@@ -85,10 +86,12 @@ class PrinterServer(object):
             port_name = 'VIRTUAL'
         else:
             port_name = self.config['Printer']['PortName']
+            port_name2 = self.config['Printer']['PortName2']
 
         baudrate = int(self.config['Printer']['Baudrate'])
 
         self._comm = smoothie.Smoothie(port_name, baudrate)
+        self._comm2 = reprap.RepRap(port_name2, baudrate)
 
         self._callback = self
 
@@ -134,6 +137,8 @@ class PrinterServer(object):
     def mcStateChange(self, state, state_string):
         if self._comm is None:
             return
+        if self._comm2 is None:
+            return
 
         self.pub_channel.send(
             {'state': state, 'state_string': state_string})
@@ -167,6 +172,7 @@ class PrinterServer(object):
     def _start(self):
         while True:
             state = self._get_state()
+            print 'Current state {}'.format(state)
             if state in self._state_table:
                 self._state_table[state]()
             else:
@@ -194,7 +200,7 @@ class PrinterServer(object):
         return state
 
     def _open(self):
-        if self._comm.open() == True:
+        if self._comm.open() == True and self._comm2.open():
             self._change_state(State.CONNECTING)
             return True
         else:
@@ -222,10 +228,26 @@ class PrinterServer(object):
         if 'ok' not in line:
             return False
 
+        if line is None:
+            return False
+
+        if line == '' or 'wait' in line:
+
+            if self._comm2.write('M105') is False:
+                return False
+
+            line = self._comm2.readline()
+            if line is None:
+                return False
+
+        if 'ok' not in line:
+            return False
+
         self._change_state(State.OPERATIONAL)
         return True
 
     def _exec_command(self):
+        current_comm = self._comm
         while True:
             cmd = None
             if self._paused_cmd is not None:
@@ -241,6 +263,37 @@ class PrinterServer(object):
             i = 0
             while i < len(cmd):
                 gcode = cmd[i]
+
+                if ('G21' in gcode) or ('G28' in gcode) or ('G90' in gcode) or ('M' in gcode):
+                    if self._comm.write(gcode) is False:
+                        self._flush_command()
+                        self._change_state(State.CLOSED_WITH_ERROR)
+                        return
+
+                    line = self._comm.readline()
+                    if 'ok' not in line:
+                        continue
+
+                    if self._comm2.write(gcode) is False:
+                        self._flush_command()
+                        self._change_state(State.CLOSED_WITH_ERROR)
+                        return
+
+                    line = self._comm2.readline()
+                    if 'ok' not in line:
+                        continue
+
+                if 'T0' in gcode:
+                    current_comm = self._comm
+                    i = i + 1
+                    gcode = cmd[i]
+                elif 'T1' in gcode:
+                    current_comm = self._comm2
+                    i = i + 1
+                    gcode = cmd[i]
+
+                print 'GCODE {}'.format(gcode)
+
                 if self._pause_flag is True:
                     self._change_state(State.PAUSED)
                     self._paused_cmd = cmd[i:]
@@ -250,12 +303,12 @@ class PrinterServer(object):
                     self._change_state(State.STOPPING)
                     return
 
-                if self._comm.write(gcode) is False:
+                if current_comm.write(gcode) is False:
                     self._flush_command()
                     self._change_state(State.CLOSED_WITH_ERROR)
                     return
 
-                line = self._comm.readline()
+                line = current_comm.readline()
                 if 'ok' not in line:
                     continue
 
@@ -348,16 +401,6 @@ class PrinterServer(object):
         if state is State.PAUSED:
             return True
         return False
-
-    def _send_command(self, cmd):
-        type_cmd = type(cmd)
-        if type_cmd is str:
-            self._cmd_queue.put([cmd])
-        elif type_cmd is list:
-            self._cmd_queue.put(cmd)
-        else:
-            return False
-        return True
 
 
 if __name__ == '__main__':

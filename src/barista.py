@@ -292,9 +292,9 @@ class Barista(object):
                     if points[i + 1].z != None and points[i].z != None:
                         middle_point.z = points[i].z
                     if points[i + 1].f != None and points[i].f != None:
-                        middle_point.f = points[i].f * 5
+                        middle_point.f = points[i].f
 
-                    middle_point.e2 = float(points[i].e1) * cold_percentage * 21.5
+                    middle_point.e2 = float(points[i].e1) * cold_percentage
                     points[i].e1 = float(points[i].e1) * hot_percentage
 
                     new_points.append(points[i])

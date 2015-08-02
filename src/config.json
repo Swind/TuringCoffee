@@ -32,7 +32,8 @@
     },
 
     "Printer":{
-        "PortName": "/dev/ttyACM0",
+        "PortName": "/dev/ttyACM1",
+        "PortName2": "/dev/ttyACM0",
         "Baudrate": 115200
     },
 

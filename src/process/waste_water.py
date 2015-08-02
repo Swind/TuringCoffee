@@ -49,6 +49,7 @@ class WasteWater(Process):
     def __point_z(self, points):
         for index, point in enumerate(points):
             point.z = 260
+        return points
 
     def __point_e1(self, points):
         for point in points:
@@ -57,7 +58,7 @@ class WasteWater(Process):
 
     def __point_e2(self, points):
         for point in points:
-            point.e2 = 2.1
+            point.e2 = 1.0
         return points
 
     def __point_f(self, points):
@@ -67,5 +68,5 @@ class WasteWater(Process):
 
     def __point_f2(self, points):
         for point in points:
-            point.f = 2100
+            point.f = 500
         return points

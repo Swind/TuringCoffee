@@ -15,7 +15,7 @@ class Wait(Process):
 
     params_rules = {
         'Time': ['time', False, None],
-        'Temperature':    ['temperature', False, None],
+        'Temperature': ['temperature', False, None],
     }
 
     def points(self):

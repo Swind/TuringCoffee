@@ -103,7 +103,7 @@ Cylinder: 8
 Total Water: 170 ml
 Total Time: 60 s
 Point interval: 1.0 mm
-Temperature: 70 degress C
+Temperature: 65 degress C
 ```
 
 ## 螺旋注水 - 繞回中心
@@ -117,7 +117,7 @@ Cylinder: 8
 Total Water: 170 ml
 Total Time: 60 s
 Point interval: 1.0 mm
-Temperature: 70 degress C
+Temperature: 65 degress C
 ```
 
 ## HOME
