@@ -20,12 +20,12 @@ class WasteWater(Process):
 
     def points(self):
 
-        cold_point_number = int(self.cold_water) * 10
-        cold_points = map(lambda index: Point(), range(0, int(cold_point_number)))
+        cold_point_number = int(self.cold_water)
+        cold_points = map(lambda index: Point(), range(0, int(cold_point_number) * 10))
         cold_points = self.__point_e2(cold_points)
         cold_points = self.__point_f2(cold_points)
 
-        hot_point_number = int(self.hot_water) * 10
+        hot_point_number = int(self.hot_water)
         hot_points = map(lambda index: Point(), range(0, int(hot_point_number)))
         hot_points = self.__point_e1(hot_points)
         hot_points = self.__point_f(hot_points)
@@ -53,12 +53,12 @@ class WasteWater(Process):
 
     def __point_e1(self, points):
         for point in points:
-            point.e1 = 0.1
+            point.e1 = 1.0
         return points
 
     def __point_e2(self, points):
         for point in points:
-            point.e2 = 1.0
+            point.e2 = 0.1
         return points
 
     def __point_f(self, points):
@@ -68,5 +68,5 @@ class WasteWater(Process):
 
     def __point_f2(self, points):
         for point in points:
-            point.f = 500
+            point.f = 200
         return points

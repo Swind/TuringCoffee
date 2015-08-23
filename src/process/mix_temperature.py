@@ -49,6 +49,8 @@ class MixTemperature(Process):
         return points
 
     def __point_e1(self, points):
+        if len(points) == 0:
+            return points
         e1 = self.total_water / len(points)
 
         for point in points:

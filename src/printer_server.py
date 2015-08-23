@@ -23,6 +23,69 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class GCODE_G1:
+
+    @staticmethod
+    def parse_axis(axis, string, end_with):
+        len_of_axis = len(axis)
+        start_axis = string.find(axis) + len_of_axis
+        end_axis = string.find(end_with, start_axis)
+        if end_axis == -1:
+            end_axis = len(string)
+        return float(string[start_axis:end_axis])
+
+    @staticmethod
+    def parse(string):
+        if 'G1' not in string:
+            return None
+
+        x = y = z = e1 = e2 = f = None
+
+        if 'X' in string:
+            x = GCODE_G1.parse_axis('X', string, ' ')
+        if 'Y' in string:
+            y = GCODE_G1.parse_axis('Y', string, ' ')
+        if 'Z' in string:
+            z = GCODE_G1.parse_axis('Z', string, ' ')
+        if 'E1' in string:
+            e1 = GCODE_G1.parse_axis('E1', string, ' ')
+        if 'E2' in string:
+            e2 = GCODE_G1.parse_axis('E2', string, ' ')
+        if 'F' in string:
+            f = GCODE_G1.parse_axis('F', string, '\n')
+
+        return GCODE_G1(x, y, z, e1, e2, f)
+
+    def __init__(self, x = None, y = None, z = None, e1 = None, e2 = None, f = None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.e1 = e1
+        self.e2 = e2
+        self.f = f
+
+    def __str__(self):
+        gcode = 'G1'
+        if self.x is not None:
+            gcode = gcode + ' X{}'.format(self.x)
+
+        if self.y is not None:
+            gcode = gcode + ' Y{}'.format(self.y)
+
+        if self.z is not None:
+            gcode = gcode + ' Z{}'.format(self.z)
+
+        if self.e1 is not None:
+            gcode = gcode + ' E{}'.format(self.e1)
+
+        if self.e2 is not None:
+            gcode = gcode + ' E{}'.format(self.e2)
+
+        if self.f is not None:
+            gcode = gcode + ' F{}'.format(self.f)
+
+        return gcode
+
 class State:
     INITIAL = 0
     CONNECTING = 1
@@ -264,14 +327,15 @@ class PrinterServer(object):
             while i < len(cmd):
                 gcode = cmd[i]
 
-                if ('G21' in gcode) or ('G28' in gcode) or ('G90' in gcode) or ('M' in gcode):
+                g1 = GCODE_G1.parse(gcode)
+                #print 'G1 {}'.format(g1)
+                if g1 is None:
                     if self._comm.write(gcode) is False:
                         self._flush_command()
                         self._change_state(State.CLOSED_WITH_ERROR)
                         return
 
-                    line = self._comm.readline()
-                    if 'ok' not in line:
+                    while 'ok' not in self._comm.readline():
                         continue
 
                     if self._comm2.write(gcode) is False:
@@ -279,38 +343,40 @@ class PrinterServer(object):
                         self._change_state(State.CLOSED_WITH_ERROR)
                         return
 
-                    line = self._comm2.readline()
-                    if 'ok' not in line:
+                    while 'ok' not in self._comm2.readline():
                         continue
 
-                if 'T0' in gcode:
-                    current_comm = self._comm
-                    i = i + 1
-                    gcode = cmd[i]
-                elif 'T1' in gcode:
-                    current_comm = self._comm2
-                    i = i + 1
-                    gcode = cmd[i]
+                else:
+                    if self._pause_flag is True:
+                        self._change_state(State.PAUSED)
+                        self._paused_cmd = cmd[i:]
+                        return
 
-                print 'GCODE {}'.format(gcode)
+                    if self._stop_flag is True:
+                        self._change_state(State.STOPPING)
+                        return
 
-                if self._pause_flag is True:
-                    self._change_state(State.PAUSED)
-                    self._paused_cmd = cmd[i:]
-                    return
+                    g1_hot = g1
+                    g1_cold = None
+                    if (g1.e1 is not None) and (g1.e2 is not None):
+                        g1_cold = GCODE_G1(e1 = g1.e2, f = (g1.f * (g1.e2/g1.e1)))
+                        g1_hot.e2 = None
+                    elif (g1.e1 is None) and (g1.e2 is not None):
+                        g1_cold = GCODE_G1(e1 = g1.e2, f = g1.f)
+                        g1_hot.e2 = None
 
-                if self._stop_flag is True:
-                    self._change_state(State.STOPPING)
-                    return
+                    if g1_hot is not None:
+                        self._comm.write(str(g1_hot))
+                    if g1_cold is not None:
+                        self._comm2.write(str(g1_cold))
 
-                if current_comm.write(gcode) is False:
-                    self._flush_command()
-                    self._change_state(State.CLOSED_WITH_ERROR)
-                    return
+                    if g1_hot is not None:
+                        while 'ok' not in self._comm.readline():
+                            continue
 
-                line = current_comm.readline()
-                if 'ok' not in line:
-                    continue
+                    if g1_cold is not None:
+                        while 'ok' not in self._comm2.readline():
+                            continue
 
                 self._cmd_counter = self._cmd_counter + 1
                 self._callback.mcProgress(self._cmd_counter)
