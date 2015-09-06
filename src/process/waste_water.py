@@ -63,10 +63,10 @@ class WasteWater(Process):
 
     def __point_f(self, points):
         for point in points:
-            point.f = 100
+            point.f = 200
         return points
 
     def __point_f2(self, points):
         for point in points:
-            point.f = 200
+            point.f = 500
         return points
