@@ -25,8 +25,8 @@ class MixTemperature(Process):
 
         points = self.__point_e1(points)
         points = self.__point_f(points)
-        points.insert(0, Point(x=-80, y=50, z=260, f=2000))
-        points.append(Point(x=0, y=0, z=300, f=2000))
+        points.insert(0, Point(x=-80, y=50, z=280, f=3000))
+        points.insert(-1, Point(x=0, y=0, z=300, f=3000))
 
         return points
 
