@@ -14,7 +14,6 @@ import Queue
 import time
 
 from utils import smoothie
-from utils import reprap
 
 from utils import json_config
 from utils import channel
@@ -154,7 +153,7 @@ class PrinterServer(object):
         baudrate = int(self.config['Printer']['Baudrate'])
 
         self._comm = smoothie.Smoothie(port_name, baudrate)
-        self._comm2 = reprap.RepRap(port_name2, baudrate)
+        self._comm2 = smoothie.Smoothie(port_name2, baudrate)
 
         self._callback = self
 
