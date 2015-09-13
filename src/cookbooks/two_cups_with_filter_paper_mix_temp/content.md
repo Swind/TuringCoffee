@@ -14,7 +14,7 @@ Command: Home
 ## 先行吐水維持溫度
 
 ``` move
-Z: 220 mm
+Z: 280 mm
 Feedrate: 1000 mm/min
 ```
 
@@ -24,7 +24,7 @@ Hot Water: 50 ml
 ```
 
 ``` mix_temperature
-Total Water: 20 ml
+Total Water: 30 ml
 Temperature: 60 degress C
 ```
 
@@ -34,17 +34,17 @@ Temperature: 60 degress C
 Feedrate: 1000 mm/min
 ```
 ``` move
-Z: 220 mm
+Z: 280 mm
 ```
 
-## 快速移動到220 mm
+## 快速移動到280 mm
 
 ``` move
 Feedrate: 1000 mm/min
 ```
 
 ``` move
-Z: 220 mm
+Z: 280 mm
 ```
 
 ## 開始預浸
@@ -57,7 +57,7 @@ Feedrate: 120 mm/min
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 220 mm to 220 mm
+High: 280 mm to 280 mm
 Total Water: 5 ml
 Extrudate: 0.1 ml/step
 Point interval: 1.0 mm
@@ -67,18 +67,18 @@ Temperature: 60 degress C
 繞圓 35 ml
 
 ``` spiral_total_water
-Radius: 0.1 cm to 1.7 cm
-High: 220 mm to 220 mm
+Radius: 0.1 cm to 2.2 cm
+High: 280 mm to 280 mm
 Cylinder: 8
 Total Water: 35 ml
-Total Time: 40 s
+Total Time: 35 s
 Point interval: 1.0 mm
 ```
 
-## 等待 8s
+## 等待 10s
 
 ``` wait
-Time: 8s
+Time: 10s
 ```
 
 ``` move
@@ -87,7 +87,7 @@ Feedrate: 120 mm/min
 
 ``` mix_temperature
 Total Water: 20 ml
-Temperature: 70 degress C
+Temperature: 65 degress C
 ```
 
 # Step 2: 沖煮
@@ -98,12 +98,11 @@ Temperature: 70 degress C
 
 ``` spiral_total_water
 Radius: 0.1 cm to 3.5 cm
-High: 220 mm to 220 mm
+High: 280 mm to 280 mm
 Cylinder: 8
 Total Water: 170 ml
 Total Time: 60 s
 Point interval: 1.0 mm
-Temperature: 65 degress C
 ```
 
 ## 螺旋注水 - 繞回中心
@@ -112,12 +111,11 @@ Temperature: 65 degress C
 
 ``` spiral_total_water
 Radius: 3.5 cm to 0.1 cm
-High: 220 mm to 220 mm
+High: 280 mm to 280 mm
 Cylinder: 8
 Total Water: 170 ml
 Total Time: 60 s
 Point interval: 1.0 mm
-Temperature: 65 degress C
 ```
 
 ## HOME
