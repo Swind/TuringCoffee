@@ -359,10 +359,10 @@ class PrinterServer(object):
                     g1_hot = g1
                     g1_cold = None
                     if (g1.e1 is not None) and (g1.e2 is not None):
-                        g1_cold = GCODE_G1(e1 = g1.e2, f = (g1.f * (g1.e2/g1.e1)))
+                        g1_cold = GCODE_G1(x = g1.x, y = g1.y, z = g1.z, e1 = g1.e2, f = g1.f)
                         g1_hot.e2 = None
                     elif (g1.e1 is None) and (g1.e2 is not None):
-                        g1_cold = GCODE_G1(e1 = g1.e2, f = g1.f)
+                        g1_cold = GCODE_G1(x = g1.x, y = g1.y, z = g1.z, e1 = g1.e2, f = g1.f)
                         g1_hot.e2 = None
 
                     if g1_hot is not None:
