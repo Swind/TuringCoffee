@@ -34,10 +34,23 @@ def __get_mock_sensor_monitor(sensor_config):
     global mock_heater
     return monitor.TemperatureMonitor(mock.MockSensor(mock_heater))
 
+def get_sensor(config, t):
+    for sensor in config['Sensors']:
+        if sensor['name'] == t:
+            return __get_sensor_monitor(sensor)
+    return None
 
 def __get_sensor_monitor(sensor_config):
     if sensor_config['type'] == 'PT100':
         import pt100
         return monitor.TemperatureMonitor(pt100.PT100(sensor_config['ce']))
+
+    if sensor_config['type'] == 'MAX31855':
+        import max31855
+        return monitor.TemperatureMonitor(max31855.MAX31855(sensor_config['ce']))
+
+    if sensor_config['type'] == 'MLX90615':
+        import mlx90615
+        return monitor.TemperatureMonitor(mlx90615.MLX90615())
 
     return None
