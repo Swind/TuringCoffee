@@ -12,9 +12,14 @@
     },
     "Sensors": [
         {
-            "name": "PT100_1",
+            "name": "PT100_tank",
             "type": "PT100",
             "ce": 0
+        },
+        {
+            "name": "output_temperature_sensor",
+            "type": "MLX90615",
+            "ce": 1
         }
     ],
     "PID": {
@@ -59,6 +64,12 @@
     {
         "Command_Socket_Address": "ipc:///tmp/refill_cmd_channel",
         "Publish_Socket_Address": "ipc:///tmp/refill_pub_channel"
+    },
+
+    "OutputServer":
+    {
+        "Command_Socket_Address": "ipc:///tmp/output_cmd_channel",
+        "Publish_Socket_Address": "ipc:///tmp/output_pub_channel"
     },
 
     "Chef":

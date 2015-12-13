@@ -41,6 +41,7 @@ heater.view = (ctrl) ->
         (m 'div.ui.column#plot', {config: ctrl.config_chart})
         (m 'div.ui.column.large.horizontal.statistics', [
             generate_heater_statistic("temperature", "Temperature")
+            generate_heater_statistic("output_temperature", "Output Temperature")
             generate_heater_statistic("set_point", "Set Point")
             generate_heater_statistic("duty_cycle", "Duty Cycle")
             generate_heater_statistic("is_water_full", "Water Level")
@@ -71,16 +72,18 @@ heater.controller = ! ->
     @config_chart = (elem, isInitialized, ctx) ->
         chart = ctx.Chart
 
-        update_heater_status = (temperature_series, set_point_series, duty_cycle_series) ->
+        update_heater_status = (temperature_series, output_temperature_series, set_point_series, duty_cycle_series) ->
             handler = ! ->
                 latest = heater.vm.heater_status!
 
                 temperature = latest["temperature"]
+                output_temperature = latest["output_temperature"]
                 set_point = latest["set_point"]
                 duty_cycle = latest["duty_cycle"]
                 update_time = latest["update_time"]
 
                 temperature_series.addPoint([update_time, temperature], true, false)
+                output_temperature_series.addPoint([update_time, output_temperature], true, false)
                 set_point_series.addPoint([update_time, set_point], true, false)
                 duty_cycle_series.addPoint([update_time, duty_cycle], true, false)
 
@@ -98,10 +101,12 @@ heater.controller = ! ->
                             temperature_series = @series[0]
                             set_point_series = @series[1]
                             duty_cycle_series = @series[2]
+                            output_temperature_series = @series[3]
 
                             setInterval( ! ->
                                 update_heater_status(
                                     temperature_series,
+                                    output_temperature_series,
                                     set_point_series,
                                     duty_cycle_series)
                             , 1000)
@@ -143,6 +148,10 @@ heater.controller = ! ->
                 },
                 {
                     name: "Duty Cycle"
+                    data: []
+                },
+                {
+                    name: "Output Temperature"
                     data: []
                 }
                 ]

@@ -15,6 +15,7 @@ from process.process import Process
 from printer_server import PrinterServer
 from heater_server import HeaterServer
 from refill_server import RefillServer
+from output_server import OutputServer
 
 from nanomsg import (
     SUB,
@@ -42,6 +43,8 @@ class Barista(object):
         self.heater_duty_cycle = 0
         self.heater_set_point = 0
         self.heater_update_time = 0
+
+        self.output_temperature = 0
 
         self.is_water_full = False
         self.total_cmd = 0
@@ -73,6 +76,9 @@ class Barista(object):
         refill_server = RefillServer()
         refill_server_thread = self.__start_worker(target=refill_server.start)
 
+        output_server = OutputServer()
+        output_server_thread = self.__start_worker(target=output_server.start)
+
         # Read config
         self.config = json_config.parse_json('config.json')
         cfg = self.config['PID']
@@ -103,11 +109,20 @@ class Barista(object):
         self.refill_pub = channel.Channel(
             cfg['Publish_Socket_Address'], 'Sub', False)
 
+        logger.info('Connect to output server ...')
+        cfg = self.config['OutputServer']
+        self.output_cmd = channel.Channel(
+            cfg['Command_Socket_Address'], 'Pair', False)
+        self.output_pub = channel.Channel(
+            cfg['Publish_Socket_Address'], 'Sub', False)
+
         logger.info('Start monitor workers ...')
         self.temperature_worker = self.__start_worker(
             self.__temperature_monitor)
         self.water_level_worker = self.__start_worker(
             self.__water_level_monitor)
+        self.output_temperature_worker = self.__start_worker(
+            self.__output_temperature_monitor)
         self.printer_worker = self.__start_worker(self.__printer_monitor)
         self.brew_worker = self.__start_worker(self.__brew_worker)
 
@@ -140,6 +155,12 @@ class Barista(object):
             self.heater_update_time = time.time()
 
             logger.debug('Receive new temperature {}'.format(resp))
+
+    def __output_temperature_monitor(self):
+        while True:
+            resp = self.output_pub.recv()
+            self.output_temperature = round(resp.get('temperature', 0), 3)
+            logger.debug('Receive new output temperature {}'.format(resp))
 
     def __water_level_monitor(self):
         while True:

@@ -272,6 +272,7 @@ def get_heater_status():
         'duty_cycle': barista.heater_duty_cycle,
         'set_point': barista.heater_set_point,
         'temperature': barista.heater_temperature,
+        'output_temperature': barista.output_temperature,
         'update_time': barista.heater_update_time,
         'is_water_full': barista.is_water_full
     }

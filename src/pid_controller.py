@@ -15,7 +15,8 @@ class PIDController(object):
     def __init__(self, config):
         # Heat
         self.__heater = hardware.get_heater(config)
-        self.__sensors = hardware.get_sensors(config)
+        #self.__sensors = hardware.get_sensors(config)
+        self.__sensors = [hardware.get_sensor(config, "PT100_tank")]
 
         # PID configuration
         pid_config = config['PID']
