@@ -23,10 +23,10 @@
         }
     ],
     "PID": {
-        "cycle_time": 5,
-        "k": 44,
+        "cycle_time": 1,
+        "k": 70,
         "i": 165,
-        "d": 4
+        "d": 16
     },
 
     "HeaterEmulator":{
