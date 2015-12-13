@@ -167,6 +167,7 @@ class PrinterServer(object):
                 State.OPERATIONAL: self._check_cmd_queue,
                 State.PRINTING: self._exec_command,
                 State.PAUSED: self._pause,
+                State.STOPPING: self._stop,
                 State.CLOSED: self._close
         }
 
@@ -391,6 +392,7 @@ class PrinterServer(object):
     def _stop(self):
         self._flush_command()
         self._change_state(State.OPERATIONAL)
+        self._stop_flag = False
 
     def _close(self):
         self._change_state(State.NONE)
@@ -401,7 +403,8 @@ class PrinterServer(object):
         self._change_state(State.PRINTING)
 
     def _flush_command(self):
-        self._cmd_queue.clear()
+        while not self._cmd_queue.empty():
+            self._cmd_queue.get()
 
     def _send_command(self, cmd):
         type_cmd = type(cmd)
@@ -421,7 +424,7 @@ class PrinterServer(object):
             cmd = self.cmd_channel.recv()
 
             if 'STOP' in cmd:
-                self._comm.stop()
+                self.stop()
 
             elif 'G' in cmd:
                 self._send_command(cmd['G'])
