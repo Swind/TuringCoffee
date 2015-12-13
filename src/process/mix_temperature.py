@@ -60,7 +60,9 @@ class MixTemperature(Process):
         return points
 
     def __point_f(self, points):
-        f = 200
+        total_time = float(self.total_water) / 10
+        num_of_points = len(points)
+        f = total_time/num_of_points
         for point in points:
             point.f = f
         return points
