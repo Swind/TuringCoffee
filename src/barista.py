@@ -81,6 +81,8 @@ class Barista(object):
 
         # Read config
         self.config = json_config.parse_json('config.json')
+        self.calibration_config = json_config.parse_json('calibration.json')
+
         cfg = self.config['PID']
         self.pid_cycle_time = cfg['cycle_time']
         self.pid_k = cfg['k']
@@ -126,8 +128,8 @@ class Barista(object):
         self.printer_worker = self.__start_worker(self.__printer_monitor)
         self.brew_worker = self.__start_worker(self.__brew_worker)
 
-        self.cold_water_temperature = int(self.config['ColdWaterTemperature'])
-        self.hot_water_temperature = int(self.config['HotWaterTemperature'])
+        self.cold_water_temperature = float(self.calibration_config['ColdWaterTemperature'])
+        self.hot_water_temperature = float(self.calibration_config['HotWaterTemperature'])
 
     def __start_worker(self, target):
         worker = Thread(target=target)
@@ -197,7 +199,10 @@ class Barista(object):
             self.__change_state(self.BREWING)
 
             self.now_cookbook_name = cookbook_name
-            self.__brew(cookbook_name)
+            if cookbook_name == 'Calibration':
+                self.temperature_calibration()
+            else:
+                self.__brew(cookbook_name)
 
             # Clean status
             self.now_cookbook_name = ''
@@ -279,6 +284,36 @@ class Barista(object):
 
         return gcode
 
+    def add_calibration_task(self):
+        self.brew('Calibration')
+
+    def temperature_calibration(self):
+        self.reset_gcode_counter()
+        self.__init_printer()
+
+        self.__send_to_printer({'C': ['G28']})
+
+        gcode = []
+        gcode.append(self.__convert_to_gcode(Point(x=-80, y=50, z=280, f=2000)))
+        for i in xrange(0, 3000):
+            gcode.append(self.__convert_to_gcode(Point(e2=0.1, f=200)))
+        self.__send_to_printer({'G': gcode})
+        self.wait_printer_finish()
+        self.cold_water_temperature = self.output_temperature
+
+        gcode = []
+        gcode.append(self.__convert_to_gcode(Point(x=-80, y=50, z=280, f=2000)))
+        for i in xrange(0, 5000):
+            gcode.append(self.__convert_to_gcode(Point(e1=0.1, f=10)))
+        self.__send_to_printer({'G': gcode})
+        self.wait_printer_finish()
+        self.hot_water_temperature = self.output_temperature
+
+        json_config.save_json({
+            'ColdWaterTemperature': self.cold_water_temperature,
+            'HotWaterTemperature': self.hot_water_temperature
+        }, 'calibration.json')
+
     def brew(self, name):
         self.brew_queue.put(name)
 
@@ -293,19 +328,16 @@ class Barista(object):
         new_points = []
         if hasattr(block.lang_map[block.lang](block.params), 'temperature'):
             target_temperature = block.lang_map[block.lang](block.params).temperature
-            hot_temperature = self.heater_temperature - 10
 
-            if hot_temperature <= self.cold_water_temperature or hot_temperature <= target_temperature:
+            if self.hot_water_temperature <= self.cold_water_temperature or self.hot_water_temperature <= target_temperature:
                 hot_percentage = 1.0
                 cold_percentage = 0.0
             elif target_temperature <= self.cold_water_temperature:
                 hot_percentage = 0.0
                 cold_percentage = 1.0
             else:
-                hot_percentage = (target_temperature - self.cold_water_temperature)/(hot_temperature - self.cold_water_temperature)
+                hot_percentage = (target_temperature - self.cold_water_temperature)/(self.hot_water_temperature - self.cold_water_temperature)
                 cold_percentage = 1 - hot_percentage
-
-            #print "HOT {} COLD {}".format(hot_percentage, cold_percentage)
 
             for i in xrange(0, len(points) - 1):
 

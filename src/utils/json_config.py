@@ -33,3 +33,7 @@ def parse_json(path):
 
     # Return json file
     return json.loads(content)
+
+def save_json(config, path):
+    with open(path, 'w') as f:
+        json.dump(config, f)

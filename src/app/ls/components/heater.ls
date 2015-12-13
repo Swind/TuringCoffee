@@ -10,6 +10,7 @@ heater.vm = do ->
 
     vm.init = ! ->
         vm.heater_status = m.prop {}
+        vm.temperature_limitation = m.prop {}
         vm.refill_status = m.prop {"full": false} 
         vm.input_temperature = m.prop 0
 
@@ -21,6 +22,16 @@ heater.vm = do ->
             }
         )
         .then(vm.heater_status)
+        .then(handler)
+
+    vm.get_calibration_result = (handler) ->
+        return m.request(
+            {
+                method: "GET",
+                url: "/calibration"
+            }
+        )
+        .then(vm.temperature_limitation)
         .then(handler)
 
     vm
@@ -37,6 +48,12 @@ heater.view = (ctrl) ->
             (m 'div.label', label_name)
         ])
 
+    generate_calibration_statistic = (key, label_name) ->
+        return (m 'div.ui.statistic', [
+            (m 'div.text.value', heater.vm.temperature_limitation![key])
+            (m 'div.label', label_name)
+        ])
+
     (m "div.ui.two.column.grid", [
         (m 'div.ui.column#plot', {config: ctrl.config_chart})
         (m 'div.ui.column.large.horizontal.statistics', [
@@ -45,10 +62,14 @@ heater.view = (ctrl) ->
             generate_heater_statistic("set_point", "Set Point")
             generate_heater_statistic("duty_cycle", "Duty Cycle")
             generate_heater_statistic("is_water_full", "Water Level")
+            generate_calibration_statistic("hot", "Hot water temperature")
+            generate_calibration_statistic("cold", "Cold water temperature")
             (m "div.ui.action.input", [
                 (m "input" {type: "text", onchange: m.withAttr("value", heater.vm.input_temperature)})
                 (m "button.ui.button" {onclick: ctrl.set_temperature},"Set Temperature")
             ])
+            (m "div" do
+                m "button.ui.blue.button" {onclick: ctrl.do_calibration} "Calibration")
         ])
     ])
 
@@ -67,6 +88,12 @@ heater.controller = ! ->
             data: {
                 "Set Point": heater.vm.input_temperature!
             }
+        })
+
+    @do_calibration = !->
+        return m.request({
+            method: "PUT"
+            url: "/calibration"
         })
 
     @config_chart = (elem, isInitialized, ctx) ->
@@ -89,6 +116,15 @@ heater.controller = ! ->
 
             heater.vm.get_heater_status(handler)
 
+        update_calibration_status = ->
+            handler = !->
+                latest = heater.vm.temperature_limitation
+
+                hot_water_tempeature = latest["hot"]
+                cold_water_tempeature = latest["cold"]
+
+            heater.vm.get_calibration_result(handler)
+
         if not isInitialized
             ctx.chart = new Highcharts.Chart(
                 chart : {
@@ -109,6 +145,7 @@ heater.controller = ! ->
                                     output_temperature_series,
                                     set_point_series,
                                     duty_cycle_series)
+                                update_calibration_status!
                             , 1000)
                     }
                 }

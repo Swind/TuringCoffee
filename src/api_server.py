@@ -302,6 +302,17 @@ def control_heater():
 
     return resp
 
+@app.route('/calibration', methods=['GET'])
+def get_calibration_status():
+    return jsonify({'cold': barista.cold_water_temperature, 'hot': barista.hot_water_temperature})
+
+@app.route('/calibration', methods=['PUT'])
+def do_calibration():
+    barista.add_calibration_task()
+    resp = make_response()
+    resp.status_code = httplib.OK
+    return resp
+
 # ===============================================================================
 #
 # Refill API
