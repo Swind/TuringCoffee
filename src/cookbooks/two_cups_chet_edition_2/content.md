@@ -3,10 +3,6 @@
 
 # Step 1: 預浸
 
-預浸需要 80 度 60ml 的水，注水結束之後等待 20 秒
-
-## 事前準備
-
 ``` operations
 Command: Home
 ```
@@ -14,7 +10,7 @@ Command: Home
 ## 先行吐水維持溫度
 
 ``` move
-Z: 280 mm
+Z: 255 mm
 Feedrate: 1000 mm/min
 ```
 
@@ -24,58 +20,50 @@ Hot Water: 50 ml
 ```
 
 ``` mix_temperature
-Total Water: 30 ml
-Temperature: 60 degress C
+Total Water: 40 ml
+Temperature: 75 degress C
 ```
 
-## 噴頭上移方便換杯
-
+## 移動一下
 ``` move
-Feedrate: 1000 mm/min
-```
-``` move
-Z: 280 mm
-```
-
-## 快速移動到280 mm
-
-``` move
+Z: 260 mm
 Feedrate: 1000 mm/min
 ```
 
-``` move
-Z: 280 mm
-```
 
 ## 開始預浸
 
-定點注水 30 ml
 
 ``` move
-Feedrate: 120 mm/min
+Feedrate: 60 mm/min
 ```
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 280 mm to 280 mm
-Total Water: 5 ml
+High: 255 mm to 255 mm
+Total Water: 10 ml
 Extrudate: 0.1 ml/step
 Point interval: 1.0 mm
-Temperature: 60 degress C
+Temperature: 75 degress C
 ```
 
 繞圓 35 ml
 
 ``` spiral_total_water
-Radius: 0.1 cm to 2.2 cm
-High: 280 mm to 280 mm
-Cylinder: 8
-Total Water: 35 ml
+Radius: 0.1 cm to 3.2 cm
+High: 255 mm to 255 mm
+Cylinder: 2
+Total Water: 50 ml
 Total Time: 35 s
 Point interval: 1.0 mm
 ```
 
-## 等待 10s
+``` mix_temperature
+Total Water: 1 ml
+Temperature: 80 degress C
+```
+
+## 預浸等待時間
 
 ``` wait
 Time: 10s
@@ -86,9 +74,15 @@ Feedrate: 120 mm/min
 ```
 
 ``` mix_temperature
-Total Water: 20 ml
-Temperature: 65 degress C
+Total Water: 50 ml
+Temperature: 80 degress C
 ```
+
+``` wait
+Time: 10s
+```
+
+
 
 # Step 2: 沖煮
 
@@ -97,26 +91,35 @@ Temperature: 65 degress C
 從離中心 0.1 cm -> 3.5 cm 的地方開始使用螺旋注水
 
 ``` spiral_total_water
-Radius: 0.1 cm to 3.5 cm
-High: 280 mm to 280 mm
-Cylinder: 8
-Total Water: 170 ml
-Total Time: 60 s
+Radius: 0.1 cm to 1.2 cm
+High: 255 mm to 255 mm
+Cylinder: 6
+Total Water: 60 ml
+Total Time: 36 s
 Point interval: 1.0 mm
 ```
 
-## 螺旋注水 - 繞回中心
-
-從離中心 3.5 cm -> 0.1 cm 的地方使用螺旋注水往回繞
 
 ``` spiral_total_water
-Radius: 3.5 cm to 0.1 cm
-High: 280 mm to 280 mm
+Radius: 1.2 cm to 2.8 cm
+High: 255 mm to 255 mm
 Cylinder: 8
-Total Water: 170 ml
-Total Time: 60 s
+Total Water: 200 ml
+Total Time: 96 s
 Point interval: 1.0 mm
 ```
+
+
+
+``` spiral_total_water
+Radius: 2.8 cm to 0.1 cm
+High: 255 mm to 255 mm
+Cylinder: 4
+Total Water: 100 ml
+Total Time: 48 s
+Point interval: 1.0 mm
+```
+
 
 ## HOME
 

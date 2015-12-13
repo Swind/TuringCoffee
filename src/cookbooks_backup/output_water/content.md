@@ -14,8 +14,9 @@ Command: Home
 
 ``` fixed_point
 Coordinates: (0, 0)
-High: 220 mm to 220 mm
-Total Water: 300 ml
+High: 280 mm to 280 mm
+Total Water: 180 ml
 Extrudate: 1 ml/step
-Feedrate: 200 mm/min
-```
+Feedrate: 50  mm/min
+Temperature: 80 degress C
+``` 

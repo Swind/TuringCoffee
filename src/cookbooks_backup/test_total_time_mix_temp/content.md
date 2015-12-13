@@ -25,10 +25,25 @@ Z: 220 mm
 ``` spiral_total_water
 Radius: 0.1 cm to 3.5 cm
 High: 220 mm to 220 mm
-Cylinder: 12
-Total Water: 200 ml
+Cylinder: 8
+Total Water: 170 ml
 Total Time: 60 s
 Point interval: 1.0 mm
+Temperature: 65 degress C
+```
+
+## 螺旋注水 - 繞回中心
+
+從離中心 3.5 cm -> 0.1 cm 的地方使用螺旋注水往回繞
+
+``` spiral_total_water
+Radius: 3.5 cm to 0.1 cm
+High: 220 mm to 220 mm
+Cylinder: 8
+Total Water: 170 ml
+Total Time: 60 s
+Point interval: 1.0 mm
+Temperature: 65 degress C
 ```
 
 ## HOME
