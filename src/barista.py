@@ -341,13 +341,17 @@ class Barista(object):
 
             for i in xrange(0, len(points) - 1):
 
-                if type(points[i]) is Point and type(points[i+1]) is Point and points[i].e1 != None and points[i+1].e1 != None and hot_percentage < 1.0:
-                    points[i].e2 = float(points[i].e1) * cold_percentage
-                    points[i].e1 = float(points[i].e1) * hot_percentage
+                if type(points[i]) is not Point:
+                    new_points.append(points[i])
+                    continue
+                if points[i].e1 == None or points[i].e1 == 0:
+                    new_points.append(points[i])
+                    continue
 
-                    new_points.append(points[i])
-                else:
-                    new_points.append(points[i])
+                points[i].e2 = float(points[i].e1) * cold_percentage
+                points[i].e1 = float(points[i].e1) * hot_percentage
+
+                new_points.append(points[i])
 
         if len(new_points) == 0:
             new_points = points
