@@ -295,7 +295,7 @@ class Barista(object):
 
         gcode = []
         gcode.append(self.__convert_to_gcode(Point(x=-80, y=50, z=280, f=2000)))
-        for i in xrange(0, 3000):
+        for i in xrange(0, 2000):
             gcode.append(self.__convert_to_gcode(Point(e2=0.1, f=200)))
         self.__send_to_printer({'G': gcode})
         self.wait_printer_finish()
@@ -303,8 +303,8 @@ class Barista(object):
 
         gcode = []
         gcode.append(self.__convert_to_gcode(Point(x=-80, y=50, z=280, f=2000)))
-        for i in xrange(0, 5000):
-            gcode.append(self.__convert_to_gcode(Point(e1=0.1, f=10)))
+        for i in xrange(0, 3000):
+            gcode.append(self.__convert_to_gcode(Point(e1=0.1, f=100)))
         self.__send_to_printer({'G': gcode})
         self.wait_printer_finish()
         self.hot_water_temperature = self.output_temperature
