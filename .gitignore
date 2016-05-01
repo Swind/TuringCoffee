@@ -6,3 +6,5 @@ bower_components
 node_modules
 .tmpjs
 cookbooks/**/*.md
+src/cookbooks
+src/cookbooks_backup
