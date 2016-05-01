@@ -49,6 +49,10 @@ def __get_sensor_monitor(sensor_config):
         import max31855
         return monitor.TemperatureMonitor(max31855.MAX31855(sensor_config['ce']))
 
+    if sensor_config['type'] == 'MAX31856':
+        import max31856
+        return monitor.TemperatureMonitor(max31856.MAX31856(sensor_config['ce']))
+
     if sensor_config['type'] == 'MLX90615':
         import mlx90615
         return monitor.TemperatureMonitor(mlx90615.MLX90615())
