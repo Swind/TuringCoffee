@@ -235,7 +235,6 @@ class PrinterServer(object):
     def _start(self):
         while True:
             state = self._get_state()
-            print 'Current state {}'.format(state)
             if state in self._state_table:
                 self._state_table[state]()
             else:
@@ -328,7 +327,6 @@ class PrinterServer(object):
                 gcode = cmd[i]
 
                 g1 = GCODE_G1.parse(gcode)
-                #print 'G1 {}'.format(g1)
                 if g1 is None:
                     if self._comm.write(gcode) is False:
                         self._flush_command()
