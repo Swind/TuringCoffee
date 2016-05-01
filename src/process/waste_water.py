@@ -35,6 +35,7 @@ class WasteWater(Process):
         points.extend(hot_points)
 
         points.insert(0, Point(x=-80, y=50, z=280, f=2000))
+        points.insert(-1, Point(x=0, y=0, f=2000))
 
         return points
 
