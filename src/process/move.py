@@ -29,9 +29,6 @@ class Move(Process):
     def points(self):
         point_list = []
 
-        if self.feedrate is not None:
-            point_list.append(Point(f=self.feedrate))
-
-        point_list.append(Point(x=self.x, y=self.y, z=self.z, e1=self.e))
+        point_list.append(Point(x=self.x, y=self.y, z=self.z, e1=self.e, f=self.feedrate))
 
         return point_list
