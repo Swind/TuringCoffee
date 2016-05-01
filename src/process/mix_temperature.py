@@ -25,8 +25,8 @@ class MixTemperature(Process):
 
         points = self.__point_e1(points)
         points = self.__point_f(points)
+
         points.insert(0, Point(x=-80, y=50, z=280, f=3000))
-        points.insert(-1, Point(x=0, y=0, z=300, f=3000))
 
         return points
 
@@ -62,7 +62,7 @@ class MixTemperature(Process):
     def __point_f(self, points):
         total_time = float(self.total_water) / 10
         num_of_points = len(points)
-        f = total_time/num_of_points
+        f = total_time / num_of_points
         for point in points:
             point.f = f
         return points
