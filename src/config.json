@@ -4,9 +4,6 @@
     "Emulator": false,
     "Unit": "C",
 
-    "ColdWaterTemperature": 25,
-    "HotWaterTemperature": 90,
-
     "Heater": {
         "pin": 7 
     },
